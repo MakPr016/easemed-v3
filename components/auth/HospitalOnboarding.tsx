@@ -1,4 +1,3 @@
-// components/auth/HospitalOnboarding.tsx
 'use client'
 
 import { useState } from 'react'
@@ -10,7 +9,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
-import { CheckCircle2 } from 'lucide-react'
+import { CheckCircle2, Building2, User, MapPin, Bell, Package } from 'lucide-react'
 
 interface HospitalOnboardingProps {
   email: string
@@ -105,176 +104,206 @@ export default function HospitalOnboarding({ email }: HospitalOnboardingProps) {
       </div>
 
       {step === 1 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Set Up Your Organization</CardTitle>
-            <CardDescription>
-              Please provide your organization details to complete your account setup.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-8">
-            <div className="space-y-4">
-              <h3 className="font-semibold">Organization Details</h3>
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Set Up Your Organization</h2>
+            <p className="text-muted-foreground">Please provide your organization details to complete your account setup.</p>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="organizationType">Organization Type *</Label>
-                <Select value={formData.organizationType} onValueChange={(value) => setFormData({ ...formData, organizationType: value })}>
-                  <SelectTrigger id="organizationType">
-                    <SelectValue placeholder="Select organization type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="public">Public Hospital</SelectItem>
-                    <SelectItem value="private">Private Hospital</SelectItem>
-                    <SelectItem value="clinic">Clinic</SelectItem>
-                    <SelectItem value="specialty">Specialty Center</SelectItem>
-                  </SelectContent>
-                </Select>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <Building2 className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">Organization Details</h3>
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="registrationNumber">Registration Number/License *</Label>
-                <Input
-                  id="registrationNumber"
-                  placeholder="Enter registration number"
-                  value={formData.registrationNumber}
-                  onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="font-semibold">Primary Contact</h3>
-
-              <div className="grid grid-cols-2 gap-4">
+              
+              <div className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Administrator Name *</Label>
+                  <Label htmlFor="organizationName">Organization Name *</Label>
                   <Input
-                    id="name"
-                    placeholder="Full name"
-                    value={formData.name}
-                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    id="organizationName"
+                    placeholder="Enter organization name"
+                    value={formData.organizationName}
+                    onChange={(e) => setFormData({ ...formData, organizationName: e.target.value })}
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="role">Position/Role *</Label>
-                  <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
-                    <SelectTrigger id="role">
-                      <SelectValue placeholder="e.g., Procurement Manager" />
+                  <Label htmlFor="organizationType">Organization Type *</Label>
+                  <Select value={formData.organizationType} onValueChange={(value) => setFormData({ ...formData, organizationType: value })}>
+                    <SelectTrigger id="organizationType">
+                      <SelectValue placeholder="Select organization type" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="cpo">Chief Procurement Officer</SelectItem>
-                      <SelectItem value="cfo">Chief Financial Officer</SelectItem>
-                      <SelectItem value="pharmacy">Pharmacy Manager</SelectItem>
-                      <SelectItem value="analyst">Procurement Analyst</SelectItem>
+                      <SelectItem value="public">Public Hospital</SelectItem>
+                      <SelectItem value="private">Private Hospital</SelectItem>
+                      <SelectItem value="clinic">Clinic</SelectItem>
+                      <SelectItem value="specialty">Specialty Center</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="registrationNumber">Registration Number/License *</Label>
+                  <Input
+                    id="registrationNumber"
+                    placeholder="Enter registration number"
+                    value={formData.registrationNumber}
+                    onChange={(e) => setFormData({ ...formData, registrationNumber: e.target.value })}
+                  />
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <User className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">Primary Contact</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name">Administrator Name *</Label>
+                    <Input
+                      id="name"
+                      placeholder="Full name"
+                      value={formData.name}
+                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="role">Position/Role *</Label>
+                    <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+                      <SelectTrigger id="role">
+                        <SelectValue placeholder="e.g., Procurement Manager" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="cpo">Chief Procurement Officer</SelectItem>
+                        <SelectItem value="cfo">Chief Financial Officer</SelectItem>
+                        <SelectItem value="pharmacy">Pharmacy Manager</SelectItem>
+                        <SelectItem value="analyst">Procurement Analyst</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Contact Email *</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      value={email}
+                      disabled
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Contact Phone *</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+1 (555) 000-0000"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-4">
+                <MapPin className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">Business Address</h3>
+              </div>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City *</Label>
+                    <Input
+                      id="city"
+                      placeholder="City"
+                      value={formData.city}
+                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="state">State/Province *</Label>
+                    <Input
+                      id="state"
+                      placeholder="State"
+                      value={formData.state}
+                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country *</Label>
+                  <Select value={formData.country} onValueChange={(value) => setFormData({ ...formData, country: value })}>
+                    <SelectTrigger id="country">
+                      <SelectValue placeholder="Select country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Germany">Germany</SelectItem>
+                      <SelectItem value="France">France</SelectItem>
+                      <SelectItem value="Italy">Italy</SelectItem>
+                      <SelectItem value="Spain">Spain</SelectItem>
+                      <SelectItem value="United Kingdom">United Kingdom</SelectItem>
+                      <SelectItem value="Netherlands">Netherlands</SelectItem>
+                      <SelectItem value="Belgium">Belgium</SelectItem>
+                      <SelectItem value="Austria">Austria</SelectItem>
+                      <SelectItem value="Switzerland">Switzerland</SelectItem>
+                      <SelectItem value="Poland">Poland</SelectItem>
+                      <SelectItem value="Sweden">Sweden</SelectItem>
+                      <SelectItem value="Denmark">Denmark</SelectItem>
+                      <SelectItem value="Norway">Norway</SelectItem>
+                      <SelectItem value="Finland">Finland</SelectItem>
+                      <SelectItem value="Portugal">Portugal</SelectItem>
+                      <SelectItem value="Greece">Greece</SelectItem>
+                      <SelectItem value="Czech Republic">Czech Republic</SelectItem>
+                      <SelectItem value="Ireland">Ireland</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="email">Contact Email *</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={email}
-                    disabled
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Contact Phone *</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+1 (555) 000-0000"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="space-y-4">
-              <h3 className="font-semibold">Business Address</h3>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="city">City *</Label>
-                  <Input
-                    id="city"
-                    placeholder="City"
-                    value={formData.city}
-                    onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="state">State/Province *</Label>
-                  <Input
-                    id="state"
-                    placeholder="State"
-                    value={formData.state}
-                    onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="country">Country *</Label>
-                <Select value={formData.country} onValueChange={(value) => setFormData({ ...formData, country: value })}>
-                  <SelectTrigger id="country">
-                    <SelectValue placeholder="Select country" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Germany">Germany</SelectItem>
-                    <SelectItem value="France">France</SelectItem>
-                    <SelectItem value="Italy">Italy</SelectItem>
-                    <SelectItem value="Spain">Spain</SelectItem>
-                    <SelectItem value="United Kingdom">United Kingdom</SelectItem>
-                    <SelectItem value="Netherlands">Netherlands</SelectItem>
-                    <SelectItem value="Belgium">Belgium</SelectItem>
-                    <SelectItem value="Austria">Austria</SelectItem>
-                    <SelectItem value="Switzerland">Switzerland</SelectItem>
-                    <SelectItem value="Poland">Poland</SelectItem>
-                    <SelectItem value="Sweden">Sweden</SelectItem>
-                    <SelectItem value="Denmark">Denmark</SelectItem>
-                    <SelectItem value="Norway">Norway</SelectItem>
-                    <SelectItem value="Finland">Finland</SelectItem>
-                    <SelectItem value="Portugal">Portugal</SelectItem>
-                    <SelectItem value="Greece">Greece</SelectItem>
-                    <SelectItem value="Czech Republic">Czech Republic</SelectItem>
-                    <SelectItem value="Ireland">Ireland</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="flex justify-between pt-4">
-              <Button variant="outline" onClick={handleBack} disabled>
-                Back
-              </Button>
-              <Button onClick={handleNext}>
-                Next: Preferences
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+          <div className="flex justify-between pt-4">
+            <Button variant="outline" onClick={handleBack} disabled>
+              Back
+            </Button>
+            <Button onClick={handleNext}>
+              Next: Preferences
+            </Button>
+          </div>
+        </div>
       )}
 
       {step === 2 && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">Customize Your Experience</CardTitle>
-            <CardDescription>
-              Set your preferences to optimize your procurement workflow.
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-4">
-              <h3 className="font-semibold">Notification Preferences</h3>
+        <div className="space-y-8">
+          <div>
+            <h2 className="text-2xl font-bold mb-2">Customize Your Experience</h2>
+            <p className="text-muted-foreground">Set your preferences to optimize your procurement workflow.</p>
+          </div>
 
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-6">
+                <Bell className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">Notification Preferences</h3>
+              </div>
+              
               <div className="grid grid-cols-2 gap-4">
                 <label className="flex items-start gap-3 cursor-pointer">
                   <Checkbox
@@ -320,82 +349,89 @@ export default function HospitalOnboarding({ email }: HospitalOnboardingProps) {
                   </div>
                 </label>
               </div>
-            </div>
+            </CardContent>
+          </Card>
 
-            <div className="space-y-4">
-              <h3 className="font-semibold">Categories of Interest</h3>
-              <p className="text-sm text-muted-foreground">Select the categories you procure most frequently</p>
-
-              <div className="grid grid-cols-2 gap-4">
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={formData.categoriesMedicines}
-                    onCheckedChange={(checked) => setFormData({ ...formData, categoriesMedicines: checked as boolean })}
-                  />
-                  <span className="font-medium text-sm">Medicines & Pharmaceuticals</span>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={formData.categoriesEquipment}
-                    onCheckedChange={(checked) => setFormData({ ...formData, categoriesEquipment: checked as boolean })}
-                  />
-                  <span className="font-medium text-sm">Medical Equipment</span>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={formData.categoriesSurgical}
-                    onCheckedChange={(checked) => setFormData({ ...formData, categoriesSurgical: checked as boolean })}
-                  />
-                  <span className="font-medium text-sm">Surgical Supplies</span>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={formData.categoriesConsumables}
-                    onCheckedChange={(checked) => setFormData({ ...formData, categoriesConsumables: checked as boolean })}
-                  />
-                  <span className="font-medium text-sm">Consumables</span>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={formData.categoriesDiagnostic}
-                    onCheckedChange={(checked) => setFormData({ ...formData, categoriesDiagnostic: checked as boolean })}
-                  />
-                  <span className="font-medium text-sm">Diagnostic Tools</span>
-                </label>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <Checkbox
-                    checked={formData.categoriesOther}
-                    onCheckedChange={(checked) => setFormData({ ...formData, categoriesOther: checked as boolean })}
-                  />
-                  <span className="font-medium text-sm">Other</span>
-                </label>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-2 mb-2">
+                <Package className="h-5 w-5 text-primary" />
+                <h3 className="font-semibold text-lg">Categories of Interest</h3>
               </div>
+              <p className="text-sm text-muted-foreground mb-6">Select the categories you procure most frequently</p>
+              
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <Checkbox
+                      checked={formData.categoriesMedicines}
+                      onCheckedChange={(checked) => setFormData({ ...formData, categoriesMedicines: checked as boolean })}
+                    />
+                    <span className="font-medium">Medicines & Pharmaceuticals</span>
+                  </label>
 
-              {formData.categoriesOther && (
-                <Input
-                  placeholder="Specify other categories..."
-                  value={formData.otherCategories}
-                  onChange={(e) => setFormData({ ...formData, otherCategories: e.target.value })}
-                  className="italic"
-                />
-              )}
-            </div>
+                  <label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <Checkbox
+                      checked={formData.categoriesEquipment}
+                      onCheckedChange={(checked) => setFormData({ ...formData, categoriesEquipment: checked as boolean })}
+                    />
+                    <span className="font-medium">Medical Equipment</span>
+                  </label>
 
-            <div className="flex justify-between pt-4">
-              <Button variant="outline" onClick={handleBack}>
-                Back
-              </Button>
-              <Button onClick={handleComplete} disabled={loading}>
-                {loading ? 'Completing Setup...' : 'Complete Setup'}
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                  <label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <Checkbox
+                      checked={formData.categoriesSurgical}
+                      onCheckedChange={(checked) => setFormData({ ...formData, categoriesSurgical: checked as boolean })}
+                    />
+                    <span className="font-medium">Surgical Supplies</span>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <Checkbox
+                      checked={formData.categoriesConsumables}
+                      onCheckedChange={(checked) => setFormData({ ...formData, categoriesConsumables: checked as boolean })}
+                    />
+                    <span className="font-medium">Consumables</span>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <Checkbox
+                      checked={formData.categoriesDiagnostic}
+                      onCheckedChange={(checked) => setFormData({ ...formData, categoriesDiagnostic: checked as boolean })}
+                    />
+                    <span className="font-medium">Diagnostic Tools</span>
+                  </label>
+
+                  <label className="flex items-center gap-3 p-4 border rounded-lg cursor-pointer hover:bg-secondary/50 transition-colors">
+                    <Checkbox
+                      checked={formData.categoriesOther}
+                      onCheckedChange={(checked) => setFormData({ ...formData, categoriesOther: checked as boolean })}
+                    />
+                    <span className="font-medium">Other</span>
+                  </label>
+                </div>
+
+                {formData.categoriesOther && (
+                  <Input
+                    placeholder="Specify other categories..."
+                    value={formData.otherCategories}
+                    onChange={(e) => setFormData({ ...formData, otherCategories: e.target.value })}
+                    className="italic"
+                  />
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          <div className="flex justify-between pt-4">
+            <Button variant="outline" onClick={handleBack}>
+              Back
+            </Button>
+            <Button onClick={handleComplete} disabled={loading}>
+              {loading ? 'Completing Setup...' : 'Complete Setup'}
+            </Button>
+          </div>
+        </div>
       )}
     </div>
   )
