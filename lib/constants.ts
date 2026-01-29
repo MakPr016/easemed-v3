@@ -224,6 +224,287 @@ export const mockVendors: Vendor[] = [
     },
 ]
 
+export const mockHospitalRFQs = {
+    'RFQ-2847': {
+        id: 'RFQ-2847',
+        title: 'Medical Supplies - PPE Kits',
+        status: 'active',
+        category: 'Medical Supplies',
+        deadline: '2026-02-15',
+        deliveryDeadline: '2026-02-28',
+        paymentTerms: 'Net 30',
+        location: 'Berlin, Germany',
+        coordinates: { lat: 52.520008, lng: 13.404954 },
+        urgency: 'moderate',
+        specifications: 'High-quality PPE kits meeting EU standards. All items must be CE certified and comply with EN 149:2001+A1:2009 for FFP2 masks.',
+        requiredDocuments: [
+            'CE Certification',
+            'Product specifications sheet',
+            'Company registration',
+            'Tax compliance certificate'
+        ],
+        items: [
+            {
+                id: '1',
+                name: 'N95 Respirator Masks',
+                quantity: 1000,
+                unit: 'pieces',
+                specification: 'FFP2/N95 certified, individually wrapped',
+                estimatedPrice: '€2.50/piece'
+            },
+            {
+                id: '2',
+                name: 'Surgical Gloves',
+                quantity: 5000,
+                unit: 'pairs',
+                specification: 'Latex-free, powder-free, size M',
+                estimatedPrice: '€0.80/pair'
+            },
+            {
+                id: '3',
+                name: 'Face Shields',
+                quantity: 500,
+                unit: 'pieces',
+                specification: 'Anti-fog, adjustable headband',
+                estimatedPrice: '€5.00/piece'
+            },
+            {
+                id: '4',
+                name: 'Protective Gowns',
+                quantity: 800,
+                unit: 'pieces',
+                specification: 'Level 3, disposable, fluid-resistant',
+                estimatedPrice: '€12.00/piece'
+            },
+            {
+                id: '5',
+                name: 'Hand Sanitizer',
+                quantity: 200,
+                unit: 'liters',
+                specification: '70% alcohol content, WHO formula',
+                estimatedPrice: '€18.00/liter'
+            },
+        ]
+    }
+}
+
+export const mockReceivedQuotations: Record<string, any[]> = {
+    'RFQ-2847': [
+        {
+            id: 'QUO-001',
+            vendorId: 'VEN-001',
+            vendorName: 'MedSupply Pro',
+            vendorRating: 4.8,
+            totalAmount: '€23,500',
+            submittedAt: '2026-01-28',
+            status: 'pending',
+            deliveryTime: '7-10 days',
+            validUntil: '2026-02-28',
+            items: [
+                {
+                    id: '1',
+                    name: 'N95 Respirator Masks',
+                    quantity: 1000,
+                    unit: 'pieces',
+                    unitPrice: '€2.50',
+                    totalPrice: '€2,500'
+                },
+                {
+                    id: '2',
+                    name: 'Surgical Gloves',
+                    quantity: 5000,
+                    unit: 'pairs',
+                    unitPrice: '€0.80',
+                    totalPrice: '€4,000'
+                },
+                {
+                    id: '3',
+                    name: 'Face Shields',
+                    quantity: 500,
+                    unit: 'pieces',
+                    unitPrice: '€5.00',
+                    totalPrice: '€2,500'
+                },
+                {
+                    id: '4',
+                    name: 'Protective Gowns',
+                    quantity: 800,
+                    unit: 'pieces',
+                    unitPrice: '€12.00',
+                    totalPrice: '€9,600'
+                },
+                {
+                    id: '5',
+                    name: 'Hand Sanitizer',
+                    quantity: 200,
+                    unit: 'liters',
+                    unitPrice: '€18.00',
+                    totalPrice: '€3,600'
+                },
+            ]
+        },
+        {
+            id: 'QUO-002',
+            vendorId: 'VEN-002',
+            vendorName: 'HealthCare Solutions',
+            vendorRating: 4.5,
+            totalAmount: '€25,200',
+            submittedAt: '2026-01-27',
+            status: 'under_review',
+            deliveryTime: '5-7 days',
+            validUntil: '2026-02-25',
+            items: [
+                {
+                    id: '1',
+                    name: 'N95 Respirator Masks',
+                    quantity: 1000,
+                    unit: 'pieces',
+                    unitPrice: '€2.80',
+                    totalPrice: '€2,800'
+                },
+                {
+                    id: '2',
+                    name: 'Surgical Gloves',
+                    quantity: 5000,
+                    unit: 'pairs',
+                    unitPrice: '€0.85',
+                    totalPrice: '€4,250'
+                },
+                {
+                    id: '3',
+                    name: 'Face Shields',
+                    quantity: 500,
+                    unit: 'pieces',
+                    unitPrice: '€5.50',
+                    totalPrice: '€2,750'
+                },
+                {
+                    id: '4',
+                    name: 'Protective Gowns',
+                    quantity: 800,
+                    unit: 'pieces',
+                    unitPrice: '€13.00',
+                    totalPrice: '€10,400'
+                },
+                {
+                    id: '5',
+                    name: 'Hand Sanitizer',
+                    quantity: 200,
+                    unit: 'liters',
+                    unitPrice: '€20.00',
+                    totalPrice: '€4,000'
+                },
+            ]
+        },
+        {
+            id: 'QUO-003',
+            vendorId: 'VEN-003',
+            vendorName: 'Global Medical Supplies',
+            vendorRating: 4.9,
+            totalAmount: '€22,800',
+            submittedAt: '2026-01-29',
+            status: 'pending',
+            deliveryTime: '10-14 days',
+            validUntil: '2026-03-01',
+            items: [
+                {
+                    id: '1',
+                    name: 'N95 Respirator Masks',
+                    quantity: 1000,
+                    unit: 'pieces',
+                    unitPrice: '€2.30',
+                    totalPrice: '€2,300'
+                },
+                {
+                    id: '2',
+                    name: 'Surgical Gloves',
+                    quantity: 5000,
+                    unit: 'pairs',
+                    unitPrice: '€0.75',
+                    totalPrice: '€3,750'
+                },
+                {
+                    id: '3',
+                    name: 'Face Shields',
+                    quantity: 500,
+                    unit: 'pieces',
+                    unitPrice: '€4.80',
+                    totalPrice: '€2,400'
+                },
+                {
+                    id: '4',
+                    name: 'Protective Gowns',
+                    quantity: 800,
+                    unit: 'pieces',
+                    unitPrice: '€11.50',
+                    totalPrice: '€9,200'
+                },
+                {
+                    id: '5',
+                    name: 'Hand Sanitizer',
+                    quantity: 200,
+                    unit: 'liters',
+                    unitPrice: '€17.00',
+                    totalPrice: '€3,400'
+                },
+            ]
+        },
+        {
+            id: 'QUO-004',
+            vendorId: 'VEN-004',
+            vendorName: 'QuickMed Distributors',
+            vendorRating: 4.3,
+            totalAmount: '€24,100',
+            submittedAt: '2026-01-26',
+            status: 'pending',
+            deliveryTime: '3-5 days',
+            validUntil: '2026-02-26',
+            items: [
+                {
+                    id: '1',
+                    name: 'N95 Respirator Masks',
+                    quantity: 1000,
+                    unit: 'pieces',
+                    unitPrice: '€2.60',
+                    totalPrice: '€2,600'
+                },
+                {
+                    id: '2',
+                    name: 'Surgical Gloves',
+                    quantity: 5000,
+                    unit: 'pairs',
+                    unitPrice: '€0.82',
+                    totalPrice: '€4,100'
+                },
+                {
+                    id: '3',
+                    name: 'Face Shields',
+                    quantity: 500,
+                    unit: 'pieces',
+                    unitPrice: '€5.20',
+                    totalPrice: '€2,600'
+                },
+                {
+                    id: '4',
+                    name: 'Protective Gowns',
+                    quantity: 800,
+                    unit: 'pieces',
+                    unitPrice: '€12.50',
+                    totalPrice: '€10,000'
+                },
+                {
+                    id: '5',
+                    name: 'Hand Sanitizer',
+                    quantity: 200,
+                    unit: 'liters',
+                    unitPrice: '€19.00',
+                    totalPrice: '€3,800'
+                },
+            ]
+        },
+    ]
+}
+
 
 // Menu Items
 export interface MenuItem {
@@ -245,12 +526,12 @@ export const hospitalMenuItems: MenuItem[] = [
         icon: FileText,
         url: '/dashboard/hospital/rfq',
         items: [
-            { title: 'All RFQs', url: '/dashboard/hospital/rfq', icon: FileText },
-            { title: 'Create RFQ', url: '/dashboard/hospital/rfq/upload', icon: Upload },
-            { title: 'Awaiting Responses', url: '/dashboard/hospital/rfq/awaiting', icon: Clock },
-            { title: 'Under Review', url: '/dashboard/hospital/rfq/under-review', icon: Eye },
-            { title: 'Awarded', url: '/dashboard/hospital/rfq/awarded', icon: Award },
-            { title: 'Closed', url: '/dashboard/hospital/rfq/closed', icon: CheckCircle2 },
+            { title: 'All RFQs', url: '/dashboard/hospital/rfq' },
+            { title: 'Create RFQ', url: '/dashboard/hospital/rfq/upload' },
+            { title: 'Awaiting Responses', url: '/dashboard/hospital/rfq/awaiting' },
+            { title: 'Under Review', url: '/dashboard/hospital/rfq/under-review' },
+            { title: 'Awarded', url: '/dashboard/hospital/rfq/awarded' },
+            { title: 'Closed', url: '/dashboard/hospital/rfq/closed' },
         ],
     },
     {
@@ -262,16 +543,6 @@ export const hospitalMenuItems: MenuItem[] = [
             { title: 'Pending', url: '/dashboard/hospital/orders?status=pending' },
             { title: 'In Transit', url: '/dashboard/hospital/orders?status=in_transit' },
             { title: 'Delivered', url: '/dashboard/hospital/orders?status=delivered' },
-        ],
-    },
-    {
-        title: 'Vendors',
-        icon: Users,
-        url: '/dashboard/hospital/vendors',
-        items: [
-            { title: 'All Vendors', url: '/dashboard/hospital/vendors' },
-            { title: 'Verified', url: '/dashboard/hospital/vendors?status=verified' },
-            { title: 'Pending Approval', url: '/dashboard/hospital/vendors?status=pending' },
         ],
     },
     {
