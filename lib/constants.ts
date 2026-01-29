@@ -1,3 +1,19 @@
+import {
+    Building2,
+    FileText,
+    LayoutDashboard,
+    Package,
+    Settings,
+    ShoppingCart,
+    Users,
+    BarChart3,
+    Upload,
+    Clock,
+    CheckCircle2,
+    Eye,
+    Award,
+} from 'lucide-react'
+
 export const cityToCountryMap: { [key: string]: string } = {
     'London': 'United Kingdom',
     'Manchester': 'United Kingdom',
@@ -198,5 +214,118 @@ export const mockVendors: Vendor[] = [
         canFulfillOtherRequirements: [],
         selected: false,
         includeOtherRequirements: [],
+    },
+]
+
+export interface MenuItem {
+    title: string
+    url: string
+    icon?: any
+    items?: MenuItem[]
+}
+
+export const hospitalMenuItems: MenuItem[] = [
+    {
+        title: 'Dashboard',
+        icon: LayoutDashboard,
+        url: '/dashboard/hospital',
+    },
+    {
+        title: 'RFQs',
+        icon: FileText,
+        url: '/dashboard/hospital/rfq',
+        items: [
+            { title: 'All RFQs', url: '/dashboard/hospital/rfq', icon: FileText },
+            { title: 'Create RFQ', url: '/dashboard/hospital/rfq/upload', icon: Upload },
+            { title: 'Awaiting Responses', url: '/dashboard/hospital/rfq/[id]/awaiting', icon: Clock },
+            { title: 'Under Review', url: '/dashboard/hospital/rfq/[id]/under-review', icon: Eye },
+            { title: 'Awarded', url: '/dashboard/hospital/rfq/[id]/awarded', icon: Award },
+            { title: 'Closed', url: '/dashboard/hospital/rfq/[id]/closed', icon: CheckCircle2 },
+        ],
+    },
+    {
+        title: 'Orders',
+        icon: Package,
+        url: '/dashboard/hospital/orders',
+        items: [
+            { title: 'All Orders', url: '/dashboard/hospital/orders' },
+            { title: 'Pending', url: '/dashboard/hospital/orders?status=pending' },
+            { title: 'In Transit', url: '/dashboard/hospital/orders?status=in_transit' },
+            { title: 'Delivered', url: '/dashboard/hospital/orders?status=delivered' },
+        ],
+    },
+    {
+        title: 'Vendors',
+        icon: Users,
+        url: '/dashboard/hospital/vendors',
+        items: [
+            { title: 'All Vendors', url: '/dashboard/hospital/vendors' },
+            { title: 'Verified', url: '/dashboard/hospital/vendors?status=verified' },
+            { title: 'Pending Approval', url: '/dashboard/hospital/vendors?status=pending' },
+        ],
+    },
+    {
+        title: 'Settings',
+        icon: Settings,
+        url: '/dashboard/hospital/settings',
+    },
+]
+
+export const vendorMenuItems: MenuItem[] = [
+    {
+        title: 'Dashboard',
+        icon: LayoutDashboard,
+        url: '/dashboard/vendor',
+    },
+    {
+        title: 'Available RFQs',
+        icon: FileText,
+        url: '/dashboard/vendor/rfq',
+        items: [
+            { title: 'All RFQs', url: '/dashboard/vendor/rfq' },
+            { title: 'New', url: '/dashboard/vendor/rfq?status=new' },
+            { title: 'Expiring Soon', url: '/dashboard/vendor/rfq?expiring=true' },
+        ],
+    },
+    {
+        title: 'My Quotations',
+        icon: ShoppingCart,
+        url: '/dashboard/vendor/quotations',
+        items: [
+            { title: 'All Quotations', url: '/dashboard/vendor/quotations' },
+            { title: 'Pending', url: '/dashboard/vendor/quotations?status=pending' },
+            { title: 'Accepted', url: '/dashboard/vendor/quotations?status=accepted' },
+            { title: 'Rejected', url: '/dashboard/vendor/quotations?status=rejected' },
+        ],
+    },
+    {
+        title: 'Orders',
+        icon: Package,
+        url: '/dashboard/vendor/orders',
+        items: [
+            { title: 'Active Orders', url: '/dashboard/vendor/orders' },
+            { title: 'Pending Delivery', url: '/dashboard/vendor/orders?status=pending' },
+            { title: 'Completed', url: '/dashboard/vendor/orders?status=completed' },
+        ],
+    },
+    {
+        title: 'Catalog',
+        icon: Package,
+        url: '/dashboard/vendor/catalog',
+    },
+    {
+        title: 'Customers',
+        icon: Building2,
+        url: '/dashboard/vendor/customers',
+    },
+    {
+        title: 'Performance',
+        icon: BarChart3,
+        url: '/dashboard/vendor/performance',
+    },
+    {
+        title: 'Settings',
+        icon: Settings,
+        url: '/dashboard/vendor/settings',
     },
 ]

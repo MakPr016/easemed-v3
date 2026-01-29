@@ -219,7 +219,14 @@ export default function RequirementVendorSelectionPage({
     }
 
     const handleSendRFQ = () => {
+        console.log('Send RFQ clicked')
         const selectedVendors = vendors.filter(v => v.selected)
+        console.log('Selected vendors:', selectedVendors.length)
+
+        if (selectedVendors.length === 0) {
+            console.log('No vendors selected')
+            return
+        }
 
         const vendorRFQs = selectedVendors.map(vendor => ({
             vendorId: vendor.id,
@@ -230,7 +237,10 @@ export default function RequirementVendorSelectionPage({
             status: 'sent' as const
         }))
 
+        console.log('Vendor RFQs:', vendorRFQs)
+
         const existingRFQ = getRFQ(resolvedParams.id)
+        console.log('Existing RFQ:', existingRFQ)
 
         if (!existingRFQ) {
             addRFQ(resolvedParams.id, {
@@ -246,11 +256,19 @@ export default function RequirementVendorSelectionPage({
         const currentIndex = allRequirements.findIndex(
             r => r.line_item_id === currentRequirement.line_item_id
         )
+
+        console.log('Current index:', currentIndex)
+        console.log('Total requirements:', allRequirements.length)
+
         if (currentIndex < allRequirements.length - 1) {
             const nextRequirement = allRequirements[currentIndex + 1]
-            router.push(`/dashboard/hospital/rfq/${resolvedParams.id}/vendors/${nextRequirement.line_item_id}`)
+            const nextUrl = `/dashboard/hospital/rfq/${resolvedParams.id}/vendors/${nextRequirement.line_item_id}`
+            console.log('Navigating to next requirement:', nextUrl)
+            router.push(nextUrl)
         } else {
-            router.push(`/dashboard/hospital/rfq/${resolvedParams.id}/awaiting`)
+            const awaitingUrl = `/dashboard/hospital/rfq/${resolvedParams.id}/awaiting`
+            console.log('Navigating to awaiting page:', awaitingUrl)
+            router.push(awaitingUrl)
         }
     }
 
@@ -423,8 +441,8 @@ export default function RequirementVendorSelectionPage({
                                 <Card
                                     key={vendor.id}
                                     className={`transition-all ${vendor.selected
-                                            ? 'border-primary bg-primary/5'
-                                            : 'border-border hover:border-primary/50'
+                                        ? 'border-primary bg-primary/5'
+                                        : 'border-border hover:border-primary/50'
                                         }`}
                                 >
                                     <CardContent className="p-4">

@@ -1,4 +1,3 @@
-// app/(auth)/login/page.tsx
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
@@ -10,12 +9,14 @@ import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Building2, ShoppingBag, ArrowLeft } from 'lucide-react'
+import { useUser } from '@/lib/contexts/user-context'
 import type { UserType } from '@/lib/types/auth'
 
 function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const [userType, setUserType] = useState<UserType>('hospital')
+  const { setUser, setUserType } = useUser()
+  const [selectedUserType, setSelectedUserType] = useState<UserType>('hospital')
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -26,7 +27,7 @@ function LoginContent() {
   useEffect(() => {
     const type = searchParams.get('type')
     if (type === 'hospital' || type === 'vendor') {
-      setUserType(type)
+      setSelectedUserType(type)
     }
   }, [searchParams])
 
@@ -35,14 +36,22 @@ function LoginContent() {
     setLoading(true)
 
     try {
-      // TODO: Implement Supabase login
-      console.log('Login data:', { ...formData, userType })
+      console.log('Login data:', { ...formData, userType: selectedUserType })
 
-      // Simulate API call
       await new Promise(resolve => setTimeout(resolve, 1000))
 
-      // Navigate to dashboard
-      router.push('/dashboard')
+      const mockUser = {
+        id: '1',
+        name: selectedUserType === 'hospital' ? 'John Doe' : 'Sarah Smith',
+        email: formData.email,
+        organization: selectedUserType === 'hospital' ? 'General Hospital' : 'PharmaCorp Ltd',
+        type: selectedUserType,
+      }
+
+      setUser(mockUser)
+      setUserType(selectedUserType)
+
+      router.push(`/dashboard/${selectedUserType}`)
     } catch (error) {
       console.error('Login error:', error)
       setErrors({ general: 'Invalid email or password' })
@@ -76,7 +85,7 @@ function LoginContent() {
           </CardHeader>
 
           <CardContent>
-            <Tabs value={userType} onValueChange={(v) => setUserType(v as UserType)} className="mb-6">
+            <Tabs value={selectedUserType} onValueChange={(v) => setSelectedUserType(v as UserType)} className="mb-6">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="hospital" className="gap-2">
                   <Building2 className="h-4 w-4" />
@@ -132,7 +141,7 @@ function LoginContent() {
 
             <div className="mt-6 text-center text-sm">
               Don't have an account?{' '}
-              <Link href={`/signup?type=${userType}`} className="text-primary hover:underline font-medium">
+              <Link href={`/signup?type=${selectedUserType}`} className="text-primary hover:underline font-medium">
                 Sign up
               </Link>
             </div>
