@@ -2,7 +2,7 @@
 
 import { useState, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { useRFQStore } from '@/lib/rfq-store'
+import dynamic from 'next/dynamic'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
@@ -28,7 +28,6 @@ import {
     Send,
     ChevronDown,
     Eye,
-    Plus,
 } from 'lucide-react'
 import {
     Command,
@@ -64,35 +63,26 @@ import {
     CollapsibleContent,
     CollapsibleTrigger,
 } from '@/components/ui/collapsible'
+import { useRFQStore } from '@/lib/rfq-store'
+import {
+    cityToCountryMap,
+    mockRequirements,
+    mockVendors,
+    type Vendor,
+    type Requirement
+} from '@/lib/constants'
 
-interface Vendor {
-    id: string
-    name: string
-    rating: number
-    location: string
-    certifications: string[]
-    pastOrders: number
-    responseRate: number
-    canFulfillOtherRequirements: {
-        line_item_id: number
-        inn_name: string
-        brand_name: string
-        dosage: string
-    }[]
-    selected: boolean
-    includeOtherRequirements: number[]
-}
-
-interface Requirement {
-    line_item_id: number
-    inn_name: string
-    brand_name: string
-    dosage: string
-    form: string
-    quantity: number
-    unit_of_issue: string
-    category: string
-}
+const EuropeMap = dynamic(
+    () => import('@/components/maps/europe-map').then(mod => ({ default: mod.EuropeMap })),
+    {
+        ssr: false,
+        loading: () => (
+            <div className="w-full h-100 flex items-center justify-center bg-muted rounded-lg border">
+                <div className="animate-pulse text-muted-foreground">Loading map...</div>
+            </div>
+        )
+    }
+)
 
 export default function RequirementVendorSelectionPage({
     params
@@ -101,133 +91,44 @@ export default function RequirementVendorSelectionPage({
 }) {
     const resolvedParams = use(params)
     const router = useRouter()
+    const { addRFQ, addVendorsToRFQ, getRFQ } = useRFQStore()
     const [searchTerm, setSearchTerm] = useState('')
-    const [locationFilter, setLocationFilter] = useState<string>('all_locations')
+    const [selectedCountries, setSelectedCountries] = useState<string[]>([])
     const [certificationFilter, setCertificationFilter] = useState<string>('all_certifications')
     const [procurementMode, setProcurementMode] = useState<string>('balanced')
     const [requirementSelectorOpen, setRequirementSelectorOpen] = useState(false)
     const [previewVendorId, setPreviewVendorId] = useState<string | null>(null)
     const [collapsedVendors, setCollapsedVendors] = useState<Set<string>>(new Set())
-    const { addRFQ, addVendorsToRFQ, getRFQ } = useRFQStore()
 
-    const [allRequirements] = useState<Requirement[]>([
-        {
-            line_item_id: 1,
-            inn_name: 'Acetylsalicylic acid',
-            brand_name: 'Aspirin',
-            dosage: '81 mg',
-            form: 'Tablet',
-            quantity: 1000,
-            unit_of_issue: 'Tablet',
-            category: 'Analgesics',
-        },
-        {
-            line_item_id: 2,
-            inn_name: 'Acetaminophen',
-            brand_name: 'Panadol Syrup',
-            dosage: '100 ml',
-            form: 'Syrup',
-            quantity: 500,
-            unit_of_issue: 'Bottle',
-            category: 'Analgesics',
-        },
-        {
-            line_item_id: 3,
-            inn_name: 'Adrenalin',
-            brand_name: 'Ampule Adre',
-            dosage: '1mg/1ml',
-            form: 'Injection',
-            quantity: 200,
-            unit_of_issue: 'Ampule',
-            category: 'Emergency Medicine',
-        },
-        {
-            line_item_id: 4,
-            inn_name: 'Amoxicillin + Clavulanate',
-            brand_name: 'Augmentin',
-            dosage: '1g',
-            form: 'Tablet',
-            quantity: 800,
-            unit_of_issue: 'Tablet',
-            category: 'Antibiotics',
-        },
-    ])
+    const [allRequirements] = useState<Requirement[]>(mockRequirements)
+    const [vendors, setVendors] = useState<Vendor[]>(mockVendors)
 
     const currentRequirement = allRequirements.find(
         r => r.line_item_id === parseInt(resolvedParams.requirementId)
     ) || allRequirements[0]
 
-    const [vendors, setVendors] = useState<Vendor[]>([
-        {
-            id: 'v1',
-            name: 'PharmaCorp Ltd',
-            rating: 4.8,
-            location: 'Mumbai',
-            certifications: ['ISO 9001', 'WHO-GMP', 'FDA'],
-            pastOrders: 45,
-            responseRate: 95,
-            canFulfillOtherRequirements: [
-                { line_item_id: 2, inn_name: 'Acetaminophen', brand_name: 'Panadol Syrup', dosage: '100 ml' },
-                { line_item_id: 4, inn_name: 'Amoxicillin + Clavulanate', brand_name: 'Augmentin', dosage: '1g' },
-            ],
-            selected: false,
-            includeOtherRequirements: [],
-        },
-        {
-            id: 'v2',
-            name: 'MediSupply International',
-            rating: 4.5,
-            location: 'Delhi',
-            certifications: ['ISO 9001', 'FDA'],
-            pastOrders: 32,
-            responseRate: 88,
-            canFulfillOtherRequirements: [
-                { line_item_id: 3, inn_name: 'Adrenalin', brand_name: 'Ampule Adre', dosage: '1mg/1ml' },
-            ],
-            selected: false,
-            includeOtherRequirements: [],
-        },
-        {
-            id: 'v3',
-            name: 'HealthCare Distributors',
-            rating: 4.2,
-            location: 'Bangalore',
-            certifications: ['WHO-GMP'],
-            pastOrders: 18,
-            responseRate: 82,
-            canFulfillOtherRequirements: [],
-            selected: false,
-            includeOtherRequirements: [],
-        },
-        {
-            id: 'v4',
-            name: 'Global Pharma Solutions',
-            rating: 4.7,
-            location: 'Mumbai',
-            certifications: ['ISO 9001', 'WHO-GMP', 'EMA'],
-            pastOrders: 38,
-            responseRate: 91,
-            canFulfillOtherRequirements: [
-                { line_item_id: 2, inn_name: 'Acetaminophen', brand_name: 'Panadol Syrup', dosage: '100 ml' },
-            ],
-            selected: false,
-            includeOtherRequirements: [],
-        },
-        {
-            id: 'v5',
-            name: 'MedLife Supplies',
-            rating: 4.3,
-            location: 'Chennai',
-            certifications: ['ISO 9001'],
-            pastOrders: 22,
-            responseRate: 85,
-            canFulfillOtherRequirements: [
-                { line_item_id: 3, inn_name: 'Adrenalin', brand_name: 'Ampule Adre', dosage: '1mg/1ml' },
-            ],
-            selected: false,
-            includeOtherRequirements: [],
-        },
-    ])
+    const getCountryFromCity = (city: string): string => {
+        return cityToCountryMap[city] || city
+    }
+
+    const getVendorCountsByCountry = () => {
+        const counts: { [key: string]: number } = {}
+
+        vendors.forEach(vendor => {
+            const country = getCountryFromCity(vendor.location)
+            counts[country] = (counts[country] || 0) + 1
+        })
+
+        return counts
+    }
+
+    const handleCountrySelect = (country: string) => {
+        setSelectedCountries(prev =>
+            prev.includes(country)
+                ? prev.filter(c => c !== country)
+                : [...prev, country]
+        )
+    }
 
     const toggleVendor = (vendorId: string) => {
         setVendors(vendors.map(v =>
@@ -279,16 +180,22 @@ export default function RequirementVendorSelectionPage({
     }
 
     const selectAllVendors = () => {
-        const allSelected = vendors.every(v => v.selected)
-        setVendors(vendors.map(v => ({ ...v, selected: !allSelected })))
+        const allSelected = filteredVendors.every(v => v.selected)
+        setVendors(vendors.map(v => {
+            if (filteredVendors.find(fv => fv.id === v.id)) {
+                return { ...v, selected: !allSelected }
+            }
+            return v
+        }))
     }
 
     const filteredVendors = vendors.filter(vendor => {
         const matchesSearch = vendor.name.toLowerCase().includes(searchTerm.toLowerCase())
-        const matchesLocation = locationFilter === 'all_locations' || vendor.location.toLowerCase() === locationFilter
+        const matchesCountry = selectedCountries.length === 0 ||
+            selectedCountries.includes(getCountryFromCity(vendor.location))
         const matchesCertification = certificationFilter === 'all_certifications' ||
             vendor.certifications.some(cert => cert.toLowerCase().replace(/[\s-]/g, '_') === certificationFilter)
-        return matchesSearch && matchesLocation && matchesCertification
+        return matchesSearch && matchesCountry && matchesCertification
     })
 
     const selectedVendorsCount = vendors.filter(v => v.selected).length
@@ -296,6 +203,19 @@ export default function RequirementVendorSelectionPage({
     const handleChangeRequirement = (lineItemId: number) => {
         router.push(`/dashboard/hospital/rfq/${resolvedParams.id}/vendors/${lineItemId}`)
         setRequirementSelectorOpen(false)
+    }
+
+    const getVendorRFQRequirements = (vendorId: string) => {
+        const vendor = vendors.find(v => v.id === vendorId)
+        if (!vendor) return []
+
+        const requirements = [currentRequirement]
+        vendor.includeOtherRequirements.forEach(reqId => {
+            const req = allRequirements.find(r => r.line_item_id === reqId)
+            if (req) requirements.push(req)
+        })
+
+        return requirements
     }
 
     const handleSendRFQ = () => {
@@ -334,20 +254,6 @@ export default function RequirementVendorSelectionPage({
         }
     }
 
-
-    const getVendorRFQRequirements = (vendorId: string) => {
-        const vendor = vendors.find(v => v.id === vendorId)
-        if (!vendor) return []
-
-        const requirements = [currentRequirement]
-        vendor.includeOtherRequirements.forEach(reqId => {
-            const req = allRequirements.find(r => r.line_item_id === reqId)
-            if (req) requirements.push(req)
-        })
-
-        return requirements
-    }
-
     const getFilteredOtherRequirements = (vendor: Vendor) => {
         return vendor.canFulfillOtherRequirements.filter(
             req => req.line_item_id !== currentRequirement.line_item_id
@@ -355,6 +261,7 @@ export default function RequirementVendorSelectionPage({
     }
 
     const previewVendor = vendors.find(v => v.id === previewVendorId)
+    const vendorCounts = getVendorCountsByCountry()
 
     return (
         <div className="space-y-6">
@@ -434,6 +341,44 @@ export default function RequirementVendorSelectionPage({
                         </CardContent>
                     </Card>
 
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Vendor Locations</CardTitle>
+                            <CardDescription>Select regions to filter vendors on the map</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <EuropeMap
+                                selectedCountries={selectedCountries}
+                                onCountrySelect={handleCountrySelect}
+                                vendorCounts={vendorCounts}
+                            />
+
+                            {selectedCountries.length > 0 && (
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-sm text-muted-foreground">Selected:</span>
+                                    {selectedCountries.map(country => (
+                                        <Badge key={country} variant="secondary" className="gap-1">
+                                            {country}
+                                            <button
+                                                onClick={() => handleCountrySelect(country)}
+                                                className="ml-1 hover:text-destructive"
+                                            >
+                                                ×
+                                            </button>
+                                        </Badge>
+                                    ))}
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setSelectedCountries([])}
+                                    >
+                                        Clear all
+                                    </Button>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
                     <div className="flex items-center gap-3">
                         <div className="relative flex-1">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -444,19 +389,6 @@ export default function RequirementVendorSelectionPage({
                                 className="pl-9"
                             />
                         </div>
-                        <Select value={locationFilter} onValueChange={setLocationFilter}>
-                            <SelectTrigger className="w-48">
-                                <MapPin className="h-4 w-4 mr-2" />
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                <SelectItem value="all_locations">All Locations</SelectItem>
-                                <SelectItem value="mumbai">Mumbai</SelectItem>
-                                <SelectItem value="delhi">Delhi</SelectItem>
-                                <SelectItem value="bangalore">Bangalore</SelectItem>
-                                <SelectItem value="chennai">Chennai</SelectItem>
-                            </SelectContent>
-                        </Select>
                         <Select value={certificationFilter} onValueChange={setCertificationFilter}>
                             <SelectTrigger className="w-52">
                                 <Filter className="h-4 w-4 mr-2" />
@@ -476,7 +408,7 @@ export default function RequirementVendorSelectionPage({
                             className="gap-2"
                         >
                             <Users className="h-4 w-4" />
-                            {vendors.every(v => v.selected) ? 'Deselect All' : 'Select All'}
+                            {filteredVendors.every(v => v.selected) ? 'Deselect All' : 'Select All'}
                         </Button>
                     </div>
 
@@ -491,8 +423,8 @@ export default function RequirementVendorSelectionPage({
                                 <Card
                                     key={vendor.id}
                                     className={`transition-all ${vendor.selected
-                                        ? 'border-primary bg-primary/5'
-                                        : 'border-border hover:border-primary/50'
+                                            ? 'border-primary bg-primary/5'
+                                            : 'border-border hover:border-primary/50'
                                         }`}
                                 >
                                     <CardContent className="p-4">
@@ -619,7 +551,7 @@ export default function RequirementVendorSelectionPage({
                                                                 Preview RFQ
                                                             </Button>
                                                         </DialogTrigger>
-                                                        <DialogContent className="max-w-6xl min-w-4xl w-[90vw] max-h-[90vh] overflow-y-auto">
+                                                        <DialogContent className="max-w-6xl w-[90vw] max-h-[90vh] overflow-y-auto">
                                                             <DialogHeader>
                                                                 <DialogTitle>RFQ Preview - {vendor.name}</DialogTitle>
                                                                 <DialogDescription>
