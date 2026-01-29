@@ -1,4 +1,3 @@
-// components/sidebar/app-sidebar.tsx
 'use client'
 
 import * as React from 'react'
@@ -17,7 +16,8 @@ import {
     Upload,
     Clock,
     CheckCircle2,
-    XCircle
+    Eye,
+    Award,
 } from 'lucide-react'
 
 import {
@@ -50,7 +50,14 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 
-const hospitalMenuItems = [
+interface MenuItem {
+    title: string;
+    url: string;
+    icon?: React.ElementType;
+    items?: MenuItem[];
+}
+
+const hospitalMenuItems: MenuItem[] = [
     {
         title: 'Dashboard',
         icon: LayoutDashboard,
@@ -63,16 +70,11 @@ const hospitalMenuItems = [
         items: [
             { title: 'All RFQs', url: '/dashboard/hospital/rfq', icon: FileText },
             { title: 'Create RFQ', url: '/dashboard/hospital/rfq/upload', icon: Upload },
-            { title: 'Awaiting Bids', url: '/dashboard/hospital/rfq?status=awaiting_bids', icon: Clock },
-            { title: 'Under Review', url: '/dashboard/hospital/rfq?status=under_review', icon: ShoppingCart },
-            { title: 'Awarded', url: '/dashboard/hospital/rfq?status=awarded', icon: CheckCircle2 },
-            { title: 'Closed', url: '/dashboard/hospital/rfq?status=closed', icon: XCircle },
+            { title: 'Awaiting Responses', url: '/dashboard/hospital/rfq/[id]/awaiting', icon: Clock },
+            { title: 'Under Review', url: '/dashboard/hospital/rfq/[id]/under-review', icon: Eye },
+            { title: 'Awarded', url: '/dashboard/hospital/rfq/[id]/awarded', icon: Award },
+            { title: 'Closed', url: '/dashboard/hospital/rfq/[id]/closed', icon: CheckCircle2 },
         ],
-    },
-    {
-        title: 'Quotations',
-        icon: ShoppingCart,
-        url: '/dashboard/hospital/quotations',
     },
     {
         title: 'Orders',
@@ -96,23 +98,13 @@ const hospitalMenuItems = [
         ],
     },
     {
-        title: 'Inventory',
-        icon: Package,
-        url: '/dashboard/hospital/inventory',
-    },
-    {
-        title: 'Analytics',
-        icon: BarChart3,
-        url: '/dashboard/hospital/analytics',
-    },
-    {
         title: 'Settings',
         icon: Settings,
         url: '/dashboard/hospital/settings',
     },
 ]
 
-const vendorMenuItems = [
+const vendorMenuItems: MenuItem[] = [
     {
         title: 'Dashboard',
         icon: LayoutDashboard,
@@ -193,12 +185,39 @@ export function AppSidebar({ userType = 'hospital', user }: AppSidebarProps) {
         avatar: user?.avatar,
     }
 
-    // Check if a path is active, including query parameters
-    const isPathActive = (url: string) => {
-        if (url.includes('?')) {
-            return pathname + window.location.search === url
+    const getRfqIdFromPath = () => {
+        const match = pathname.match(/\/rfq\/([^\/]+)/)
+        return match ? match[1] : null
+    }
+
+    const getResolvedUrl = (url: string) => {
+        if (url.includes('[id]')) {
+            const rfqId = getRfqIdFromPath()
+            if (rfqId) {
+                return url.replace('[id]', rfqId)
+            }
+            return url
         }
-        return pathname === url
+        return url
+    }
+
+    const isLinkDisabled = (url: string) => {
+        if (url.includes('[id]')) {
+            const rfqId = getRfqIdFromPath()
+            return !rfqId
+        }
+        return false
+    }
+
+    const isPathActive = (url: string) => {
+        const resolvedUrl = getResolvedUrl(url)
+        if (resolvedUrl.includes('?')) {
+            if (typeof window !== 'undefined') {
+                return pathname + window.location.search === resolvedUrl
+            }
+            return pathname === resolvedUrl.split('?')[0]
+        }
+        return pathname === resolvedUrl
     }
 
     return (
@@ -206,7 +225,7 @@ export function AppSidebar({ userType = 'hospital', user }: AppSidebarProps) {
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <Link href={userType === 'hospital' ? '/dashboard/hospital' : '/dashboard/vendor'}>
+                        <Link href={userType === 'hospital' ? '/dashboard/hospital' : '/dashboard/vendor'} prefetch={false}>
                             <div className="flex items-center gap-2 px-2 py-4 cursor-pointer hover:opacity-80 transition-opacity">
                                 <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
                                     <span className="text-primary-foreground font-bold text-lg">E</span>
@@ -235,26 +254,39 @@ export function AppSidebar({ userType = 'hospital', user }: AppSidebarProps) {
                                             <SidebarMenuItem>
                                                 <CollapsibleTrigger asChild>
                                                     <SidebarMenuButton>
-                                                        <item.icon className="h-4 w-4" />
+                                                        {item.icon && typeof item.icon === 'function' && <item.icon className="h-4 w-4" />}
                                                         <span>{item.title}</span>
                                                         <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
                                                     </SidebarMenuButton>
                                                 </CollapsibleTrigger>
                                                 <CollapsibleContent>
                                                     <SidebarMenuSub>
-                                                        {item.items.map((subItem) => (
-                                                            <SidebarMenuSubItem key={subItem.title}>
-                                                                <SidebarMenuSubButton
-                                                                    asChild
-                                                                    isActive={pathname.startsWith(subItem.url.split('?')[0])}
-                                                                >
-                                                                    <Link href={subItem.url}>
-                                                                        {'icon' in subItem && subItem.icon && <subItem.icon className="h-3 w-3 mr-2" />}
-                                                                        <span>{subItem.title}</span>
-                                                                    </Link>
-                                                                </SidebarMenuSubButton>
-                                                            </SidebarMenuSubItem>
-                                                        ))}
+                                                        {item.items.map((subItem) => {
+                                                            const disabled = isLinkDisabled(subItem.url)
+                                                            const resolvedUrl = getResolvedUrl(subItem.url)
+
+                                                            return (
+                                                                <SidebarMenuSubItem key={subItem.title}>
+                                                                    <SidebarMenuSubButton
+                                                                        asChild={!disabled}
+                                                                        isActive={!disabled && isPathActive(subItem.url)}
+                                                                        className={disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
+                                                                    >
+                                                                        {disabled ? (
+                                                                            <div className="flex items-center">
+                                                                                {'icon' in subItem && subItem.icon && <subItem.icon className="h-3 w-3 mr-2" />}
+                                                                                <span>{subItem.title}</span>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <Link href={resolvedUrl} prefetch={false}>
+                                                                                {'icon' in subItem && subItem.icon && <subItem.icon className="h-3 w-3 mr-2" />}
+                                                                                <span>{subItem.title}</span>
+                                                                            </Link>
+                                                                        )}
+                                                                    </SidebarMenuSubButton>
+                                                                </SidebarMenuSubItem>
+                                                            )
+                                                        })}
                                                     </SidebarMenuSub>
                                                 </CollapsibleContent>
                                             </SidebarMenuItem>
@@ -262,8 +294,8 @@ export function AppSidebar({ userType = 'hospital', user }: AppSidebarProps) {
                                     ) : (
                                         <SidebarMenuItem>
                                             <SidebarMenuButton asChild isActive={pathname === item.url}>
-                                                <Link href={item.url}>
-                                                    <item.icon className="h-4 w-4" />
+                                                <Link href={item.url} prefetch={false}>
+                                                    {item.icon && typeof item.icon === 'function' && <item.icon className="h-4 w-4" />}
                                                     <span>{item.title}</span>
                                                 </Link>
                                             </SidebarMenuButton>
