@@ -1,0 +1,152 @@
+.json-viewer-container {
+  animation: slideUp 0.3s ease;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.json-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #f0f0f0;
+}
+
+.json-header h3 {
+  margin: 0;
+  font-size: 18px;
+  color: #333;
+}
+
+.copy-btn {
+  padding: 8px 16px;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 13px;
+  transition: all 0.3s ease;
+}
+
+.copy-btn:hover {
+  background: #764ba2;
+  transform: translateY(-2px);
+}
+
+.json-content {
+  background: #1e1e1e;
+  border-radius: 8px;
+  padding: 0;
+  overflow-x: auto;
+  border: 1px solid #333;
+  max-height: 600px;
+  overflow-y: auto;
+}
+
+.json-pre {
+  margin: 0;
+  padding: 16px;
+  font-size: 13px;
+  line-height: 1.6;
+  font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+}
+
+.json-code {
+  color: #d4d4d4;
+}
+
+.json-bracket {
+  color: #d4d4d4;
+  cursor: pointer;
+  user-select: none;
+}
+
+.json-bracket.expandable {
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.json-bracket.expandable:hover {
+  opacity: 1;
+}
+
+.json-key {
+  color: #9cdcfe;
+}
+
+.json-string {
+  color: #ce9178;
+}
+
+.json-number {
+  color: #b5cea8;
+}
+
+.json-bool {
+  color: #569cd6;
+}
+
+.json-null {
+  color: #569cd6;
+}
+
+.json-object,
+.json-array {
+  display: inline-block;
+}
+
+.json-properties,
+.json-items {
+  display: block;
+}
+
+.json-property,
+.json-item {
+  margin-bottom: 0;
+}
+
+.json-footer {
+  margin-top: 16px;
+  padding: 12px;
+  background: #f0f2ff;
+  border-left: 4px solid #667eea;
+  border-radius: 4px;
+}
+
+.json-footer p {
+  margin: 0;
+  font-size: 13px;
+  color: #555;
+}
+
+@media (max-width: 768px) {
+  .json-content {
+    max-height: 400px;
+  }
+
+  .json-pre {
+    font-size: 12px;
+  }
+
+  .json-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .copy-btn {
+    width: 100%;
+  }
+}
