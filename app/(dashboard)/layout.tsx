@@ -1,4 +1,3 @@
-// app/(dashboard)/layout.tsx
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { SidebarProvider, SidebarTrigger, SidebarInset } from '@/components/ui/sidebar'
 import { Separator } from '@/components/ui/separator'
@@ -10,7 +9,7 @@ export default function DashboardLayout({
 }) {
     return (
         <SidebarProvider>
-            <AppSidebar userType="hospital" />
+            <AppSidebar />
             <SidebarInset>
                 <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4">
                     <SidebarTrigger className="-ml-1" />
