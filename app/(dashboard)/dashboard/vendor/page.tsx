@@ -1,4 +1,3 @@
-// app/(dashboard)/dashboard/vendor/page.tsx
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import {
@@ -24,6 +23,14 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table"
+import {
+    vendorStats,
+    bidPerformance,
+    rfqOpportunities,
+    activeBids,
+    topCustomers,
+} from '@/lib/constants'
+
 
 export default function VendorDashboardPage() {
     return (
@@ -47,6 +54,7 @@ export default function VendorDashboardPage() {
                 </div>
             </div>
 
+
             {/* Stats Cards */}
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
                 <Card>
@@ -57,12 +65,15 @@ export default function VendorDashboardPage() {
                         <DollarSign className="h-4 w-4 text-green-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold">€184,500</div>
+                        <div className="text-3xl font-bold">{vendorStats.totalRevenue.value}</div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            <span className="text-green-600">+24%</span> from last month
+                            <span className={vendorStats.totalRevenue.isPositive ? "text-green-600" : "text-red-600"}>
+                                {vendorStats.totalRevenue.change}
+                            </span> from last month
                         </p>
                     </CardContent>
                 </Card>
+
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -72,12 +83,13 @@ export default function VendorDashboardPage() {
                         <FileText className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold">23</div>
+                        <div className="text-3xl font-bold">{vendorStats.activeBids.total}</div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            15 pending • 8 shortlisted
+                            {vendorStats.activeBids.pending} pending • {vendorStats.activeBids.shortlisted} shortlisted
                         </p>
                     </CardContent>
                 </Card>
+
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -87,12 +99,15 @@ export default function VendorDashboardPage() {
                         <Target className="h-4 w-4 text-purple-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold">68%</div>
+                        <div className="text-3xl font-bold">{vendorStats.winRate.percentage}%</div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            <span className="text-green-600">+12%</span> vs last quarter
+                            <span className={vendorStats.winRate.isPositive ? "text-green-600" : "text-red-600"}>
+                                {vendorStats.winRate.change}
+                            </span> vs last quarter
                         </p>
                     </CardContent>
                 </Card>
+
 
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -102,13 +117,14 @@ export default function VendorDashboardPage() {
                         <Award className="h-4 w-4 text-orange-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-3xl font-bold">42</div>
+                        <div className="text-3xl font-bold">{vendorStats.newOpportunities.count}</div>
                         <p className="text-xs text-muted-foreground mt-1">
-                            <span className="text-green-600">+8</span> added today
+                            <span className="text-green-600">+{vendorStats.newOpportunities.addedToday}</span> added today
                         </p>
                     </CardContent>
                 </Card>
             </div>
+
 
             {/* Revenue and Bid Performance */}
             <div className="grid gap-4 md:grid-cols-2">
@@ -119,10 +135,11 @@ export default function VendorDashboardPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div>
-                            <div className="text-3xl font-bold">€184,500</div>
+                            <div className="text-3xl font-bold">{vendorStats.totalRevenue.value}</div>
                             <p className="text-sm text-muted-foreground mt-1">This month</p>
-                            <p className="text-sm text-green-600 mt-1">+24% vs last month</p>
+                            <p className="text-sm text-green-600 mt-1">{vendorStats.totalRevenue.change} vs last month</p>
                         </div>
+
 
                         <div className="h-48 bg-linear-to-r from-green-50 to-green-100 rounded-lg p-4 relative overflow-hidden">
                             <svg className="w-full h-full" viewBox="0 0 400 150" preserveAspectRatio="none">
@@ -152,6 +169,7 @@ export default function VendorDashboardPage() {
                     </CardContent>
                 </Card>
 
+
                 <Card>
                     <CardHeader>
                         <CardTitle>Bid Performance</CardTitle>
@@ -161,35 +179,36 @@ export default function VendorDashboardPage() {
                         <div className="grid grid-cols-3 gap-4">
                             <div className="text-center p-4 border rounded-lg bg-green-50">
                                 <CheckCircle2 className="h-8 w-8 text-green-600 mx-auto mb-2" />
-                                <div className="text-2xl font-bold text-green-600">45</div>
+                                <div className="text-2xl font-bold text-green-600">{bidPerformance.won}</div>
                                 <div className="text-xs text-muted-foreground mt-1">Won</div>
                             </div>
                             <div className="text-center p-4 border rounded-lg bg-yellow-50">
                                 <Clock className="h-8 w-8 text-yellow-600 mx-auto mb-2" />
-                                <div className="text-2xl font-bold text-yellow-600">23</div>
+                                <div className="text-2xl font-bold text-yellow-600">{bidPerformance.pending}</div>
                                 <div className="text-xs text-muted-foreground mt-1">Pending</div>
                             </div>
                             <div className="text-center p-4 border rounded-lg bg-red-50">
                                 <XCircle className="h-8 w-8 text-red-600 mx-auto mb-2" />
-                                <div className="text-2xl font-bold text-red-600">12</div>
+                                <div className="text-2xl font-bold text-red-600">{bidPerformance.lost}</div>
                                 <div className="text-xs text-muted-foreground mt-1">Lost</div>
                             </div>
                         </div>
+
 
                         <div className="space-y-3 mt-6">
                             <div>
                                 <div className="flex justify-between text-sm mb-1">
                                     <span>Win Rate</span>
-                                    <span className="font-medium">68%</span>
+                                    <span className="font-medium">{bidPerformance.winRate}%</span>
                                 </div>
                                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
-                                    <div className="h-full bg-green-500" style={{ width: '68%' }} />
+                                    <div className="h-full bg-green-500" style={{ width: `${bidPerformance.winRate}%` }} />
                                 </div>
                             </div>
                             <div>
                                 <div className="flex justify-between text-sm mb-1">
                                     <span>Average Bid Value</span>
-                                    <span className="font-medium">€12,400</span>
+                                    <span className="font-medium">{bidPerformance.averageBidValue}</span>
                                 </div>
                                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
                                     <div className="h-full bg-blue-500" style={{ width: '85%' }} />
@@ -198,7 +217,7 @@ export default function VendorDashboardPage() {
                             <div>
                                 <div className="flex justify-between text-sm mb-1">
                                     <span>Response Time</span>
-                                    <span className="font-medium">2.3 days</span>
+                                    <span className="font-medium">{bidPerformance.responseTime}</span>
                                 </div>
                                 <div className="h-2 bg-secondary rounded-full overflow-hidden">
                                     <div className="h-full bg-purple-500" style={{ width: '92%' }} />
@@ -208,6 +227,7 @@ export default function VendorDashboardPage() {
                     </CardContent>
                 </Card>
             </div>
+
 
             {/* New RFQ Opportunities */}
             <Card>
@@ -232,62 +252,32 @@ export default function VendorDashboardPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow>
-                                <TableCell className="font-medium text-xs">RFQ-2847</TableCell>
-                                <TableCell className="text-xs">City General Hospital</TableCell>
-                                <TableCell className="text-xs">Medical Supplies - PPE Kits</TableCell>
-                                <TableCell className="text-right text-xs">€15,000</TableCell>
-                                <TableCell className="text-center text-xs">7</TableCell>
-                                <TableCell className="text-center">
-                                    <Badge variant="destructive" className="text-xs">18h</Badge>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                    <Button size="sm" className="h-7 text-xs">Place Bid</Button>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium text-xs">RFQ-2846</TableCell>
-                                <TableCell className="text-xs">St. Mary's Hospital</TableCell>
-                                <TableCell className="text-xs">Surgical Instruments</TableCell>
-                                <TableCell className="text-right text-xs">€28,500</TableCell>
-                                <TableCell className="text-center text-xs">4</TableCell>
-                                <TableCell className="text-center">
-                                    <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-700">2d</Badge>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                    <Button size="sm" className="h-7 text-xs">Place Bid</Button>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium text-xs">RFQ-2845</TableCell>
-                                <TableCell className="text-xs">County Medical Center</TableCell>
-                                <TableCell className="text-xs">Laboratory Equipment</TableCell>
-                                <TableCell className="text-right text-xs">€52,000</TableCell>
-                                <TableCell className="text-center text-xs">11</TableCell>
-                                <TableCell className="text-center">
-                                    <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-700">3d</Badge>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                    <Button size="sm" className="h-7 text-xs">Place Bid</Button>
-                                </TableCell>
-                            </TableRow>
-                            <TableRow>
-                                <TableCell className="font-medium text-xs">RFQ-2844</TableCell>
-                                <TableCell className="text-xs">Regional Health Center</TableCell>
-                                <TableCell className="text-xs">Disposable Syringes (Bulk)</TableCell>
-                                <TableCell className="text-right text-xs">€8,900</TableCell>
-                                <TableCell className="text-center text-xs">6</TableCell>
-                                <TableCell className="text-center">
-                                    <Badge variant="secondary" className="text-xs bg-blue-100 text-blue-700">5d</Badge>
-                                </TableCell>
-                                <TableCell className="text-center">
-                                    <Button size="sm" className="h-7 text-xs">Place Bid</Button>
-                                </TableCell>
-                            </TableRow>
+                            {rfqOpportunities.map((rfq) => (
+                                <TableRow key={rfq.id}>
+                                    <TableCell className="font-medium text-xs">{rfq.id}</TableCell>
+                                    <TableCell className="text-xs">{rfq.hospital}</TableCell>
+                                    <TableCell className="text-xs">{rfq.title}</TableCell>
+                                    <TableCell className="text-right text-xs">{rfq.budget}</TableCell>
+                                    <TableCell className="text-center text-xs">{rfq.competitors}</TableCell>
+                                    <TableCell className="text-center">
+                                        <Badge
+                                            variant={rfq.deadlineVariant}
+                                            className={`text-xs ${rfq.deadlineVariant === 'secondary' ? 'bg-yellow-100 text-yellow-700' : ''
+                                                }`}
+                                        >
+                                            {rfq.deadline}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <Button size="sm" className="h-7 text-xs">Place Bid</Button>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
                         </TableBody>
                     </Table>
                 </CardContent>
             </Card>
+
 
             {/* My Active Bids and Top Customers */}
             <div className="grid gap-4 md:grid-cols-2">
@@ -310,54 +300,28 @@ export default function VendorDashboardPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                <TableRow>
-                                    <TableCell className="font-medium text-xs">BID-8934</TableCell>
-                                    <TableCell className="text-xs">Medical Gloves</TableCell>
-                                    <TableCell className="text-right text-xs">€9,800</TableCell>
-                                    <TableCell className="text-center">
-                                        <Badge className="text-xs bg-green-100 text-green-700">1st</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <Badge className="text-xs bg-yellow-100 text-yellow-700">Under Review</Badge>
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell className="font-medium text-xs">BID-8933</TableCell>
-                                    <TableCell className="text-xs">IV Infusion Sets</TableCell>
-                                    <TableCell className="text-right text-xs">€14,200</TableCell>
-                                    <TableCell className="text-center">
-                                        <Badge className="text-xs bg-blue-100 text-blue-700">2nd</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <Badge className="text-xs bg-yellow-100 text-yellow-700">Pending</Badge>
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell className="font-medium text-xs">BID-8932</TableCell>
-                                    <TableCell className="text-xs">Surgical Masks</TableCell>
-                                    <TableCell className="text-right text-xs">€6,500</TableCell>
-                                    <TableCell className="text-center">
-                                        <Badge className="text-xs bg-green-100 text-green-700">1st</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <Badge className="text-xs bg-green-100 text-green-700">Shortlisted</Badge>
-                                    </TableCell>
-                                </TableRow>
-                                <TableRow>
-                                    <TableCell className="font-medium text-xs">BID-8931</TableCell>
-                                    <TableCell className="text-xs">ECG Electrodes</TableCell>
-                                    <TableCell className="text-right text-xs">€4,800</TableCell>
-                                    <TableCell className="text-center">
-                                        <Badge className="text-xs bg-orange-100 text-orange-700">3rd</Badge>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <Badge className="text-xs bg-yellow-100 text-yellow-700">Pending</Badge>
-                                    </TableCell>
-                                </TableRow>
+                                {activeBids.map((bid) => (
+                                    <TableRow key={bid.bidId}>
+                                        <TableCell className="font-medium text-xs">{bid.bidId}</TableCell>
+                                        <TableCell className="text-xs">{bid.rfqTitle}</TableCell>
+                                        <TableCell className="text-right text-xs">{bid.yourBid}</TableCell>
+                                        <TableCell className="text-center">
+                                            <Badge className={`text-xs bg-${bid.rankVariant}-100 text-${bid.rankVariant}-700`}>
+                                                {bid.rank}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-center">
+                                            <Badge className={`text-xs bg-${bid.statusVariant}-100 text-${bid.statusVariant}-700`}>
+                                                {bid.status}
+                                            </Badge>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
                             </TableBody>
                         </Table>
                     </CardContent>
                 </Card>
+
 
                 <Card>
                     <CardHeader>
@@ -365,13 +329,7 @@ export default function VendorDashboardPage() {
                         <CardDescription>Your best performing relationships</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        {[
-                            { rank: 1, name: 'City General Hospital', orders: 42, amount: '€85,000', color: 'bg-green-500' },
-                            { rank: 2, name: "St. Mary's Medical Center", orders: 38, amount: '€62,500', color: 'bg-green-400' },
-                            { rank: 3, name: 'County Health Services', orders: 31, amount: '€48,200', color: 'bg-green-300' },
-                            { rank: 4, name: 'Regional Hospital Network', orders: 24, amount: '€38,900', color: 'bg-green-200' },
-                            { rank: 5, name: 'Metro Clinical Center', orders: 19, amount: '€25,400', color: 'bg-green-100' },
-                        ].map((customer) => (
+                        {topCustomers.map((customer) => (
                             <div key={customer.rank} className="flex items-center gap-3">
                                 <div className="flex items-center justify-center w-8 h-8 rounded-full bg-secondary text-sm font-medium">
                                     #{customer.rank}

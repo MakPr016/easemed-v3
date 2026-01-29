@@ -1,3 +1,4 @@
+// lib/constants.ts
 import {
     Building2,
     FileText,
@@ -13,6 +14,7 @@ import {
     Eye,
     Award,
 } from 'lucide-react'
+
 
 export const cityToCountryMap: { [key: string]: string } = {
     'London': 'United Kingdom',
@@ -47,6 +49,8 @@ export const cityToCountryMap: { [key: string]: string } = {
     'Geneva': 'Switzerland',
 }
 
+
+// Hospital RFQ Requirements
 export interface Requirement {
     line_item_id: number
     inn_name: string
@@ -57,6 +61,7 @@ export interface Requirement {
     unit_of_issue: string
     category: string
 }
+
 
 export interface Vendor {
     id: string
@@ -75,6 +80,7 @@ export interface Vendor {
     selected: boolean
     includeOtherRequirements: number[]
 }
+
 
 export const mockRequirements: Requirement[] = [
     {
@@ -118,6 +124,7 @@ export const mockRequirements: Requirement[] = [
         category: 'Antibiotics',
     },
 ]
+
 
 export const mockVendors: Vendor[] = [
     {
@@ -217,12 +224,15 @@ export const mockVendors: Vendor[] = [
     },
 ]
 
+
+// Menu Items
 export interface MenuItem {
     title: string
     url: string
     icon?: any
     items?: MenuItem[]
 }
+
 
 export const hospitalMenuItems: MenuItem[] = [
     {
@@ -237,10 +247,10 @@ export const hospitalMenuItems: MenuItem[] = [
         items: [
             { title: 'All RFQs', url: '/dashboard/hospital/rfq', icon: FileText },
             { title: 'Create RFQ', url: '/dashboard/hospital/rfq/upload', icon: Upload },
-            { title: 'Awaiting Responses', url: '/dashboard/hospital/rfq/[id]/awaiting', icon: Clock },
-            { title: 'Under Review', url: '/dashboard/hospital/rfq/[id]/under-review', icon: Eye },
-            { title: 'Awarded', url: '/dashboard/hospital/rfq/[id]/awarded', icon: Award },
-            { title: 'Closed', url: '/dashboard/hospital/rfq/[id]/closed', icon: CheckCircle2 },
+            { title: 'Awaiting Responses', url: '/dashboard/hospital/rfq/awaiting', icon: Clock },
+            { title: 'Under Review', url: '/dashboard/hospital/rfq/under-review', icon: Eye },
+            { title: 'Awarded', url: '/dashboard/hospital/rfq/awarded', icon: Award },
+            { title: 'Closed', url: '/dashboard/hospital/rfq/closed', icon: CheckCircle2 },
         ],
     },
     {
@@ -271,6 +281,7 @@ export const hospitalMenuItems: MenuItem[] = [
     },
 ]
 
+
 export const vendorMenuItems: MenuItem[] = [
     {
         title: 'Dashboard',
@@ -293,9 +304,6 @@ export const vendorMenuItems: MenuItem[] = [
         url: '/dashboard/vendor/quotations',
         items: [
             { title: 'All Quotations', url: '/dashboard/vendor/quotations' },
-            { title: 'Pending', url: '/dashboard/vendor/quotations?status=pending' },
-            { title: 'Accepted', url: '/dashboard/vendor/quotations?status=accepted' },
-            { title: 'Rejected', url: '/dashboard/vendor/quotations?status=rejected' },
         ],
     },
     {
@@ -309,23 +317,537 @@ export const vendorMenuItems: MenuItem[] = [
         ],
     },
     {
-        title: 'Catalog',
-        icon: Package,
-        url: '/dashboard/vendor/catalog',
-    },
-    {
-        title: 'Customers',
-        icon: Building2,
-        url: '/dashboard/vendor/customers',
-    },
-    {
-        title: 'Performance',
-        icon: BarChart3,
-        url: '/dashboard/vendor/performance',
-    },
-    {
         title: 'Settings',
         icon: Settings,
         url: '/dashboard/vendor/settings',
     },
 ]
+
+// Vendor Dashboard Data
+export interface VendorStats {
+    totalRevenue: {
+        value: string
+        change: string
+        isPositive: boolean
+    }
+    activeBids: {
+        total: number
+        pending: number
+        shortlisted: number
+    }
+    winRate: {
+        percentage: number
+        change: string
+        isPositive: boolean
+    }
+    newOpportunities: {
+        count: number
+        addedToday: number
+    }
+}
+
+
+export interface BidPerformance {
+    won: number
+    pending: number
+    lost: number
+    winRate: number
+    averageBidValue: string
+    responseTime: string
+}
+
+
+export interface RFQOpportunity {
+    id: string
+    hospital: string
+    title: string
+    budget: string
+    competitors: number
+    deadline: string
+    deadlineVariant: 'destructive' | 'secondary'
+}
+
+
+export interface ActiveBid {
+    bidId: string
+    rfqTitle: string
+    yourBid: string
+    rank: string
+    rankVariant: 'green' | 'blue' | 'orange'
+    status: string
+    statusVariant: 'yellow' | 'green'
+}
+
+
+export interface TopCustomer {
+    rank: number
+    name: string
+    orders: number
+    amount: string
+    color: string
+}
+
+
+export const vendorStats: VendorStats = {
+    totalRevenue: {
+        value: '€184,500',
+        change: '+24%',
+        isPositive: true,
+    },
+    activeBids: {
+        total: 23,
+        pending: 15,
+        shortlisted: 8,
+    },
+    winRate: {
+        percentage: 68,
+        change: '+12%',
+        isPositive: true,
+    },
+    newOpportunities: {
+        count: 42,
+        addedToday: 8,
+    },
+}
+
+
+export const bidPerformance: BidPerformance = {
+    won: 45,
+    pending: 23,
+    lost: 12,
+    winRate: 68,
+    averageBidValue: '€12,400',
+    responseTime: '2.3 days',
+}
+
+
+export const rfqOpportunities: RFQOpportunity[] = [
+    {
+        id: 'RFQ-2847',
+        hospital: 'City General Hospital',
+        title: 'Medical Supplies - PPE Kits',
+        budget: '€15,000',
+        competitors: 7,
+        deadline: '18h',
+        deadlineVariant: 'destructive',
+    },
+    {
+        id: 'RFQ-2846',
+        hospital: "St. Mary's Hospital",
+        title: 'Surgical Instruments',
+        budget: '€28,500',
+        competitors: 4,
+        deadline: '2d',
+        deadlineVariant: 'secondary',
+    },
+    {
+        id: 'RFQ-2845',
+        hospital: 'County Medical Center',
+        title: 'Laboratory Equipment',
+        budget: '€52,000',
+        competitors: 11,
+        deadline: '3d',
+        deadlineVariant: 'secondary',
+    },
+    {
+        id: 'RFQ-2844',
+        hospital: 'Regional Health Center',
+        title: 'Disposable Syringes (Bulk)',
+        budget: '€8,900',
+        competitors: 6,
+        deadline: '5d',
+        deadlineVariant: 'secondary',
+    },
+]
+
+
+export const activeBids: ActiveBid[] = [
+    {
+        bidId: 'BID-8934',
+        rfqTitle: 'Medical Gloves',
+        yourBid: '€9,800',
+        rank: '1st',
+        rankVariant: 'green',
+        status: 'Under Review',
+        statusVariant: 'yellow',
+    },
+    {
+        bidId: 'BID-8933',
+        rfqTitle: 'IV Infusion Sets',
+        yourBid: '€14,200',
+        rank: '2nd',
+        rankVariant: 'blue',
+        status: 'Pending',
+        statusVariant: 'yellow',
+    },
+    {
+        bidId: 'BID-8932',
+        rfqTitle: 'Surgical Masks',
+        yourBid: '€6,500',
+        rank: '1st',
+        rankVariant: 'green',
+        status: 'Shortlisted',
+        statusVariant: 'green',
+    },
+    {
+        bidId: 'BID-8931',
+        rfqTitle: 'ECG Electrodes',
+        yourBid: '€4,800',
+        rank: '3rd',
+        rankVariant: 'orange',
+        status: 'Pending',
+        statusVariant: 'yellow',
+    },
+]
+
+
+export const topCustomers: TopCustomer[] = [
+    {
+        rank: 1,
+        name: 'City General Hospital',
+        orders: 42,
+        amount: '€85,000',
+        color: 'bg-green-500',
+    },
+    {
+        rank: 2,
+        name: "St. Mary's Medical Center",
+        orders: 38,
+        amount: '€62,500',
+        color: 'bg-green-400',
+    },
+    {
+        rank: 3,
+        name: 'County Health Services',
+        orders: 31,
+        amount: '€48,200',
+        color: 'bg-green-300',
+    },
+    {
+        rank: 4,
+        name: 'Regional Hospital Network',
+        orders: 24,
+        amount: '€38,900',
+        color: 'bg-green-200',
+    },
+    {
+        rank: 5,
+        name: 'Metro Clinical Center',
+        orders: 19,
+        amount: '€25,400',
+        color: 'bg-green-100',
+    },
+]
+
+
+// Vendor RFQ Opportunities Data
+export interface VendorRFQ {
+    id: string
+    title: string
+    hospital: string
+    location: string
+    category: string
+    budget: string
+    deadline: string
+    urgency: 'urgent' | 'moderate' | 'low'
+    itemCount: number  // Changed from 'items' to 'itemCount'
+    description: string
+    competitors: number
+    rating: number
+    pastOrders: number
+}
+
+
+export interface VendorRFQStats {
+    totalRFQs: number
+    urgentRFQs: number
+    totalValue: string
+    avgCompetitors: string
+}
+
+
+export const vendorRFQCategories = [
+    'Medical Supplies',
+    'Surgical Equipment',
+    'Lab Equipment',
+    'Diagnostic Equipment',
+    'Pharmaceuticals',
+    'Medical Devices',
+] as const
+
+
+export const vendorRFQList: VendorRFQ[] = [
+    {
+        id: 'RFQ-2847',
+        title: 'Medical Supplies - PPE Kits',
+        hospital: 'City General Hospital',
+        location: 'Berlin, Germany',
+        category: 'Medical Supplies',
+        budget: '€15,000',
+        deadline: '18h',
+        urgency: 'urgent',
+        itemCount: 4,
+        description: 'Bulk order of PPE kits including masks, gloves, and sanitizers',
+        competitors: 7,
+        rating: 4.8,
+        pastOrders: 45,
+    },
+    {
+        id: 'RFQ-2846',
+        title: 'Surgical Instruments Set',
+        hospital: "St. Mary's Hospital",
+        location: 'Munich, Germany',
+        category: 'Surgical Equipment',
+        budget: '€28,500',
+        deadline: '2d',
+        urgency: 'moderate',
+        itemCount: 4,
+        description: 'Complete set of surgical instruments for cardiology department',
+        competitors: 4,
+        rating: 4.9,
+        pastOrders: 62,
+    },
+    {
+        id: 'RFQ-2845',
+        title: 'Laboratory Equipment',
+        hospital: 'County Medical Center',
+        location: 'Frankfurt, Germany',
+        category: 'Lab Equipment',
+        budget: '€52,000',
+        deadline: '3d',
+        urgency: 'moderate',
+        itemCount: 6,
+        description: 'Various laboratory testing equipment and supplies',
+        competitors: 11,
+        rating: 4.6,
+        pastOrders: 38,
+    },
+    {
+        id: 'RFQ-2844',
+        title: 'Disposable Syringes (Bulk)',
+        hospital: 'Regional Health Center',
+        location: 'Hamburg, Germany',
+        category: 'Medical Supplies',
+        budget: '€8,900',
+        deadline: '5d',
+        urgency: 'low',
+        itemCount: 3,
+        description: 'Bulk order of disposable syringes in various sizes',
+        competitors: 6,
+        rating: 4.5,
+        pastOrders: 29,
+    },
+    {
+        id: 'RFQ-2843',
+        title: 'Diagnostic Imaging Supplies',
+        hospital: 'University Medical Center',
+        location: 'Cologne, Germany',
+        category: 'Diagnostic Equipment',
+        budget: '€42,300',
+        deadline: '6d',
+        urgency: 'low',
+        itemCount: 8,
+        description: 'X-ray films, contrast agents, and related supplies',
+        competitors: 9,
+        rating: 4.7,
+        pastOrders: 51,
+    },
+    {
+        id: 'RFQ-2842',
+        title: 'Pharmaceuticals - Antibiotics',
+        hospital: 'Central City Hospital',
+        location: 'Stuttgart, Germany',
+        category: 'Pharmaceuticals',
+        budget: '€31,200',
+        deadline: '1d',
+        urgency: 'urgent',
+        itemCount: 12,
+        description: 'Wide range of antibiotic medications for pharmacy stock',
+        competitors: 8,
+        rating: 4.6,
+        pastOrders: 72,
+    },
+    {
+        id: 'RFQ-2841',
+        title: 'Patient Monitoring Devices',
+        hospital: 'Metropolitan Hospital',
+        location: 'Düsseldorf, Germany',
+        category: 'Medical Devices',
+        budget: '€67,800',
+        deadline: '7d',
+        urgency: 'low',
+        itemCount: 5,
+        description: 'Advanced patient monitoring systems for ICU',
+        competitors: 5,
+        rating: 4.9,
+        pastOrders: 34,
+    },
+]
+
+
+export const vendorRFQStats: VendorRFQStats = {
+    totalRFQs: vendorRFQList.length,
+    urgentRFQs: vendorRFQList.filter((r) => r.urgency === 'urgent').length,
+    totalValue: '€243.7K',
+    avgCompetitors: '7.0',
+}
+
+
+// RFQ Item Details
+export interface RFQItem {
+    id: number
+    name: string
+    quantity: number
+    unit: string
+    specification: string
+    estimatedPrice?: string
+}
+
+
+// Extended Vendor RFQ with detailed information
+export interface VendorRFQDetail extends Omit<VendorRFQ, 'itemCount'> {
+    hospitalAddress: string
+    coordinates: {
+        lat: number
+        lng: number
+    }
+    contactPerson: string
+    contactEmail: string
+    contactPhone: string
+    requiredDocuments: string[]
+    deliveryDeadline: string
+    paymentTerms: string
+    specifications: string
+    items: RFQItem[]  // Array of items with details
+}
+
+
+// Sample detailed RFQ data
+export const vendorRFQDetails: Record<string, VendorRFQDetail> = {
+    'RFQ-2847': {
+        id: 'RFQ-2847',
+        title: 'Medical Supplies - PPE Kits',
+        hospital: 'City General Hospital',
+        location: 'Berlin, Germany',
+        hospitalAddress: 'Charitéplatz 1, 10117 Berlin, Germany',
+        coordinates: {
+            lat: 52.5200,
+            lng: 13.4050,
+        },
+        category: 'Medical Supplies',
+        budget: '€15,000',
+        deadline: '18h',
+        urgency: 'urgent',
+        description: 'Bulk order of PPE kits including masks, gloves, and sanitizers for immediate use',
+        competitors: 7,
+        rating: 4.8,
+        pastOrders: 45,
+        contactPerson: 'Dr. Anna Schmidt',
+        contactEmail: 'procurement@citygeneral.de',
+        contactPhone: '+49 30 450 50',
+        requiredDocuments: [
+            'Company registration certificate',
+            'ISO 9001 certification',
+            'Product compliance certificates',
+            'Price breakdown sheet',
+        ],
+        deliveryDeadline: 'February 5, 2026',
+        paymentTerms: '30 days net',
+        specifications: 'All items must comply with EU medical device regulations. PPE kits should include N95 masks, nitrile gloves, face shields, and hand sanitizers.',
+        items: [
+            {
+                id: 1,
+                name: 'N95 Respirator Masks',
+                quantity: 5000,
+                unit: 'pieces',
+                specification: 'FDA approved, individually wrapped',
+                estimatedPrice: '€2.50',
+            },
+            {
+                id: 2,
+                name: 'Nitrile Gloves (Large)',
+                quantity: 10000,
+                unit: 'pairs',
+                specification: 'Powder-free, latex-free, box of 100',
+                estimatedPrice: '€0.15',
+            },
+            {
+                id: 3,
+                name: 'Face Shields',
+                quantity: 2000,
+                unit: 'pieces',
+                specification: 'Anti-fog, adjustable headband',
+                estimatedPrice: '€1.20',
+            },
+            {
+                id: 4,
+                name: 'Hand Sanitizer (500ml)',
+                quantity: 1000,
+                unit: 'bottles',
+                specification: '70% alcohol content, pump dispenser',
+                estimatedPrice: '€3.50',
+            },
+        ],
+    },
+    'RFQ-2846': {
+        id: 'RFQ-2846',
+        title: 'Surgical Instruments Set',
+        hospital: "St. Mary's Hospital",
+        location: 'Munich, Germany',
+        hospitalAddress: 'Nußbaumstraße 20, 80336 München, Germany',
+        coordinates: {
+            lat: 48.1351,
+            lng: 11.5820,
+        },
+        category: 'Surgical Equipment',
+        budget: '€28,500',
+        deadline: '2d',
+        urgency: 'moderate',
+        description: 'Complete set of surgical instruments for cardiology department',
+        competitors: 4,
+        rating: 4.9,
+        pastOrders: 62,
+        contactPerson: 'Prof. Michael Weber',
+        contactEmail: 'procurement@stmarys-muc.de',
+        contactPhone: '+49 89 4400 52',
+        requiredDocuments: [
+            'CE marking certificates',
+            'Sterilization certificates',
+            'Material composition reports',
+            'Warranty documentation',
+        ],
+        deliveryDeadline: 'February 10, 2026',
+        paymentTerms: '45 days net',
+        specifications: 'Surgical instruments must be made of medical-grade stainless steel, autoclavable, and come with comprehensive warranty.',
+        items: [
+            {
+                id: 1,
+                name: 'Scalpel Handle Set',
+                quantity: 20,
+                unit: 'sets',
+                specification: 'Sizes 3, 4, 7 - Stainless steel',
+            },
+            {
+                id: 2,
+                name: 'Surgical Scissors',
+                quantity: 50,
+                unit: 'pieces',
+                specification: 'Mayo and Metzenbaum varieties',
+            },
+            {
+                id: 3,
+                name: 'Forceps Set',
+                quantity: 100,
+                unit: 'pieces',
+                specification: 'Various types for cardiac surgery',
+            },
+            {
+                id: 4,
+                name: 'Needle Holders',
+                quantity: 30,
+                unit: 'pieces',
+                specification: 'Mayo-Hegar, different sizes',
+            },
+        ],
+    },
+}
