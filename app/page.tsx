@@ -32,7 +32,7 @@ export default function HomePage() {
             Modern Procurement Platform for Healthcare
           </h1>
           <p className="text-xl text-muted-foreground">
-            Streamline your medical procurement process with AI-powered RFQs, 
+            Streamline your medical procurement process with AI-powered RFQs,
             real-time bidding, and compliance verification.
           </p>
           <div className="flex items-center justify-center gap-4 pt-4">
