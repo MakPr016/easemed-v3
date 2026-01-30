@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
 import {
-  Building2,
   User,
   CreditCard,
   ShieldCheck,
@@ -12,91 +11,44 @@ import {
   Lock,
   MapPin,
   CheckCircle2,
-  Info,
   Bell,
   Truck,
   FileBadge,
   Leaf,
   Users,
-  Trash2,
   Plus,
-  AlertCircle,
-  Thermometer,
   Loader2,
+  Trash2,
+  X,
+  Building,
 } from "lucide-react";
 
-// --- Types & Interfaces ---
+// --- Types ---
 
-type EconomicRole =
-  | "manufacturer_eu"
-  | "manufacturer_non_eu"
-  | "importer"
-  | "distributor"
-  | "auth_rep";
-type TeamRole = "admin" | "sales" | "compliance" | "finance" | "logistics";
-
-// European Medical Device Nomenclature (EMDN) Categories
-const EMDN_CATEGORIES = [
-  {
-    id: "A",
-    label: "Consumables",
-    desc: "Single-use devices, needles, syringes",
-  },
-  { id: "B", label: "Haematology", desc: "Blood bags, transfusion sets" },
-  { id: "C", label: "Cardiopulmonary", desc: "Catheters, stents, balloons" },
-  { id: "D", label: "Dental", desc: "Implants, fillings, tools" },
-  { id: "G", label: "Gastrointestinal", desc: "Endoscopes, ostomy bags" },
-  { id: "J", label: "Active Implantable", desc: "Pacemakers, defibrillators" },
-  { id: "L", label: "Electromechanical", desc: "MRI, CT, Ultrasound, Lasers" },
-  {
-    id: "M",
-    label: "Reusable Instruments",
-    desc: "Scalpels, forceps, scissors",
-  },
-  { id: "P", label: "Prosthetics", desc: "Artificial limbs, orthopedic aids" },
-  { id: "R", label: "Respiratory", desc: "Ventilators, oxygen masks, CPAP" },
-  { id: "S", label: "Sterilization", desc: "Autoclaves, disinfectants" },
-  { id: "W", label: "IVD", desc: "In Vitro Diagnostics" },
-  {
-    id: "Z",
-    label: "Minimally Invasive",
-    desc: "Robotic surgery, microsurgery",
-  },
-];
+interface Warehouse {
+  id?: string;
+  label: string;
+  address: string;
+  city: string;
+  postal_code: string;
+  country: string;
+}
 
 interface TeamMember {
-  id: string;
+  id?: string;
   name: string;
   email: string;
-  role: TeamRole;
+  role: "admin" | "member" | "viewer";
   status: "active" | "invited";
 }
 
-interface Warehouse {
-  id: string;
-  label: string;
-  address: string;
-  tempRanges: string[];
-  fleet: string[];
-}
-
-interface Certification {
-  id: string;
-  type: string;
-  number: string;
-  expiryDate: string;
-  status: "valid" | "expired" | "pending";
-}
-
 interface VendorProfile {
-  // Identity
+  id: string;
   companyName: string;
   vatId: string;
   dunsNumber: string;
-  country: string;
   complianceStatus: "verified" | "pending" | "rejected";
 
-  // Contact & GPSR
   contactPerson: string;
   contactEmail: string;
   contactPhone: string;
@@ -106,56 +58,39 @@ interface VendorProfile {
   addressZip: string;
   addressState: string;
 
-  // ESG
-  smeStatus: boolean;
-  esgScore: string;
+  role: string;
+  industry: string;
+  targetMarkets: string[];
+  interestedCategories: string[];
 
-  // Security
-  mfaEnabled: boolean;
-  teamMembers: TeamMember[];
-
-  // Logistics
-  warehouses: Warehouse[];
   shippingIncoterms: string[];
   minOrderValue: number;
   expressDeliveryAvailable: boolean;
 
-  // Regulatory
-  role: EconomicRole;
-  srnNumber: string;
-  certifications: Certification[];
-  liabilityInsuranceAmount: string;
-  euRepName: string;
-  euRepEmail: string;
-  euRepAddress: string;
-  targetMarkets: string[];
-  dmidsCode: string;
-  rdmNumber: string;
-  hasFrenchSupport: boolean;
+  bankName: string;
+  iban: string;
+  swift: string;
 
-  // Vigilance
+  smeStatus: boolean;
+  esgScore: string;
   safetyOfficerName: string;
   safetyOfficerEmail: string;
   safetyOfficerPhone: string;
 
-  // Interests
-  interestedCategories: string[];
   notifyNewRfq: boolean;
   notifyBidUpdates: boolean;
   notifyWeeklyDigest: boolean;
 
-  // Finance
-  iban: string;
-  swift: string;
-  bankName: string;
+  // Relational Data
+  warehouses: Warehouse[];
+  teamMembers: TeamMember[];
 }
 
-// EMPTY DEFAULT STATE (No Static Data)
 const DEFAULT_STATE: VendorProfile = {
+  id: "",
   companyName: "",
   vatId: "",
   dunsNumber: "",
-  country: "",
   complianceStatus: "pending",
   contactPerson: "",
   contactEmail: "",
@@ -165,35 +100,26 @@ const DEFAULT_STATE: VendorProfile = {
   addressCity: "",
   addressZip: "",
   addressState: "",
-  smeStatus: false,
-  esgScore: "",
-  mfaEnabled: false,
-  teamMembers: [],
-  warehouses: [],
+  role: "distributor",
+  industry: "",
+  targetMarkets: [],
+  interestedCategories: [],
   shippingIncoterms: [],
   minOrderValue: 0,
   expressDeliveryAvailable: false,
-  role: "distributor",
-  srnNumber: "",
-  certifications: [],
-  liabilityInsuranceAmount: "",
-  euRepName: "",
-  euRepEmail: "",
-  euRepAddress: "",
-  targetMarkets: [],
-  dmidsCode: "",
-  rdmNumber: "",
-  hasFrenchSupport: false,
+  bankName: "",
+  iban: "",
+  swift: "",
+  smeStatus: false,
+  esgScore: "",
   safetyOfficerName: "",
   safetyOfficerEmail: "",
   safetyOfficerPhone: "",
-  interestedCategories: [],
   notifyNewRfq: true,
   notifyBidUpdates: true,
   notifyWeeklyDigest: false,
-  iban: "",
-  swift: "",
-  bankName: "",
+  warehouses: [],
+  teamMembers: [],
 };
 
 export default function VendorSettingsPage() {
@@ -204,163 +130,243 @@ export default function VendorSettingsPage() {
   const [formData, setFormData] = useState<VendorProfile>(DEFAULT_STATE);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // --- 1. Fetch Real Data on Mount ---
+  // Local state for "Adding" items
+  const [newInterest, setNewInterest] = useState("");
+  const [isAddingWarehouse, setIsAddingWarehouse] = useState(false);
+  const [newWarehouse, setNewWarehouse] = useState<Warehouse>({
+    label: "",
+    address: "",
+    city: "",
+    postal_code: "",
+    country: "",
+  });
+  const [newTeamEmail, setNewTeamEmail] = useState("");
+
+  // --- 1. Robust Data Fetching ---
   useEffect(() => {
     async function fetchData() {
       setLoading(true);
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
 
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-      if (!user) return; // Redirect to login in middleware
+        // 1. Fetch Main Vendor Profile
+        const { data: vendor, error: vendorError } = await supabase
+          .from("vendors")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
 
-      // Fetch Vendor Data
-      const { data: vendor, error } = await supabase
-        .from("vendors")
-        .select(
-          `
-          *,
-          vendor_warehouses(*),
-          vendor_certifications(*),
-          vendor_team_members(*)
-        `,
-        )
-        .eq("user_id", user.id)
-        .single();
+        if (vendorError) {
+          console.error("Error fetching vendor profile:", vendorError);
+          setLoading(false);
+          return;
+        }
 
-      if (vendor && !error) {
-        // Map DB Snake_Case to UI CamelCase
+        // 2. Fetch Relations (Safely separated)
+        const { data: warehouses } = await supabase
+          .from("vendor_warehouses")
+          .select("*")
+          .eq("vendor_id", vendor.id);
+
+        const { data: team } = await supabase
+          .from("vendor_team_members")
+          .select("*")
+          .eq("vendor_id", vendor.id);
+
+        // 3. Map Data to State
         setFormData({
+          id: vendor.id,
           companyName: vendor.vendor_name || "",
           vatId: vendor.vat_id || "",
           dunsNumber: vendor.duns_number || "",
-          country: vendor.state || "", // Assuming state field is used for country in simple schema, or adjust
           complianceStatus: vendor.compliance_status || "pending",
 
           contactPerson: vendor.contact_person || "",
           contactEmail: vendor.contact_email || "",
           contactPhone: vendor.contact_phone || "",
           website: vendor.website || "",
-          addressStreet: vendor.address_street || "",
+          addressStreet: vendor.address || "",
           addressCity: vendor.city || "",
-          addressZip: vendor.postal_code || "",
+          addressZip: vendor.postal_code || "", // Assuming you added postal_code column
           addressState: vendor.state || "",
 
-          smeStatus: vendor.sme_status || false,
-          esgScore: vendor.esg_score || "",
+          role: vendor.economic_role || "distributor",
+          industry: vendor.vendor_type || "",
+          targetMarkets: vendor.target_markets || [],
+          interestedCategories: vendor.interested_categories || [],
 
-          mfaEnabled: false, // In separate auth table usually
-          teamMembers: vendor.vendor_team_members || [],
-
-          warehouses: vendor.vendor_warehouses || [],
           shippingIncoterms: vendor.shipping_incoterms || [],
           minOrderValue: vendor.min_order_value || 0,
           expressDeliveryAvailable: vendor.express_delivery || false,
 
-          role: vendor.economic_role || "distributor",
-          srnNumber: vendor.srn_number || "",
-          certifications: vendor.vendor_certifications || [],
-          liabilityInsuranceAmount: "", // Needs field in DB
+          bankName: vendor.bank_name || "",
+          iban: vendor.bank_account || "",
+          swift: vendor.bank_ifsc || "",
 
-          euRepName: vendor.eu_rep_name || "",
-          euRepEmail: vendor.eu_rep_email || "",
-          euRepAddress: vendor.eu_rep_address || "",
-          targetMarkets: vendor.target_markets || [],
-          dmidsCode: vendor.dmids_code || "",
-          rdmNumber: vendor.rdm_number || "",
-          hasFrenchSupport: vendor.has_french_support || false,
-
+          smeStatus: vendor.sme_status || false,
+          esgScore: vendor.esg_score || "",
           safetyOfficerName: vendor.safety_officer_name || "",
           safetyOfficerEmail: vendor.safety_officer_email || "",
           safetyOfficerPhone: vendor.safety_officer_phone || "",
 
-          interestedCategories: vendor.interested_categories || [],
           notifyNewRfq: vendor.notification_preferences?.new_rfq ?? true,
           notifyBidUpdates:
             vendor.notification_preferences?.bid_updates ?? true,
           notifyWeeklyDigest:
             vendor.notification_preferences?.weekly_digest ?? false,
 
-          iban: vendor.bank_account || "", // Mapping bank_account to IBAN
-          swift: vendor.bank_ifsc || "", // Mapping IFSC to SWIFT for EU context
-          bankName: vendor.bank_name || "",
+          // Relations (Default to empty array if fetch failed)
+          warehouses: warehouses || [],
+          teamMembers: team || [],
         });
+      } catch (err) {
+        console.error("Unexpected error loading settings:", err);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
     fetchData();
-  }, [supabase]);
+  }, []);
 
-  // --- 2. Change Handlers ---
+  // --- 2. General Handlers ---
   const handleChange = (field: keyof VendorProfile, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
     setHasChanges(true);
   };
 
-  const toggleArrayItem = (field: keyof VendorProfile, item: string) => {
-    const current = formData[field] as string[];
-    const updated = current.includes(item)
-      ? current.filter((i) => i !== item)
-      : [...current, item];
-    handleChange(field, updated);
+  // --- 3. Interest Logic ---
+  const addInterest = () => {
+    if (
+      newInterest.trim() &&
+      !formData.interestedCategories.includes(newInterest.trim())
+    ) {
+      const updated = [...formData.interestedCategories, newInterest.trim()];
+      handleChange("interestedCategories", updated);
+      setNewInterest("");
+    }
   };
 
-  // --- 3. Save to Supabase ---
+  const removeInterest = (item: string) => {
+    const updated = formData.interestedCategories.filter((i) => i !== item);
+    handleChange("interestedCategories", updated);
+  };
+
+  // --- 4. Logistics Logic ---
+  const saveWarehouse = async () => {
+    if (!newWarehouse.label || !newWarehouse.address) return;
+
+    // Optimistic Update
+    const tempId = Math.random().toString();
+    const optimisticList = [
+      ...formData.warehouses,
+      { ...newWarehouse, id: tempId },
+    ];
+    setFormData((prev) => ({ ...prev, warehouses: optimisticList }));
+    setIsAddingWarehouse(false);
+
+    // DB Insert
+    try {
+      const { data, error } = await supabase
+        .from("vendor_warehouses")
+        .insert({
+          vendor_id: formData.id,
+          label: newWarehouse.label,
+          address: newWarehouse.address,
+          city: newWarehouse.city,
+          postal_code: newWarehouse.postal_code,
+          country: newWarehouse.country,
+        })
+        .select()
+        .single();
+
+      if (!error && data) {
+        // Replace temp item with real DB item
+        setFormData((prev) => ({
+          ...prev,
+          warehouses: prev.warehouses.map((w) => (w.id === tempId ? data : w)),
+        }));
+        setNewWarehouse({
+          label: "",
+          address: "",
+          city: "",
+          postal_code: "",
+          country: "",
+        });
+      }
+    } catch (err) {
+      console.error("Failed to save warehouse", err);
+    }
+  };
+
+  const deleteWarehouse = async (id: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      warehouses: prev.warehouses.filter((w) => w.id !== id),
+    }));
+    await supabase.from("vendor_warehouses").delete().eq("id", id);
+  };
+
+  // --- 5. Team Logic ---
+  const inviteTeamMember = async () => {
+    if (!newTeamEmail) return;
+
+    const { data, error } = await supabase
+      .from("vendor_team_members")
+      .insert({
+        vendor_id: formData.id,
+        email: newTeamEmail,
+        role: "member",
+        status: "invited",
+        name: newTeamEmail.split("@")[0],
+      })
+      .select()
+      .single();
+
+    if (!error && data) {
+      setFormData((prev) => ({
+        ...prev,
+        teamMembers: [...prev.teamMembers, data],
+      }));
+      setNewTeamEmail("");
+    }
+  };
+
+  // --- 6. Main Save ---
   const handleSave = async () => {
     setIsSaving(true);
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const updates = {
+      vendor_name: formData.companyName,
+      contact_person: formData.contactPerson,
+      contact_phone: formData.contactPhone,
+      website: formData.website,
+      address: formData.addressStreet,
+      city: formData.addressCity,
+      state: formData.addressState,
+      economic_role: formData.role,
+      interested_categories: formData.interestedCategories,
+      sme_status: formData.smeStatus,
+      esg_score: formData.esgScore,
+      safety_officer_name: formData.safetyOfficerName,
+      safety_officer_email: formData.safetyOfficerEmail,
+      safety_officer_phone: formData.safetyOfficerPhone,
+      bank_name: formData.bankName,
+      bank_account: formData.iban,
+      bank_ifsc: formData.swift,
+      updated_at: new Date().toISOString(),
+    };
 
-    if (user) {
-      // Map UI CamelCase back to DB Snake_Case
-      const updates = {
-        vendor_name: formData.companyName,
-        contact_person: formData.contactPerson,
-        contact_phone: formData.contactPhone,
-        website: formData.website,
-        address_street: formData.addressStreet,
-        city: formData.addressCity,
-        postal_code: formData.addressZip,
-        state: formData.addressState,
-        sme_status: formData.smeStatus,
-        esg_score: formData.esgScore,
-        economic_role: formData.role,
-        srn_number: formData.srnNumber,
-        eu_rep_name: formData.euRepName,
-        eu_rep_email: formData.euRepEmail,
-        eu_rep_address: formData.euRepAddress,
-        target_markets: formData.targetMarkets,
-        dmids_code: formData.dmidsCode,
-        rdm_number: formData.rdmNumber,
-        has_french_support: formData.hasFrenchSupport,
-        safety_officer_name: formData.safetyOfficerName,
-        safety_officer_email: formData.safetyOfficerEmail,
-        safety_officer_phone: formData.safetyOfficerPhone,
-        interested_categories: formData.interestedCategories,
-        shipping_incoterms: formData.shippingIncoterms,
-        min_order_value: formData.minOrderValue,
-        express_delivery: formData.expressDeliveryAvailable,
-        bank_account: formData.iban,
-        bank_ifsc: formData.swift,
-        bank_name: formData.bankName,
-        notification_preferences: {
-          new_rfq: formData.notifyNewRfq,
-          bid_updates: formData.notifyBidUpdates,
-          weekly_digest: formData.notifyWeeklyDigest,
-        },
-        updated_at: new Date(),
-      };
-
-      const { error } = await supabase
-        .from("vendors")
-        .update(updates)
-        .eq("user_id", user.id);
-
-      if (!error) {
-        setHasChanges(false);
-        // toast.success('Profile updated');
-      }
+    const { error } = await supabase
+      .from("vendors")
+      .update(updates)
+      .eq("id", formData.id);
+    if (!error) {
+      setHasChanges(false);
+      // Ensure UI reflects saved state
+    } else {
+      console.error("Save error:", error);
     }
     setIsSaving(false);
   };
@@ -369,9 +375,6 @@ export default function VendorSettingsPage() {
     return (
       <div className="flex h-screen items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
-        <span className="ml-2 text-slate-500 font-medium">
-          Loading Vendor Profile...
-        </span>
       </div>
     );
 
@@ -389,11 +392,7 @@ export default function VendorSettingsPage() {
         </div>
         <div className="flex items-center gap-3">
           <span
-            className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${
-              formData.complianceStatus === "verified"
-                ? "bg-emerald-100 text-emerald-800"
-                : "bg-amber-100 text-amber-800"
-            }`}
+            className={`px-3 py-1 rounded-full text-sm font-medium flex items-center gap-2 ${formData.complianceStatus === "verified" ? "bg-emerald-100 text-emerald-800" : "bg-amber-100 text-amber-800"}`}
           >
             {formData.complianceStatus === "verified" ? (
               <ShieldCheck size={16} />
@@ -401,8 +400,8 @@ export default function VendorSettingsPage() {
               <AlertTriangle size={16} />
             )}
             {formData.complianceStatus === "verified"
-              ? "MDR Compliant"
-              : "Verification Needed"}
+              ? "Verified Partner"
+              : "Verification Pending"}
           </span>
         </div>
       </div>
@@ -417,7 +416,7 @@ export default function VendorSettingsPage() {
               label: "Quality & Regulatory",
               icon: FileBadge,
             },
-            { id: "interests", label: "Interests (EMDN)", icon: Bell },
+            { id: "interests", label: "Interests", icon: Bell },
             { id: "logistics", label: "Logistics", icon: Truck },
             { id: "team", label: "Team", icon: Users },
             { id: "billing", label: "Finance", icon: CreditCard },
@@ -428,7 +427,7 @@ export default function VendorSettingsPage() {
               className={`pb-4 px-2 border-b-2 font-medium text-sm flex items-center gap-2 transition-colors ${
                 activeTab === tab.id
                   ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300"
+                  : "border-transparent text-slate-500 hover:text-slate-700"
               }`}
             >
               <tab.icon size={18} /> {tab.label}
@@ -438,7 +437,6 @@ export default function VendorSettingsPage() {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* MAIN FORM AREA */}
         <div className="lg:col-span-8 space-y-6">
           {/* --- TAB 1: GENERAL --- */}
           {activeTab === "general" && (
@@ -448,6 +446,24 @@ export default function VendorSettingsPage() {
                   Contact Details
                 </h2>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">
+                      Company Name
+                    </label>
+                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-2.5 rounded-lg text-sm text-slate-700">
+                      <Lock size={14} className="text-slate-400" />{" "}
+                      {formData.companyName}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">
+                      VAT ID
+                    </label>
+                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-2.5 rounded-lg text-sm text-slate-700 font-mono">
+                      <Lock size={14} className="text-slate-400" />{" "}
+                      {formData.vatId}
+                    </div>
+                  </div>
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700">
                       Primary Contact
@@ -491,7 +507,7 @@ export default function VendorSettingsPage() {
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
                 <h2 className="text-lg font-semibold flex items-center gap-2">
                   <MapPin size={20} className="text-slate-400" /> Registered
-                  Address (GPSR)
+                  Address
                 </h2>
                 <div className="space-y-4">
                   <input
@@ -515,15 +531,6 @@ export default function VendorSettingsPage() {
                     />
                     <input
                       type="text"
-                      placeholder="Zip"
-                      value={formData.addressZip}
-                      onChange={(e) =>
-                        handleChange("addressZip", e.target.value)
-                      }
-                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
-                    />
-                    <input
-                      type="text"
                       placeholder="State/Region"
                       value={formData.addressState}
                       onChange={(e) =>
@@ -531,184 +538,125 @@ export default function VendorSettingsPage() {
                       }
                       className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
                     />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <Leaf size={20} className="text-emerald-500" /> ESG &
-                  Sustainability
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">
-                      ESG Rating
-                    </label>
                     <input
                       type="text"
-                      value={formData.esgScore}
-                      onChange={(e) => handleChange("esgScore", e.target.value)}
-                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
-                      placeholder="e.g. EcoVadis Gold"
-                    />
-                  </div>
-                  <div className="flex items-center gap-3 pt-6">
-                    <input
-                      type="checkbox"
-                      checked={formData.smeStatus}
+                      placeholder="Zip"
+                      value={formData.addressZip}
                       onChange={(e) =>
-                        handleChange("smeStatus", e.target.checked)
+                        handleChange("addressZip", e.target.value)
                       }
-                      className="h-5 w-5 rounded border-slate-300 text-blue-600"
+                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
                     />
-                    <span className="text-sm font-medium text-slate-700">
-                      We qualify as an EU SME
-                    </span>
                   </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* --- TAB 2: QUALITY & REGULATORY --- */}
+          {/* --- TAB 2: COMPLIANCE --- */}
           {activeTab === "compliance" && (
             <div className="space-y-6">
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
                 <h2 className="text-lg font-semibold text-slate-900">
-                  Legal Entity & Role
+                  Economic Role
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-500">
-                      Legal Name
-                    </label>
-                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-2 rounded-md text-sm text-slate-700">
-                      <Lock size={14} />{" "}
-                      {formData.companyName || "MedSupply Europe BV"}
-                    </div>
-                  </div>
-                  <div className="space-y-1">
-                    <label className="text-xs font-semibold text-slate-500">
-                      DUNS Number
-                    </label>
-                    <input
-                      value={formData.dunsNumber}
-                      onChange={(e) =>
-                        handleChange("dunsNumber", e.target.value)
-                      }
-                      className="w-full rounded-md border-slate-300 p-2 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-1 md:col-span-2">
-                    <label className="text-xs font-semibold text-slate-500">
-                      Economic Operator Role
-                    </label>
-                    <select
-                      value={formData.role}
-                      onChange={(e) => handleChange("role", e.target.value)}
-                      className="w-full rounded-md border-slate-300 p-2 text-sm bg-white"
-                    >
-                      <option value="manufacturer_eu">Manufacturer (EU)</option>
-                      <option value="distributor">
-                        Distributor / Wholesaler
-                      </option>
-                      <option value="importer">Importer (Non-EU Goods)</option>
-                      <option value="auth_rep">
-                        Authorized Representative
-                      </option>
-                    </select>
-                  </div>
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    Registered Role
+                  </label>
+                  <select
+                    value={formData.role}
+                    onChange={(e) => handleChange("role", e.target.value)}
+                    className="w-full rounded-lg border-slate-300 p-2.5 text-sm bg-white"
+                  >
+                    <option value="manufacturer">Manufacturer</option>
+                    <option value="distributor">Distributor</option>
+                    <option value="importer">Importer</option>
+                  </select>
                 </div>
               </div>
 
               <div className="bg-amber-50 rounded-xl border border-amber-100 p-6 space-y-4">
                 <h2 className="text-lg font-semibold text-amber-900 flex items-center gap-2">
-                  <AlertTriangle size={20} /> Vigilance & Safety (MDR Art. 15)
+                  <AlertTriangle size={20} /> Safety Officer
                 </h2>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-amber-800">
-                      Safety Officer Name
-                    </label>
-                    <input
-                      className="w-full rounded border-amber-200 p-2 text-sm"
-                      value={formData.safetyOfficerName}
-                      onChange={(e) =>
-                        handleChange("safetyOfficerName", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-amber-800">
-                      Emergency Phone
-                    </label>
-                    <input
-                      className="w-full rounded border-amber-200 p-2 text-sm"
-                      value={formData.safetyOfficerPhone}
-                      onChange={(e) =>
-                        handleChange("safetyOfficerPhone", e.target.value)
-                      }
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-xs font-semibold text-amber-800">
-                      Direct Email
-                    </label>
-                    <input
-                      className="w-full rounded border-amber-200 p-2 text-sm"
-                      value={formData.safetyOfficerEmail}
-                      onChange={(e) =>
-                        handleChange("safetyOfficerEmail", e.target.value)
-                      }
-                    />
-                  </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <input
+                    placeholder="Name"
+                    value={formData.safetyOfficerName}
+                    onChange={(e) =>
+                      handleChange("safetyOfficerName", e.target.value)
+                    }
+                    className="w-full rounded border-amber-200 p-2 text-sm bg-white"
+                  />
+                  <input
+                    placeholder="Phone"
+                    value={formData.safetyOfficerPhone}
+                    onChange={(e) =>
+                      handleChange("safetyOfficerPhone", e.target.value)
+                    }
+                    className="w-full rounded border-amber-200 p-2 text-sm bg-white"
+                  />
+                  <input
+                    placeholder="Email"
+                    value={formData.safetyOfficerEmail}
+                    onChange={(e) =>
+                      handleChange("safetyOfficerEmail", e.target.value)
+                    }
+                    className="w-full rounded border-amber-200 p-2 text-sm md:col-span-2 bg-white"
+                  />
                 </div>
               </div>
             </div>
           )}
 
-          {/* --- TAB 3: INTERESTS (EMDN) --- */}
+          {/* --- TAB 3: INTERESTS --- */}
           {activeTab === "interests" && (
             <div className="space-y-6">
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-slate-900">
-                    Product Portfolio (EMDN)
-                  </h2>
-                  <p className="text-sm text-slate-500">
-                    Select categories to match with relevant Hospital RFQs.
-                    Based on EU Regulation 2017/745.
-                  </p>
+                <h2 className="text-lg font-semibold">Expansion Interests</h2>
+                <p className="text-sm text-slate-500">
+                  Add keywords for products you want to supply. We will alert
+                  you when matching RFQs appear.
+                </p>
+
+                <div className="flex gap-2">
+                  <input
+                    value={newInterest}
+                    onChange={(e) => setNewInterest(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && addInterest()}
+                    className="flex-1 rounded-lg border-slate-300 p-2.5 text-sm"
+                    placeholder="e.g. MRI Machines, Surgical Gloves..."
+                  />
+                  <button
+                    onClick={addInterest}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700"
+                  >
+                    Add
+                  </button>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {EMDN_CATEGORIES.map((cat) => (
-                    <label
-                      key={cat.id}
-                      className={`flex items-start gap-3 p-4 border rounded-xl cursor-pointer transition-all ${formData.interestedCategories.includes(cat.id) ? "bg-blue-50 border-blue-200 ring-1 ring-blue-200" : "bg-white hover:border-slate-300"}`}
-                    >
-                      <div
-                        className={`mt-0.5 h-5 w-5 rounded border flex items-center justify-center shrink-0 ${formData.interestedCategories.includes(cat.id) ? "bg-blue-600 border-blue-600 text-white" : "border-slate-300"}`}
+
+                <div className="flex flex-wrap gap-2 pt-2">
+                  {formData.interestedCategories.length > 0 ? (
+                    formData.interestedCategories.map((cat, i) => (
+                      <span
+                        key={i}
+                        className="flex items-center gap-2 bg-blue-50 text-blue-700 text-sm px-3 py-1.5 rounded-full border border-blue-100"
                       >
-                        {formData.interestedCategories.includes(cat.id) && (
-                          <CheckCircle2 size={14} />
-                        )}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-slate-400 bg-slate-100 px-1.5 rounded">
-                            {cat.id}
-                          </span>
-                          <h4 className="text-sm font-semibold text-slate-900">
-                            {cat.label}
-                          </h4>
-                        </div>
-                        <p className="text-xs text-slate-500 mt-1 leading-snug">
-                          {cat.desc}
-                        </p>
-                      </div>
-                    </label>
-                  ))}
+                        {cat}
+                        <button
+                          onClick={() => removeInterest(cat)}
+                          className="hover:text-blue-900"
+                        >
+                          <X size={14} />
+                        </button>
+                      </span>
+                    ))
+                  ) : (
+                    <p className="text-sm text-slate-400 italic">
+                      No interests added yet.
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -718,21 +666,112 @@ export default function VendorSettingsPage() {
           {activeTab === "logistics" && (
             <div className="space-y-6">
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
-                <h2 className="text-lg font-semibold text-slate-900">
-                  Warehouse Capabilities (GDP)
-                </h2>
-                <div className="text-center p-8 border-2 border-dashed border-slate-200 rounded-xl">
-                  <Truck className="mx-auto h-8 w-8 text-slate-300" />
-                  <h3 className="mt-2 text-sm font-semibold text-slate-900">
-                    No warehouses configured
-                  </h3>
-                  <p className="mt-1 text-sm text-slate-500">
-                    Add your distribution centers to calculate shipping times.
-                  </p>
-                  <button className="mt-4 inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                    <Plus className="-ml-1 mr-2 h-5 w-5" aria-hidden="true" />
-                    Add Warehouse
+                <div className="flex justify-between items-center">
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <Truck size={20} className="text-slate-400" /> Warehouses
+                  </h2>
+                  <button
+                    onClick={() => setIsAddingWarehouse(!isAddingWarehouse)}
+                    className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1"
+                  >
+                    {isAddingWarehouse ? "Cancel" : "+ Add New"}
                   </button>
+                </div>
+
+                {isAddingWarehouse && (
+                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <input
+                        placeholder="Label (e.g. Berlin Hub)"
+                        value={newWarehouse.label}
+                        onChange={(e) =>
+                          setNewWarehouse({
+                            ...newWarehouse,
+                            label: e.target.value,
+                          })
+                        }
+                        className="w-full rounded-md border-slate-300 p-2 text-sm"
+                      />
+                      <input
+                        placeholder="Address"
+                        value={newWarehouse.address}
+                        onChange={(e) =>
+                          setNewWarehouse({
+                            ...newWarehouse,
+                            address: e.target.value,
+                          })
+                        }
+                        className="w-full rounded-md border-slate-300 p-2 text-sm"
+                      />
+                      <input
+                        placeholder="City"
+                        value={newWarehouse.city}
+                        onChange={(e) =>
+                          setNewWarehouse({
+                            ...newWarehouse,
+                            city: e.target.value,
+                          })
+                        }
+                        className="w-full rounded-md border-slate-300 p-2 text-sm"
+                      />
+                      <input
+                        placeholder="Country"
+                        value={newWarehouse.country}
+                        onChange={(e) =>
+                          setNewWarehouse({
+                            ...newWarehouse,
+                            country: e.target.value,
+                          })
+                        }
+                        className="w-full rounded-md border-slate-300 p-2 text-sm"
+                      />
+                    </div>
+                    <div className="flex justify-end">
+                      <button
+                        onClick={saveWarehouse}
+                        className="bg-emerald-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-emerald-700"
+                      >
+                        Save Warehouse
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                <div className="space-y-3">
+                  {formData.warehouses.length === 0 ? (
+                    <div className="text-center p-8 border-2 border-dashed border-slate-200 rounded-xl">
+                      <p className="text-sm text-slate-500">
+                        No warehouses configured.
+                      </p>
+                    </div>
+                  ) : (
+                    formData.warehouses.map((w, i) => (
+                      <div
+                        key={i}
+                        className="flex justify-between items-start p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="bg-slate-100 p-2 rounded-md">
+                            <Building size={20} className="text-slate-500" />
+                          </div>
+                          <div>
+                            <h4 className="font-medium text-slate-900">
+                              {w.label}
+                            </h4>
+                            <p className="text-sm text-slate-500">
+                              {w.address}, {w.city}
+                            </p>
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => w.id && deleteWarehouse(w.id)}
+                          className="text-slate-400 hover:text-red-600 p-2"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </div>
@@ -741,39 +780,60 @@ export default function VendorSettingsPage() {
           {/* --- TAB 5: TEAM --- */}
           {activeTab === "team" && (
             <div className="space-y-6">
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 flex justify-between items-center">
-                <div>
-                  <h2 className="text-lg font-semibold text-slate-900 flex items-center gap-2">
-                    Two-Factor Authentication (2FA)
-                  </h2>
-                  <p className="text-sm text-slate-500">
-                    Mandatory for Admin and Finance roles.
-                  </p>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
+                <h2 className="text-lg font-semibold">Team Members</h2>
+                <div className="flex gap-2">
                   <input
-                    type="checkbox"
-                    className="sr-only peer"
-                    checked={formData.mfaEnabled}
-                    onChange={(e) =>
-                      handleChange("mfaEnabled", e.target.checked)
-                    }
+                    type="email"
+                    placeholder="colleague@company.com"
+                    value={newTeamEmail}
+                    onChange={(e) => setNewTeamEmail(e.target.value)}
+                    className="flex-1 rounded-lg border-slate-300 p-2.5 text-sm"
                   />
-                  <div className="w-11 h-6 bg-slate-200 rounded-full peer peer-checked:bg-emerald-500 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:after:translate-x-full peer-checked:after:border-white"></div>
-                </label>
+                  <button
+                    onClick={inviteTeamMember}
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2"
+                  >
+                    <Plus size={16} /> Invite
+                  </button>
+                </div>
+                <div className="space-y-2">
+                  {formData.teamMembers.map((member, i) => (
+                    <div
+                      key={i}
+                      className="flex justify-between items-center p-3 border-b border-slate-100 last:border-0"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">
+                          {member.name ? member.name[0].toUpperCase() : "U"}
+                        </div>
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">
+                            {member.email}
+                          </p>
+                          <p className="text-xs text-slate-500 capitalize">
+                            {member.role} • {member.status}
+                          </p>
+                        </div>
+                      </div>
+                      {member.status === "invited" && (
+                        <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
+                          Pending
+                        </span>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
-              {/* Team List would go here (mapped from formData.teamMembers) */}
             </div>
           )}
 
           {/* --- TAB 6: BILLING --- */}
           {activeTab === "billing" && (
             <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
-              <h2 className="text-lg font-semibold text-slate-900">
-                Payout Coordinates
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
+              <h2 className="text-lg font-semibold">Payout Details</h2>
+              <div className="space-y-4">
+                <div>
                   <label className="text-sm font-medium text-slate-700">
                     Bank Name
                   </label>
@@ -784,27 +844,29 @@ export default function VendorSettingsPage() {
                     className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
                   />
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">
-                    IBAN
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.iban}
-                    onChange={(e) => handleChange("iban", e.target.value)}
-                    className="w-full rounded-lg border-slate-300 p-2.5 text-sm font-mono"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">
-                    SWIFT/BIC
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.swift}
-                    onChange={(e) => handleChange("swift", e.target.value)}
-                    className="w-full rounded-lg border-slate-300 p-2.5 text-sm font-mono"
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">
+                      IBAN
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.iban}
+                      onChange={(e) => handleChange("iban", e.target.value)}
+                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium text-slate-700">
+                      SWIFT/BIC
+                    </label>
+                    <input
+                      type="text"
+                      value={formData.swift}
+                      onChange={(e) => handleChange("swift", e.target.value)}
+                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm font-mono"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -815,11 +877,7 @@ export default function VendorSettingsPage() {
             <button
               onClick={handleSave}
               disabled={!hasChanges || isSaving}
-              className={`shadow-xl flex items-center gap-2 px-8 py-3 rounded-full font-bold text-white transition-all transform ${
-                !hasChanges || isSaving
-                  ? "bg-slate-300 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700 hover:scale-105"
-              }`}
+              className={`shadow-xl flex items-center gap-2 px-8 py-3 rounded-full font-bold text-white transition-all transform ${!hasChanges || isSaving ? "bg-slate-300 cursor-not-allowed" : "bg-blue-600 hover:bg-blue-700 hover:scale-105"}`}
             >
               {isSaving ? (
                 "Saving..."
@@ -832,7 +890,7 @@ export default function VendorSettingsPage() {
           </div>
         </div>
 
-        {/* SIDEBAR: STATUS */}
+        {/* SIDEBAR */}
         <div className="lg:col-span-4 space-y-6">
           <div className="bg-white rounded-xl border border-slate-200 p-6 sticky top-6">
             <h3 className="text-sm font-bold text-slate-900 mb-4 uppercase tracking-wide">
@@ -841,19 +899,18 @@ export default function VendorSettingsPage() {
             <div className="space-y-4">
               <div className="flex justify-between text-sm">
                 <span className="text-slate-500">Profile Strength</span>
-                <span className="font-medium text-slate-900">95%</span>
+                <span className="font-medium text-slate-900">85%</span>
               </div>
               <div className="w-full bg-slate-100 rounded-full h-1.5">
                 <div
                   className="bg-emerald-500 h-1.5 rounded-full"
-                  style={{ width: "95%" }}
+                  style={{ width: "85%" }}
                 ></div>
               </div>
-
               <div className="pt-4 border-t border-slate-100 space-y-3">
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-600 flex items-center gap-2">
-                    <ShieldCheck size={14} /> VIES Validated
+                    <ShieldCheck size={14} /> VAT Validated
                   </span>
                   <span
                     className={`font-medium ${formData.vatId ? "text-emerald-600" : "text-slate-400"}`}
@@ -863,10 +920,10 @@ export default function VendorSettingsPage() {
                 </div>
                 <div className="flex items-center justify-between text-sm">
                   <span className="text-slate-600 flex items-center gap-2">
-                    <FileBadge size={14} /> Quality Certs
+                    <FileBadge size={14} /> Role
                   </span>
-                  <span className="text-slate-400">
-                    {formData.certifications.length} Active
+                  <span className="text-slate-700 capitalize">
+                    {formData.role}
                   </span>
                 </div>
               </div>

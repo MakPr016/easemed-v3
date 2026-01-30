@@ -1,391 +1,544 @@
-'use client'
+"use client";
 
-import { use, useState } from 'react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
+import { use, useState, useEffect } from "react";
 import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@/components/ui/dialog'
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import {
-    MapPin,
-    Clock,
-    Package,
-    Calendar,
-    FileText,
-    CreditCard,
-    ArrowLeft,
-    AlertCircle,
-    Upload,
-    X,
-    CheckCircle2,
-} from 'lucide-react'
-import Link from 'next/link'
-import { vendorRFQDetails } from '@/lib/constants'
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table'
-import { RFQMap } from '@/components/maps/RFQMap'
+  MapPin,
+  Clock,
+  Package,
+  Calendar,
+  FileText,
+  CreditCard,
+  ArrowLeft,
+  AlertCircle,
+  Upload,
+  X,
+  CheckCircle2,
+  Loader2,
+  Download,
+  FileJson,
+} from "lucide-react";
+import Link from "next/link";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+
+// Helper
+const formatDate = (dateString: string | null) => {
+  if (!dateString) return "N/A";
+  return new Date(dateString).toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+};
 
 export default function VendorRFQDetailPage({
-    params,
+  params,
 }: {
-    params: Promise<{ id: string }>
+  params: Promise<{ id: string }>;
 }) {
-    const { id } = use(params)
-    const rfq = vendorRFQDetails[id]
+  const { id } = use(params);
+  const router = useRouter();
+  const supabase = createClient();
 
-    const [bidDialogOpen, setBidDialogOpen] = useState(false)
-    const [quotationFile, setQuotationFile] = useState<File | null>(null)
-    const [notes, setNotes] = useState('')
-    const [isSubmitting, setIsSubmitting] = useState(false)
-    const [submitSuccess, setSubmitSuccess] = useState(false)
+  const [rfq, setRfq] = useState<any>(null);
+  const [items, setItems] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [bidDialogOpen, setBidDialogOpen] = useState(false);
+  const [quotationFile, setQuotationFile] = useState<File | null>(null);
+  const [notes, setNotes] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+  const [vendorProfile, setVendorProfile] = useState<any>(null);
 
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setQuotationFile(e.target.files[0])
-        }
+  // --- 1. Fetch Real Data ---
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (!user) return;
+
+        // Get Vendor Profile
+        const { data: vendor } = await supabase
+          .from("vendors")
+          .select("*")
+          .eq("user_id", user.id)
+          .single();
+
+        if (vendor) setVendorProfile(vendor);
+
+        // Fetch RFQ Details & Items
+        const { data: rfqData, error } = await supabase
+          .from("rfqs")
+          .select(
+            `
+                        *,
+                        hospitals ( hospital_name, city, address ),
+                        rfq_items (*)
+                    `,
+          )
+          .eq("id", id)
+          .single();
+
+        if (error) throw error;
+        setRfq(rfqData);
+        setItems(rfqData.rfq_items || []);
+      } catch (err) {
+        console.error("Error loading RFQ:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchData();
+  }, [id]);
+
+  // --- 2. Template Generation Logic ---
+  const handleDownloadTemplate = () => {
+    if (!rfq || !items) return;
+
+    const template = {
+      quote_header: {
+        rfq_reference: rfq.id,
+        quote_reference: `Q-${new Date().getFullYear()}-${Math.floor(Math.random() * 10000)}`,
+        submission_date: new Date().toISOString(),
+        validity_period_days: 60,
+        currency: rfq.metadata?.currency || "USD",
+        payment_terms: "100% within 30 days after receipt",
+        delivery_terms: "DAP",
+        delivery_locations: [rfq.hospitals?.city || "Primary Location"],
+      },
+      vendor_profile: {
+        company_name: vendorProfile?.vendor_name || "Your Company Name",
+        contact_person: vendorProfile?.contact_person || "",
+        email: vendorProfile?.contact_email || "",
+        phone: vendorProfile?.contact_phone || "",
+        address: vendorProfile?.address || "",
+        vendor_type: vendorProfile?.vendor_type || "Distributor",
+      },
+      logistics_estimate: {
+        lead_time_days: 14,
+        total_estimated_weight_kg: 0,
+        total_estimated_volume_m3: 0,
+        country_of_origin_general: "Mixed",
+      },
+      line_items: items.map((item, index) => ({
+        item_no: index + 1,
+        rfq_item_id: item.id,
+        type: "PHARMACEUTICAL",
+        rfq_description: item.item_name,
+        requested_qty: item.quantity,
+        unit_of_measure: item.unit,
+        offer_details: {
+          offered_product: "",
+          brand_name: "",
+          manufacturer: "",
+          country_of_origin: "",
+          unit_price: 0.0,
+          total_line_price: 0.0,
+        },
+      })),
+    };
+
+    const blob = new Blob([JSON.stringify(template, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `QUOTE_DRAFT_${rfq.title.replace(/\s+/g, "_")}.json`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setQuotationFile(e.target.files[0]);
+    }
+  };
+
+  const handleRemoveFile = () => {
+    setQuotationFile(null);
+  };
+
+  // --- 3. Submit Bid Logic (FIXED) ---
+  const handleSubmitBid = async () => {
+    if (!quotationFile) {
+      alert("Please upload a quotation document");
+      return;
     }
 
-    const handleRemoveFile = () => {
-        setQuotationFile(null)
+    if (!vendorProfile?.id) {
+      alert(
+        "Vendor profile not found. Please ensure you are logged in as a vendor.",
+      );
+      return;
     }
 
-    const handleSubmitBid = async () => {
-        if (!quotationFile) {
-            alert('Please upload a quotation document')
-            return
-        }
+    setIsSubmitting(true);
 
-        setIsSubmitting(true)
+    try {
+      // A. Generate a Custom ID (Since your DB schema requires text ID, not UUID default)
+      const quoteId = `Q-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
 
-        try {
-            const formData = new FormData()
-            formData.append('rfqId', id)
-            formData.append('quotationDocument', quotationFile)
-            formData.append('notes', notes)
-            formData.append('submittedAt', new Date().toISOString())
+      // Placeholder for File URL (You can implement Storage upload later)
+      const fakeUrl = `https://storage.example.com/${quotationFile.name}`;
 
-            await new Promise(resolve => setTimeout(resolve, 2000))
+      // B. Insert Quotation Record
+      // IMPORTANT: We explicitly provide 'id' because your schema demands it
+      const { error: quoteError } = await supabase.from("quotations").insert({
+        id: quoteId, // <--- FIXED: Explicit ID generation
+        rfq_id: id,
+        vendor_id: vendorProfile.id,
+        total_amount: 0, // Will be parsed from file by backend/admin later
+        status: "pending",
+        notes: notes,
+        document_url: fakeUrl,
+        valid_until: new Date(
+          Date.now() + 60 * 24 * 60 * 60 * 1000,
+        ).toISOString(),
+        delivery_time_days: 14,
+      });
 
-            console.log('Bid submitted:', {
-                rfqId: id,
-                fileName: quotationFile.name,
-                fileSize: quotationFile.size,
-                notes,
-                submittedAt: new Date().toISOString()
-            })
+      if (quoteError) {
+        console.error("Supabase Insert Error:", quoteError);
+        throw quoteError;
+      }
 
-            setSubmitSuccess(true)
-            setTimeout(() => {
-                window.location.href = '/dashboard/vendor/quotations'
-            }, 2000)
+      setSubmitSuccess(true);
 
-
-        } catch (error) {
-            console.error('Error submitting bid:', error)
-            alert('Failed to submit bid. Please try again.')
-        } finally {
-            setIsSubmitting(false)
-        }
+      setTimeout(() => {
+        router.push("/dashboard/vendor");
+      }, 2000);
+    } catch (error: any) {
+      console.error("Error submitting bid:", error);
+      alert(`Failed to submit bid: ${error.message || "Unknown error"}`);
+    } finally {
+      setIsSubmitting(false);
     }
+  };
 
-    if (!rfq) {
-        return (
-            <div className="space-y-6">
-                <Card>
-                    <CardContent className="p-12 text-center">
-                        <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">RFQ Not Found</h3>
-                        <p className="text-sm text-muted-foreground mb-4">
-                            This RFQ may have been closed or is not available to you.
-                        </p>
-                        <Link href="/dashboard/vendor/rfq">
-                            <Button>Back to RFQs</Button>
-                        </Link>
-                    </CardContent>
-                </Card>
-            </div>
-        )
-    }
-
-    const getUrgencyColor = (urgency: string) => {
-        switch (urgency) {
-            case 'urgent':
-                return 'bg-red-100 text-red-700 border-red-200'
-            case 'moderate':
-                return 'bg-yellow-100 text-yellow-700 border-yellow-200'
-            case 'low':
-                return 'bg-blue-100 text-blue-700 border-blue-200'
-            default:
-                return 'bg-gray-100 text-gray-700 border-gray-200'
-        }
-    }
-
+  if (loading)
     return (
-        <div className="space-y-6">
-            <div className="flex items-center gap-4">
-                <Link href="/dashboard/vendor/rfq">
-                    <Button variant="ghost" size="icon">
-                        <ArrowLeft className="h-5 w-5" />
-                    </Button>
-                </Link>
-                <div>
-                    <div className="flex items-center gap-2 mb-1">
-                        <h1 className="text-3xl font-bold tracking-tight">{rfq.title}</h1>
-                        <Badge className={getUrgencyColor(rfq.urgency)}>
-                            {rfq.deadline}
-                        </Badge>
-                    </div>
-                    <p className="text-muted-foreground">{rfq.id}</p>
-                </div>
+      <div className="flex h-screen items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+
+  if (!rfq) {
+    return (
+      <div className="space-y-6 max-w-4xl mx-auto mt-10">
+        <Card>
+          <CardContent className="p-12 text-center">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">RFQ Not Found</h3>
+            <Link href="/dashboard/vendor">
+              <Button>Back to Dashboard</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const getDeadlineColor = (dateString: string) => {
+    const days = Math.ceil(
+      (new Date(dateString).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+    );
+    if (days < 3) return "bg-red-100 text-red-700 border-red-200";
+    if (days < 7) return "bg-yellow-100 text-yellow-700 border-yellow-200";
+    return "bg-blue-100 text-blue-700 border-blue-200";
+  };
+
+  return (
+    <div className="space-y-6 max-w-6xl mx-auto pb-20">
+      {/* Header */}
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex items-center gap-4">
+          <Link href="/dashboard/vendor">
+            <Button variant="ghost" size="icon">
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
+          </Link>
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <h1 className="text-3xl font-bold tracking-tight">{rfq.title}</h1>
+              <Badge className={getDeadlineColor(rfq.deadline)}>
+                Due: {formatDate(rfq.deadline)}
+              </Badge>
             </div>
-
-            <div className="grid gap-6 lg:grid-cols-3">
-                <div className="lg:col-span-2 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Items Required</CardTitle>
-                            <CardDescription>{rfq.items.length} items in this RFQ</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Item Name</TableHead>
-                                        <TableHead>Quantity</TableHead>
-                                        <TableHead>Specification</TableHead>
-                                        <TableHead className="text-right">Est. Price</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {rfq.items.map((item) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell className="font-medium">{item.name}</TableCell>
-                                            <TableCell>
-                                                {item.quantity} {item.unit}
-                                            </TableCell>
-                                            <TableCell className="text-sm text-muted-foreground">
-                                                {item.specification}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                {item.estimatedPrice || '-'}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Delivery Location</CardTitle>
-                            <CardDescription>Region for this order</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-start gap-3">
-                                <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                                <div>
-                                    <p className="font-semibold">{rfq.location}</p>
-                                </div>
-                            </div>
-
-                            <RFQMap
-                                lat={rfq.coordinates.lat}
-                                lng={rfq.coordinates.lng}
-                                location={rfq.location}
-                            />
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Technical Specifications</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <p className="text-sm text-muted-foreground">{rfq.specifications}</p>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Required Documents</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <ul className="space-y-2">
-                                {rfq.requiredDocuments.map((doc, index) => (
-                                    <li key={index} className="flex items-center gap-2">
-                                        <FileText className="h-4 w-4 text-primary" />
-                                        <span className="text-sm">{doc}</span>
-                                    </li>
-                                ))}
-                            </ul>
-                        </CardContent>
-                    </Card>
-                </div>
-
-                <div className="space-y-6">
-                    <div className="sticky top-6 space-y-6">
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Key Details</CardTitle>
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="flex items-start gap-3">
-                                    <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Delivery Deadline</p>
-                                        <p className="font-medium">{rfq.deliveryDeadline}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Payment Terms</p>
-                                        <p className="font-medium">{rfq.paymentTerms}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <Package className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Category</p>
-                                        <Badge variant="outline">{rfq.category}</Badge>
-                                    </div>
-                                </div>
-                                <div className="flex items-start gap-3">
-                                    <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
-                                    <div>
-                                        <p className="text-sm text-muted-foreground">Bid Deadline</p>
-                                        <p className="font-medium">{rfq.deadline}</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-
-                        <Button
-                            size="lg"
-                            className="w-full"
-                            onClick={() => setBidDialogOpen(true)}
-                        >
-                            Place Your Bid
-                        </Button>
-                    </div>
-                </div>
-            </div>
-
-            <Dialog open={bidDialogOpen} onOpenChange={setBidDialogOpen}>
-                <DialogContent className="sm:max-w-125">
-                    {submitSuccess ? (
-                        <div className="flex flex-col items-center justify-center py-8">
-                            <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
-                            <h3 className="text-xl font-semibold mb-2">Bid Submitted Successfully!</h3>
-                            <p className="text-sm text-muted-foreground text-center">
-                                Your quotation has been received and is being processed.
-                            </p>
-                        </div>
-                    ) : (
-                        <>
-                            <DialogHeader>
-                                <DialogTitle>Submit Your Bid</DialogTitle>
-                                <DialogDescription>
-                                    Upload your quotation document for {rfq.title}
-                                </DialogDescription>
-                            </DialogHeader>
-
-                            <div className="space-y-4 py-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="quotation">Quotation Document *</Label>
-                                    {!quotationFile ? (
-                                        <div className="border-2 border-dashed rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer">
-                                            <input
-                                                id="quotation"
-                                                type="file"
-                                                accept=".pdf,.xlsx,.xls,.csv,.doc,.docx"
-                                                onChange={handleFileChange}
-                                                className="hidden"
-                                            />
-                                            <label htmlFor="quotation" className="cursor-pointer">
-                                                <Upload className="h-10 w-10 text-muted-foreground mx-auto mb-2" />
-                                                <p className="text-sm font-medium">Click to upload quotation</p>
-                                                <p className="text-xs text-muted-foreground mt-1">
-                                                    PDF, Excel, CSV or Word (max 10MB)
-                                                </p>
-                                            </label>
-                                        </div>
-                                    ) : (
-                                        <div className="border rounded-lg p-4 flex items-center justify-between bg-muted/50">
-                                            <div className="flex items-center gap-3">
-                                                <FileText className="h-8 w-8 text-primary" />
-                                                <div>
-                                                    <p className="text-sm font-medium">{quotationFile.name}</p>
-                                                    <p className="text-xs text-muted-foreground">
-                                                        {(quotationFile.size / 1024).toFixed(2)} KB
-                                                    </p>
-                                                </div>
-                                            </div>
-                                            <Button
-                                                variant="ghost"
-                                                size="icon"
-                                                onClick={handleRemoveFile}
-                                            >
-                                                <X className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="space-y-2">
-                                    <Label htmlFor="notes">Additional Notes (Optional)</Label>
-                                    <Textarea
-                                        id="notes"
-                                        placeholder="Add any additional information or terms..."
-                                        value={notes}
-                                        onChange={(e) => setNotes(e.target.value)}
-                                        rows={4}
-                                    />
-                                </div>
-
-                                <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                                    <p className="text-xs text-blue-800">
-                                        <strong>Note:</strong> Your quotation will be parsed automatically.
-                                        Ensure it includes item names, quantities, and unit prices for accurate processing.
-                                    </p>
-                                </div>
-                            </div>
-
-                            <DialogFooter>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => setBidDialogOpen(false)}
-                                    disabled={isSubmitting}
-                                >
-                                    Cancel
-                                </Button>
-                                <Button
-                                    onClick={handleSubmitBid}
-                                    disabled={!quotationFile || isSubmitting}
-                                >
-                                    {isSubmitting ? 'Submitting...' : 'Submit Bid'}
-                                </Button>
-                            </DialogFooter>
-                        </>
-                    )}
-                </DialogContent>
-            </Dialog>
+            <p className="text-muted-foreground text-sm flex gap-2 items-center">
+              <FileText className="h-3.5 w-3.5" /> ID: {rfq.id.slice(0, 8)}...
+              <span className="text-slate-300">|</span>
+              <MapPin className="h-3.5 w-3.5" />{" "}
+              {rfq.hospitals?.city || "Location N/A"}
+            </p>
+          </div>
         </div>
-    )
+
+        <div className="flex gap-3">
+          <Button
+            variant="outline"
+            onClick={handleDownloadTemplate}
+            className="gap-2"
+          >
+            <FileJson className="h-4 w-4 text-blue-600" />
+            Download JSON Template
+          </Button>
+          <Button
+            onClick={() => setBidDialogOpen(true)}
+            size="lg"
+            className="bg-blue-600 hover:bg-blue-700"
+          >
+            Submit Quotation
+          </Button>
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-3">
+        {/* Left Column: Items */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Items Required</CardTitle>
+              <CardDescription>
+                {items.length} items listed in this request
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="border rounded-lg overflow-hidden">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Item Name</TableHead>
+                      <TableHead>Qty</TableHead>
+                      <TableHead>Specification</TableHead>
+                      <TableHead className="text-right">Est. Price</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {items.map((item) => (
+                      <TableRow key={item.id}>
+                        <TableCell className="font-medium">
+                          {item.item_name}
+                        </TableCell>
+                        <TableCell className="font-mono">
+                          {item.quantity} {item.unit}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {item.specification || item.description || "-"}
+                        </TableCell>
+                        <TableCell className="text-right text-muted-foreground">
+                          {item.estimated_price
+                            ? `€${item.estimated_price}`
+                            : "-"}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                    {items.length === 0 && (
+                      <TableRow>
+                        <TableCell
+                          colSpan={4}
+                          className="text-center py-8 text-muted-foreground"
+                        >
+                          No items found for this RFQ.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Right Column: Details */}
+        <div className="space-y-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Details</CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="flex items-start gap-3">
+                <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">
+                    Posted
+                  </p>
+                  <p className="font-medium">{formatDate(rfq.created_at)}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">
+                    Deadline
+                  </p>
+                  <p className="font-medium">{formatDate(rfq.deadline)}</p>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <Package className="h-5 w-5 text-muted-foreground mt-0.5" />
+                <div>
+                  <p className="text-xs font-semibold text-muted-foreground uppercase">
+                    Contract
+                  </p>
+                  <Badge variant="outline">
+                    {rfq.metadata?.contract_type?.replace(/_/g, " ") ||
+                      "One-time"}
+                  </Badge>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+
+      {/* Submission Dialog */}
+      <Dialog open={bidDialogOpen} onOpenChange={setBidDialogOpen}>
+        <DialogContent className="sm:max-w-[500px]">
+          {submitSuccess ? (
+            <div className="flex flex-col items-center justify-center py-8">
+              <CheckCircle2 className="h-16 w-16 text-green-500 mb-4" />
+              <h3 className="text-xl font-semibold mb-2">Bid Submitted!</h3>
+              <p className="text-sm text-muted-foreground text-center">
+                Redirecting you to the dashboard...
+              </p>
+            </div>
+          ) : (
+            <>
+              <DialogHeader>
+                <DialogTitle>Submit Your Quotation</DialogTitle>
+                <DialogDescription>
+                  Upload your official quotation (PDF or JSON).
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-6 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="quotation">Upload Document *</Label>
+                  {!quotationFile ? (
+                    <div className="border-2 border-dashed rounded-lg p-8 text-center hover:bg-slate-50 transition-colors cursor-pointer group">
+                      <input
+                        id="quotation"
+                        type="file"
+                        accept=".pdf,.json,.xlsx,.csv,.doc,.docx"
+                        onChange={handleFileChange}
+                        className="hidden"
+                      />
+                      <label
+                        htmlFor="quotation"
+                        className="cursor-pointer block"
+                      >
+                        <Upload className="h-10 w-10 text-muted-foreground group-hover:text-blue-600 mx-auto mb-3 transition-colors" />
+                        <p className="text-sm font-medium text-slate-700">
+                          Click to upload quotation
+                        </p>
+                        <p className="text-xs text-muted-foreground mt-1">
+                          JSON (Recommended), PDF, or Excel
+                        </p>
+                      </label>
+                    </div>
+                  ) : (
+                    <div className="border rounded-lg p-4 flex items-center justify-between bg-blue-50/50 border-blue-100">
+                      <div className="flex items-center gap-3">
+                        <div className="bg-white p-2 rounded shadow-sm">
+                          {quotationFile.name.endsWith(".json") ? (
+                            <FileJson className="h-6 w-6 text-orange-600" />
+                          ) : (
+                            <FileText className="h-6 w-6 text-blue-600" />
+                          )}
+                        </div>
+                        <div className="overflow-hidden">
+                          <p className="text-sm font-medium truncate max-w-[200px]">
+                            {quotationFile.name}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {(quotationFile.size / 1024).toFixed(2)} KB
+                          </p>
+                        </div>
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={handleRemoveFile}
+                        className="text-slate-400 hover:text-red-500"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="notes">Additional Notes</Label>
+                  <Textarea
+                    id="notes"
+                    placeholder="Add delivery estimates or comments..."
+                    value={notes}
+                    onChange={(e) => setNotes(e.target.value)}
+                    rows={3}
+                  />
+                </div>
+              </div>
+
+              <DialogFooter>
+                <Button
+                  variant="outline"
+                  onClick={() => setBidDialogOpen(false)}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSubmitBid}
+                  disabled={!quotationFile || isSubmitting}
+                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />{" "}
+                      Submitting...
+                    </>
+                  ) : (
+                    "Submit Bid"
+                  )}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 }

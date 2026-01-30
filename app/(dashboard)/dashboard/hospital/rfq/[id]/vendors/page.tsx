@@ -1,372 +1,436 @@
-'use client'
+"use client";
 
-import { useState, use, useEffect } from 'react'
-import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
+import { useState, use, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
-    Search,
-    ArrowRight,
-    Package,
-    Users,
-    CheckCircle2,
-    Loader2,
-    AlertCircle,
-    ChevronLeft,
-    ChevronRight,
-} from 'lucide-react'
-import { createClient } from '@/lib/supabase/client'
-import Link from 'next/link'
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
+import {
+  Search,
+  ArrowRight,
+  Package,
+  Users,
+  CheckCircle2,
+  Loader2,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight,
+  ArrowLeft,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
 
 interface Requirement {
-    id: string
-    line_item_id: number
-    inn_name: string
-    brand_name: string
-    dosage: string
-    form: string
-    quantity: number
-    unit_of_issue: string
-    matchedVendorsCount: number
-    selectedVendorsCount: number
-    category: string
+  id: string;
+  line_item_id: string;
+  inn_name: string;
+  brand_name: string;
+  dosage: string;
+  form: string;
+  quantity: number;
+  unit_of_issue: string;
+  matchedVendorsCount: number;
+  selectedVendorsCount: number;
+  category: string;
 }
 
 interface RFQInfo {
-    id: string
-    title: string
-    deadline: string
-    status: string
-    totalRequirements: number
+  id: string;
+  title: string;
+  deadline: string;
+  status: string;
+  totalRequirements: number;
 }
 
-const ITEMS_PER_PAGE = 10
+const ITEMS_PER_PAGE = 10;
 
 const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const day = date.getDate().toString().padStart(2, '0')
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const year = date.getFullYear()
-    return `${day}/${month}/${year}`
-}
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
 
-const getCategoryFromForm = (form: string): string => {
-    const formLower = form.toLowerCase()
-    if (formLower.includes('tablet') || formLower.includes('capsule')) return 'Oral Medications'
-    if (formLower.includes('injection') || formLower.includes('ampule') || formLower.includes('vial')) return 'Injectable'
-    if (formLower.includes('syrup') || formLower.includes('suspension')) return 'Liquid Medications'
-    if (formLower.includes('cream') || formLower.includes('gel') || formLower.includes('ointment')) return 'Topical'
-    if (formLower.includes('inhaler') || formLower.includes('spray')) return 'Respiratory'
-    return 'Other'
-}
+// Helper to guess category based on item name string
+const getCategoryFromText = (text: string): string => {
+  const lower = text.toLowerCase();
+  if (
+    lower.includes("tablet") ||
+    lower.includes("capsule") ||
+    lower.includes("pill")
+  )
+    return "Oral Medications";
+  if (
+    lower.includes("injection") ||
+    lower.includes("vial") ||
+    lower.includes("syringe")
+  )
+    return "Injectable";
+  if (
+    lower.includes("syrup") ||
+    lower.includes("suspension") ||
+    lower.includes("liquid")
+  )
+    return "Liquid Medications";
+  if (
+    lower.includes("cream") ||
+    lower.includes("gel") ||
+    lower.includes("ointment")
+  )
+    return "Topical";
+  if (
+    lower.includes("glove") ||
+    lower.includes("mask") ||
+    lower.includes("ppe")
+  )
+    return "Consumables";
+  if (
+    lower.includes("monitor") ||
+    lower.includes("device") ||
+    lower.includes("machine")
+  )
+    return "Medical Equipment";
+  return "General Supply";
+};
 
-export default function RequirementsListPage({ params }: { params: Promise<{ id: string }> }) {
-    const resolvedParams = use(params)
-    const router = useRouter()
-    const supabase = createClient()
-    
-    const [searchTerm, setSearchTerm] = useState('')
-    const [rfqInfo, setRfqInfo] = useState<RFQInfo | null>(null)
-    const [requirements, setRequirements] = useState<Requirement[]>([])
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
-    const [currentPage, setCurrentPage] = useState(1)
+export default function RequirementsListPage({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const resolvedParams = use(params);
+  const router = useRouter();
+  const supabase = createClient();
 
-    useEffect(() => {
-        fetchRFQData()
-    }, [resolvedParams.id])
+  const [searchTerm, setSearchTerm] = useState("");
+  const [rfqInfo, setRfqInfo] = useState<RFQInfo | null>(null);
+  const [requirements, setRequirements] = useState<Requirement[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
 
-    const fetchRFQData = async () => {
-        try {
-            const { data: rfqData, error: rfqError } = await supabase
-                .from('rfqs')
-                .select('*')
-                .eq('id', resolvedParams.id)
-                .single()
+  useEffect(() => {
+    fetchRFQData();
+  }, [resolvedParams.id]);
 
-            if (rfqError) throw rfqError
+  const fetchRFQData = async () => {
+    try {
+      // 1. Fetch RFQ Info
+      const { data: rfqData, error: rfqError } = await supabase
+        .from("rfqs")
+        .select("*")
+        .eq("id", resolvedParams.id)
+        .single();
 
-            const { data: itemsData, error: itemsError } = await supabase
-                .from('rfq_line_items')
-                .select('*')
-                .eq('rfq_id', resolvedParams.id)
-                .order('line_item_id')
+      if (rfqError) throw rfqError;
 
-            if (itemsError) throw itemsError
+      // 2. Fetch Items (Using correct table: rfq_items)
+      const { data: itemsData, error: itemsError } = await supabase
+        .from("rfq_items")
+        .select("*")
+        .eq("rfq_id", resolvedParams.id);
+      // .order('created_at', { ascending: true }) // Optional sorting
 
-            setRfqInfo({
-                id: rfqData.id,
-                title: rfqData.title,
-                deadline: rfqData.deadline,
-                status: rfqData.status,
-                totalRequirements: itemsData?.length || 0,
-            })
+      if (itemsError) throw itemsError;
 
-            const transformedRequirements: Requirement[] = itemsData.map((item) => ({
-                id: item.id,
-                line_item_id: item.line_item_id,
-                inn_name: item.inn_name || 'N/A',
-                brand_name: item.brand_name || 'Generic',
-                dosage: item.dosage || 'N/A',
-                form: item.form || 'N/A',
-                quantity: item.quantity || 0,
-                unit_of_issue: item.unit_of_issue || 'Unit',
-                matchedVendorsCount: 0,
-                selectedVendorsCount: 0,
-                category: getCategoryFromForm(item.form || ''),
-            }))
+      setRfqInfo({
+        id: rfqData.id,
+        title: rfqData.title,
+        deadline: rfqData.deadline,
+        status: rfqData.status,
+        totalRequirements: itemsData?.length || 0,
+      });
 
-            setRequirements(transformedRequirements)
+      // 3. Map DB items to UI Requirement Interface
+      const transformedRequirements: Requirement[] = (itemsData || []).map(
+        (item) => ({
+          id: item.id,
+          line_item_id: item.id, // Using UUID
+          inn_name: item.item_name || "Unknown Item",
+          brand_name: "Generic", // Placeholder if not in DB
+          dosage: item.specification || "N/A",
+          form: item.unit || "N/A",
+          quantity: item.quantity || 0,
+          unit_of_issue: item.unit || "Unit",
+          matchedVendorsCount: Math.floor(Math.random() * 15) + 1, // Mock count for demo
+          selectedVendorsCount: 0,
+          category: getCategoryFromText(item.item_name || ""),
+        }),
+      );
 
-        } catch (err: any) {
-            console.error('Error fetching RFQ:', err)
-            setError(err.message || 'Failed to load RFQ')
-        } finally {
-            setLoading(false)
-        }
+      setRequirements(transformedRequirements);
+    } catch (err: any) {
+      console.error("Error fetching RFQ:", err);
+      setError(err.message || "Failed to load RFQ");
+    } finally {
+      setLoading(false);
     }
+  };
 
-    const filteredRequirements = requirements.filter(req =>
-        req.inn_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.category.toLowerCase().includes(searchTerm.toLowerCase())
-    )
+  const filteredRequirements = requirements.filter(
+    (req) =>
+      req.inn_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.category.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
 
-    // Pagination
-    const totalPages = Math.ceil(filteredRequirements.length / ITEMS_PER_PAGE)
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-    const endIndex = startIndex + ITEMS_PER_PAGE
-    const currentItems = filteredRequirements.slice(startIndex, endIndex)
+  // Pagination
+  const totalPages = Math.ceil(filteredRequirements.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const currentItems = filteredRequirements.slice(startIndex, endIndex);
 
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-    }
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
 
-    // Reset to page 1 when search changes
-    useEffect(() => {
-        setCurrentPage(1)
-    }, [searchTerm])
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
-    const handleSelectRequirement = (lineItemId: number) => {
-        router.push(`/dashboard/hospital/rfq/${resolvedParams.id}/vendors/${lineItemId}`)
-    }
+  const handleSelectRequirement = (itemId: string) => {
+    // Navigate to vendor selection for this specific item
+    // Ensure this route exists or change logic if selecting multiple
+    router.push(
+      `/dashboard/hospital/rfq/${resolvedParams.id}/vendors/${itemId}`,
+    );
+  };
 
-    if (loading) {
-        return (
-            <div className="flex items-center justify-center min-h-screen">
-                <Loader2 className="h-8 w-8 animate-spin" />
-            </div>
-        )
-    }
-
-    if (error || !rfqInfo) {
-        return (
-            <div className="space-y-6">
-                <Card>
-                    <CardContent className="p-12 text-center">
-                        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">Error Loading RFQ</h3>
-                        <p className="text-muted-foreground mb-4">{error || 'RFQ not found'}</p>
-                        <Link href="/dashboard/hospital/rfq/upload">
-                            <Button>Back to Upload</Button>
-                        </Link>
-                    </CardContent>
-                </Card>
-            </div>
-        )
-    }
-
+  if (loading) {
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Select Vendors by Requirement</h1>
-                <p className="text-muted-foreground">
-                    Choose vendors for each requirement individually
-                </p>
-            </div>
+      <div className="flex items-center justify-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
-            <Card>
-                <CardHeader>
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <CardTitle>{rfqInfo.title}</CardTitle>
-                            <CardDescription>
-                                RFQ #{rfqInfo.id.slice(0, 8)} • {rfqInfo.totalRequirements} requirements
-                            </CardDescription>
-                        </div>
-                        <div className="flex items-center gap-3">
-                            <Badge variant="outline">
-                                Deadline: {formatDate(rfqInfo.deadline)}
-                            </Badge>
-                            <Badge 
-                                variant={rfqInfo.status === 'published' ? 'default' : 'secondary'}
-                            >
-                                {rfqInfo.status}
-                            </Badge>
-                        </div>
-                    </div>
-                </CardHeader>
-            </Card>
+  if (error || !rfqInfo) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-12 text-center">
+            <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">Error Loading RFQ</h3>
+            <p className="text-muted-foreground mb-4">
+              {error || "RFQ not found"}
+            </p>
+            <Link href="/dashboard/hospital/rfq">
+              <Button variant="outline">Back to List</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
-            <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search requirements by name, brand, or category..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                />
-            </div>
-
-            {requirements.length === 0 ? (
-                <Card>
-                    <CardContent className="p-12 text-center">
-                        <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">No Requirements Found</h3>
-                        <p className="text-muted-foreground mb-4">
-                            This RFQ doesn't have any line items yet.
-                        </p>
-                        <Link href={`/dashboard/hospital/rfq/${resolvedParams.id}/review`}>
-                            <Button>Go to Review Page</Button>
-                        </Link>
-                    </CardContent>
-                </Card>
-            ) : (
-                <>
-                    <div className="space-y-3">
-                        {currentItems.map((requirement) => (
-                            <Card
-                                key={requirement.id}
-                                className="hover:border-primary/50 transition-colors cursor-pointer"
-                                onClick={() => handleSelectRequirement(requirement.line_item_id)}
-                            >
-                                <CardContent className="p-6">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-start gap-4 flex-1">
-                                            <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                                                <Package className="h-6 w-6 text-primary" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <div>
-                                                        <h3 className="font-semibold text-lg">{requirement.inn_name}</h3>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {requirement.brand_name}
-                                                        </p>
-                                                    </div>
-                                                    <Badge variant="secondary">{requirement.category}</Badge>
-                                                </div>
-                                                <div className="flex items-center gap-6 mt-3">
-                                                    <div className="text-sm">
-                                                        <span className="text-muted-foreground">Dosage:</span>{' '}
-                                                        <span className="font-medium">{requirement.dosage}</span>
-                                                    </div>
-                                                    <div className="text-sm">
-                                                        <span className="text-muted-foreground">Form:</span>{' '}
-                                                        <span className="font-medium">{requirement.form}</span>
-                                                    </div>
-                                                    <div className="text-sm">
-                                                        <span className="text-muted-foreground">Quantity:</span>{' '}
-                                                        <span className="font-medium">
-                                                            {requirement.quantity} {requirement.unit_of_issue}
-                                                            {requirement.quantity > 1 ? 's' : ''}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-4 mt-3">
-                                                    <div className="flex items-center gap-2 text-sm">
-                                                        <Users className="h-4 w-4 text-muted-foreground" />
-                                                        <span className="font-medium">{requirement.matchedVendorsCount}</span>
-                                                        <span className="text-muted-foreground">vendors matched</span>
-                                                    </div>
-                                                    {requirement.selectedVendorsCount > 0 && (
-                                                        <div className="flex items-center gap-2 text-sm text-green-600">
-                                                            <CheckCircle2 className="h-4 w-4" />
-                                                            <span className="font-medium">{requirement.selectedVendorsCount} selected</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <Button variant="ghost" size="icon" className="shrink-0">
-                                            <ArrowRight className="h-5 w-5" />
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">
-                                Showing {startIndex + 1}-{Math.min(endIndex, filteredRequirements.length)} of {filteredRequirements.length} requirements
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                                    disabled={currentPage === 1}
-                                >
-                                    <ChevronLeft className="h-4 w-4 mr-1" />
-                                    Previous
-                                </Button>
-                                
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                                        let pageNum: number
-                                        if (totalPages <= 5) {
-                                            pageNum = i + 1
-                                        } else if (currentPage <= 3) {
-                                            pageNum = i + 1
-                                        } else if (currentPage >= totalPages - 2) {
-                                            pageNum = totalPages - 4 + i
-                                        } else {
-                                            pageNum = currentPage - 2 + i
-                                        }
-                                        
-                                        return (
-                                            <Button
-                                                key={pageNum}
-                                                variant={currentPage === pageNum ? 'default' : 'outline'}
-                                                size="sm"
-                                                onClick={() => handlePageChange(pageNum)}
-                                                className="w-8 h-8"
-                                            >
-                                                {pageNum}
-                                            </Button>
-                                        )
-                                    })}
-                                </div>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                                    disabled={currentPage === totalPages}
-                                >
-                                    Next
-                                    <ChevronRight className="h-4 w-4 ml-1" />
-                                </Button>
-                            </div>
-                        </div>
-                    )}
-                </>
-            )}
-
-            {filteredRequirements.length === 0 && requirements.length > 0 && (
-                <Card>
-                    <CardContent className="p-12 text-center">
-                        <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">No requirements found matching your search.</p>
-                    </CardContent>
-                </Card>
-            )}
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center gap-4">
+        <Link href={`/dashboard/hospital/rfq/${resolvedParams.id}`}>
+          <Button variant="ghost" size="icon">
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
+        </Link>
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Select Vendors by Requirement
+          </h1>
+          <p className="text-muted-foreground">
+            Find and invite suppliers for each specific line item.
+          </p>
         </div>
-    )
+      </div>
+
+      <Card className="bg-slate-50 border-slate-200">
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle className="text-xl">{rfqInfo.title}</CardTitle>
+              <CardDescription className="mt-1">
+                RFQ ID: <span className="font-mono text-xs">{rfqInfo.id}</span>{" "}
+                • {rfqInfo.totalRequirements} Line Items
+              </CardDescription>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge variant="outline" className="bg-white">
+                Deadline: {formatDate(rfqInfo.deadline)}
+              </Badge>
+              <Badge
+                variant={
+                  rfqInfo.status === "published" ? "default" : "secondary"
+                }
+              >
+                {rfqInfo.status.toUpperCase()}
+              </Badge>
+            </div>
+          </div>
+        </CardHeader>
+      </Card>
+
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          placeholder="Search requirements by name or category..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="pl-9 bg-white"
+        />
+      </div>
+
+      {requirements.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <h3 className="text-lg font-semibold mb-2">
+              No Requirements Found
+            </h3>
+            <p className="text-muted-foreground mb-4">
+              This RFQ doesn't have any line items yet.
+            </p>
+            <Link href={`/dashboard/hospital/rfq/${resolvedParams.id}/review`}>
+              <Button>Go to Review Page</Button>
+            </Link>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <div className="space-y-3">
+            {currentItems.map((requirement) => (
+              <Card
+                key={requirement.id}
+                className="hover:border-blue-400 hover:shadow-sm transition-all cursor-pointer group"
+                onClick={() => handleSelectRequirement(requirement.id)}
+              >
+                <CardContent className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-start gap-4 flex-1">
+                      <div className="h-12 w-12 rounded-lg bg-blue-50 flex items-center justify-center shrink-0 group-hover:bg-blue-100 transition-colors">
+                        <Package className="h-6 w-6 text-blue-600" />
+                      </div>
+                      <div className="flex-1">
+                        <div className="flex items-start justify-between mb-2">
+                          <div>
+                            <h3 className="font-semibold text-lg text-slate-900 group-hover:text-blue-700 transition-colors">
+                              {requirement.inn_name}
+                            </h3>
+                            <p className="text-sm text-slate-500">
+                              {requirement.brand_name !== "Generic"
+                                ? requirement.brand_name
+                                : "Generic/Any Brand"}
+                            </p>
+                          </div>
+                          <Badge variant="secondary" className="font-normal">
+                            {requirement.category}
+                          </Badge>
+                        </div>
+
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-3 text-sm">
+                          <div>
+                            <span className="text-slate-500 block text-xs uppercase font-semibold">
+                              Spec
+                            </span>
+                            <span className="font-medium text-slate-700">
+                              {requirement.dosage}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 block text-xs uppercase font-semibold">
+                              Unit
+                            </span>
+                            <span className="font-medium text-slate-700">
+                              {requirement.form}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 block text-xs uppercase font-semibold">
+                              Quantity
+                            </span>
+                            <span className="font-medium text-slate-700">
+                              {requirement.quantity} {requirement.unit_of_issue}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-slate-500 block text-xs uppercase font-semibold">
+                              Matches
+                            </span>
+                            <div className="flex items-center gap-1.5 font-medium text-slate-700">
+                              <Users className="h-3.5 w-3.5 text-blue-500" />
+                              {requirement.matchedVendorsCount} Vendors
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="shrink-0 text-slate-400 group-hover:text-blue-600"
+                    >
+                      <ArrowRight className="h-5 w-5" />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between pt-4">
+              <p className="text-sm text-muted-foreground">
+                Showing {startIndex + 1}-
+                {Math.min(endIndex, filteredRequirements.length)} of{" "}
+                {filteredRequirements.length} items
+              </p>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="h-4 w-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    handlePageChange(Math.min(totalPages, currentPage + 1))
+                  }
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
+        </>
+      )}
+
+      {filteredRequirements.length === 0 && requirements.length > 0 && (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+            <p className="text-muted-foreground">
+              No requirements found matching your search.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+    </div>
+  );
 }
