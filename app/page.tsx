@@ -1,17 +1,34 @@
 // app/page.tsx
-import Link from 'next/link'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Building2, ShoppingBag, ArrowRight, CheckCircle2, Zap, DollarSign, Shield } from 'lucide-react'
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import {
+  Building2,
+  ShoppingBag,
+  ArrowRight,
+  CheckCircle2,
+  Zap,
+  DollarSign,
+  Shield,
+} from "lucide-react";
+import { WorldMap } from "@/components/ui/map";
 
 export default function HomePage() {
   return (
     <div className="min-h-screen bg-linear-to-b from-background to-secondary/20">
-      <header className="border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 sticky top-0 z-50">
+      <header className="border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-              <span className="text-primary-foreground font-bold text-lg">E</span>
+              <span className="text-primary-foreground font-bold text-lg">
+                E
+              </span>
             </div>
             <span className="text-xl font-bold">EaseMed</span>
           </div>
@@ -72,19 +89,27 @@ export default function HomePage() {
               <ul className="space-y-3">
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-sm">Create and manage RFQs effortlessly</span>
+                  <span className="text-sm">
+                    Create and manage RFQs effortlessly
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-sm">AI-powered bid evaluation and scoring</span>
+                  <span className="text-sm">
+                    AI-powered bid evaluation and scoring
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-sm">EMA compliance verification built-in</span>
+                  <span className="text-sm">
+                    EMA compliance verification built-in
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-sm">Real-time inventory management</span>
+                  <span className="text-sm">
+                    Real-time inventory management
+                  </span>
                 </li>
               </ul>
               <Link href="/signup?type=hospital" className="block">
@@ -114,11 +139,15 @@ export default function HomePage() {
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-sm">Submit competitive bids instantly</span>
+                  <span className="text-sm">
+                    Submit competitive bids instantly
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
-                  <span className="text-sm">Track performance and analytics</span>
+                  <span className="text-sm">
+                    Track performance and analytics
+                  </span>
                 </li>
                 <li className="flex items-start gap-2">
                   <CheckCircle2 className="h-5 w-5 text-primary shrink-0 mt-0.5" />
@@ -184,10 +213,87 @@ export default function HomePage() {
         </div>
       </section>
 
+      {/* World Map Section */}
+      <section className="container mx-auto px-4 py-16">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl font-bold mb-4">
+            Global Medical Supply Chain
+          </h2>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Hover over the map to view our extensive European distribution
+            network. We connect top-tier manufacturers across the globe.
+          </p>
+        </div>
+
+        <div className="max-w-6xl mx-auto bg-card border rounded-xl shadow-sm overflow-hidden">
+          <WorldMap
+            dots={[
+              {
+                start: { lat: 64.2008, lng: -149.4937, label: "Fairbanks" },
+                end: { lat: 34.0522, lng: -118.2437, label: "Los Angeles" },
+              },
+              {
+                start: { lat: 64.2008, lng: -149.4937, label: "Fairbanks" },
+                end: { lat: -15.7975, lng: -47.8919, label: "Brasília" },
+              },
+              {
+                start: { lat: -15.7975, lng: -47.8919, label: "Brasília" },
+                end: { lat: 38.7223, lng: -9.1393, label: "Lisbon" },
+              },
+              {
+                start: { lat: 51.5074, lng: -0.1278, label: "London" },
+                end: { lat: 28.6139, lng: 77.209, label: "New Delhi" },
+              },
+              {
+                start: { lat: 28.6139, lng: 77.209, label: "New Delhi" },
+                end: { lat: 43.1332, lng: 131.9113, label: "Vladivostok" },
+              },
+              {
+                start: { lat: 28.6139, lng: 77.209, label: "New Delhi" },
+                end: { lat: -1.2921, lng: 36.8219, label: "Nairobi" },
+              },
+            ]}
+            regionDots={[
+              {
+                start: { lat: 51.5074, lng: -0.1278, label: "London" },
+                end: { lat: 48.8566, lng: 2.3522, label: "Paris" },
+              },
+              {
+                start: { lat: 48.8566, lng: 2.3522, label: "Paris" },
+                end: { lat: 52.52, lng: 13.405, label: "Berlin" },
+              },
+              {
+                start: { lat: 52.52, lng: 13.405, label: "Berlin" },
+                end: { lat: 40.4168, lng: -3.7038, label: "Madrid" },
+              },
+              {
+                start: { lat: 40.4168, lng: -3.7038, label: "Madrid" },
+                end: { lat: 41.9028, lng: 12.4964, label: "Rome" },
+              },
+              {
+                start: { lat: 41.9028, lng: 12.4964, label: "Rome" },
+                end: { lat: 52.2297, lng: 21.0122, label: "Warsaw" },
+              },
+              // New connections added below
+              {
+                start: { lat: 52.2297, lng: 21.0122, label: "Warsaw" },
+                end: { lat: 47.4979, lng: 19.0402, label: "Budapest" },
+              },
+              {
+                start: { lat: 47.4979, lng: 19.0402, label: "Budapest" },
+                end: { lat: 37.9838, lng: 23.7275, label: "Athens" },
+              },
+            ]}
+          />
+        </div>
+      </section>
+
       <section className="container mx-auto px-4 py-16">
         <Card className="bg-primary text-primary-foreground">
           <CardContent className="p-12 text-center">
-            <h2 className="text-3xl font-bold mb-4">Ready to transform your procurement?</h2>
+            <h2 className="text-3xl font-bold mb-4">
+              Ready to transform your procurement?
+            </h2>
             <p className="text-lg mb-8 opacity-90">
               Join hundreds of hospitals and vendors already using EaseMed
             </p>
@@ -205,7 +311,9 @@ export default function HomePage() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <div className="h-6 w-6 rounded-lg bg-primary flex items-center justify-center">
-                <span className="text-primary-foreground font-bold text-sm">E</span>
+                <span className="text-primary-foreground font-bold text-sm">
+                  E
+                </span>
               </div>
               <span className="font-bold">EaseMed</span>
             </div>
@@ -216,5 +324,5 @@ export default function HomePage() {
         </div>
       </footer>
     </div>
-  )
+  );
 }
