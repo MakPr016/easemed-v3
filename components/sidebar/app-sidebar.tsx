@@ -1,6 +1,7 @@
 'use client'
 
 import * as React from 'react'
+import { useId } from 'react'
 import {
     ChevronDown,
     LogOut,
@@ -38,14 +39,13 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { hospitalMenuItems, vendorMenuItems } from '@/lib/constants'
-import { useAuth } from '@/contexts/auth-context' // Changed import
+import { useAuth } from '@/contexts/auth-context'
 
 export function AppSidebar() {
     const pathname = usePathname()
     const router = useRouter()
-    const { profile, signOut } = useAuth() // Changed from useUser
+    const { profile, signOut } = useAuth()
 
-    // Determine userType from profile role
     const userType = profile?.role === 'hospital' ? 'hospital' : 'vendor'
 
     const menuItems = userType === 'hospital' ? hospitalMenuItems : vendorMenuItems
@@ -93,7 +93,7 @@ export function AppSidebar() {
     }
 
     const handleLogout = async () => {
-        await signOut() // Changed from logout()
+        await signOut()
         router.push('/login')
     }
 
@@ -121,65 +121,69 @@ export function AppSidebar() {
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {menuItems.map((item) => (
-                                <React.Fragment key={item.title}>
-                                    {item.items ? (
-                                        <Collapsible
-                                            defaultOpen={pathname.startsWith(item.url)}
-                                            className="group/collapsible"
-                                        >
+                            {menuItems.map((item) => {
+                                const collapsibleId = useId()
+
+                                return (
+                                    <React.Fragment key={item.title}>
+                                        {item.items ? (
+                                            <Collapsible
+                                                defaultOpen={pathname.startsWith(item.url)}
+                                                className="group/collapsible"
+                                            >
+                                                <SidebarMenuItem>
+                                                    <CollapsibleTrigger asChild>
+                                                        <SidebarMenuButton id={collapsibleId}>
+                                                            {item.icon && typeof item.icon === 'function' && <item.icon className="h-4 w-4" />}
+                                                            <span>{item.title}</span>
+                                                            <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                                                        </SidebarMenuButton>
+                                                    </CollapsibleTrigger>
+                                                    <CollapsibleContent>
+                                                        <SidebarMenuSub>
+                                                            {item.items.map((subItem) => {
+                                                                const disabled = isLinkDisabled(subItem.url)
+                                                                const resolvedUrl = getResolvedUrl(subItem.url)
+
+                                                                return (
+                                                                    <SidebarMenuSubItem key={subItem.title}>
+                                                                        <SidebarMenuSubButton
+                                                                            asChild={!disabled}
+                                                                            isActive={!disabled && isPathActive(subItem.url)}
+                                                                            className={disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
+                                                                        >
+                                                                            {disabled ? (
+                                                                                <div className="flex items-center">
+                                                                                    {'icon' in subItem && subItem.icon && <subItem.icon className="h-3 w-3 mr-2" />}
+                                                                                    <span>{subItem.title}</span>
+                                                                                </div>
+                                                                            ) : (
+                                                                                <Link href={resolvedUrl} prefetch={false}>
+                                                                                    {'icon' in subItem && subItem.icon && <subItem.icon className="h-3 w-3 mr-2" />}
+                                                                                    <span>{subItem.title}</span>
+                                                                                </Link>
+                                                                            )}
+                                                                        </SidebarMenuSubButton>
+                                                                    </SidebarMenuSubItem>
+                                                                )
+                                                            })}
+                                                        </SidebarMenuSub>
+                                                    </CollapsibleContent>
+                                                </SidebarMenuItem>
+                                            </Collapsible>
+                                        ) : (
                                             <SidebarMenuItem>
-                                                <CollapsibleTrigger asChild>
-                                                    <SidebarMenuButton>
+                                                <SidebarMenuButton asChild isActive={pathname === item.url}>
+                                                    <Link href={item.url} prefetch={false}>
                                                         {item.icon && typeof item.icon === 'function' && <item.icon className="h-4 w-4" />}
                                                         <span>{item.title}</span>
-                                                        <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                                                    </SidebarMenuButton>
-                                                </CollapsibleTrigger>
-                                                <CollapsibleContent>
-                                                    <SidebarMenuSub>
-                                                        {item.items.map((subItem) => {
-                                                            const disabled = isLinkDisabled(subItem.url)
-                                                            const resolvedUrl = getResolvedUrl(subItem.url)
-
-                                                            return (
-                                                                <SidebarMenuSubItem key={subItem.title}>
-                                                                    <SidebarMenuSubButton
-                                                                        asChild={!disabled}
-                                                                        isActive={!disabled && isPathActive(subItem.url)}
-                                                                        className={disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
-                                                                    >
-                                                                        {disabled ? (
-                                                                            <div className="flex items-center">
-                                                                                {'icon' in subItem && subItem.icon && <subItem.icon className="h-3 w-3 mr-2" />}
-                                                                                <span>{subItem.title}</span>
-                                                                            </div>
-                                                                        ) : (
-                                                                            <Link href={resolvedUrl} prefetch={false}>
-                                                                                {'icon' in subItem && subItem.icon && <subItem.icon className="h-3 w-3 mr-2" />}
-                                                                                <span>{subItem.title}</span>
-                                                                            </Link>
-                                                                        )}
-                                                                    </SidebarMenuSubButton>
-                                                                </SidebarMenuSubItem>
-                                                            )
-                                                        })}
-                                                    </SidebarMenuSub>
-                                                </CollapsibleContent>
+                                                    </Link>
+                                                </SidebarMenuButton>
                                             </SidebarMenuItem>
-                                        </Collapsible>
-                                    ) : (
-                                        <SidebarMenuItem>
-                                            <SidebarMenuButton asChild isActive={pathname === item.url}>
-                                                <Link href={item.url} prefetch={false}>
-                                                    {item.icon && typeof item.icon === 'function' && <item.icon className="h-4 w-4" />}
-                                                    <span>{item.title}</span>
-                                                </Link>
-                                            </SidebarMenuButton>
-                                        </SidebarMenuItem>
-                                    )}
-                                </React.Fragment>
-                            ))}
+                                        )}
+                                    </React.Fragment>
+                                )
+                            })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
