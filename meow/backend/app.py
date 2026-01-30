@@ -6,14 +6,21 @@ Provides endpoints for PDF upload, parsing, and data extraction
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
+from dotenv import load_dotenv
 import json
 from datetime import datetime
 import uuid
 from werkzeug.utils import secure_filename
 from rfq_parser import RFQParser
+from medicine_validator import MedicineValidator
+import requests
+import re
 
 app = Flask(__name__)
 CORS(app)
+
+# Load environment variables from .env in this folder (if present)
+load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
 
 # Configuration
 UPLOAD_FOLDER = '../uploads'
@@ -351,6 +358,241 @@ def list_documents():
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
+
+@app.route('/api/document/<document_id>/validate', methods=['GET'])
+def validate_medicines(document_id):
+    """Validate document medicines against EU authorized dataset and return summary/points"""
+    try:
+        if document_id not in parsed_documents:
+            # Try to load from file
+            json_path = os.path.join(EXTRACTED_FOLDER, f"{document_id}_extracted.json")
+            if os.path.exists(json_path):
+                with open(json_path, 'r') as f:
+                    parsed_documents[document_id] = json.load(f)
+            else:
+                return jsonify({'error': 'Document not found'}), 404
+
+        doc = parsed_documents[document_id]
+        line_items = doc.get('line_items', [])
+
+        # Normalize items to expected validator schema
+        medicines = []
+        for item in line_items:
+            medicines.append({
+                'inn_name': item.get('inn_name', ''),
+                'dosage': item.get('dosage', ''),
+                'form': item.get('form', ''),
+                'line_item_id': item.get('line_item_id')
+            })
+
+        validator = MedicineValidator()
+        authorized, rejected = validator.filter_authorized_medicines(medicines, min_confidence=0.7)
+
+        # Build human-friendly "points" for quick clustering/removal use
+        authorized_points = [
+            f"• {m.get('inn_name', '')} — {m.get('dosage', 'N/A')} [{m.get('form', 'N/A')}]"
+            for m in authorized
+        ]
+
+        return jsonify({
+            'document_id': document_id,
+            'total': len(medicines),
+            'authorized_count': len(authorized),
+            'rejected_count': len(rejected),
+            'authorization_rate': round(len(authorized) / len(medicines) * 100, 2) if medicines else 0,
+            'authorized': authorized,
+            'rejected': rejected,
+            'authorized_points': authorized_points,
+            'database_size': len(validator.get_authorized_medicines_list())
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+def _normalize_text(s: str) -> str:
+    if s is None:
+        return ''
+    s = str(s).lower()
+    s = s.replace('\u00a0', ' ')
+    # keep alphanumeric, spaces, slash and percent
+    s = ''.join(ch for ch in s if ch.isalnum() or ch.isspace() or ch in ['/', '%'])
+    s = ' '.join(s.split())
+    # unit normalizations
+    s = s.replace('millilitre', 'ml').replace('milliliter', 'ml')
+    s = s.replace('milligram', 'mg').replace('microgram', 'mcg')
+    s = s.replace('tablets', 'tab').replace('tablet', 'tab')
+    s = s.replace('boxes', 'box')
+    return s
+
+
+def _normalize_item_for_compare(item: dict) -> str:
+    parts = [
+        item.get('inn_name', ''),
+        item.get('dosage', ''),
+        item.get('form', ''),
+        item.get('unit_of_issue', '')
+    ]
+    joined = ' | '.join([str(p) for p in parts if p])
+    return _normalize_text(joined)
+
+
+@app.route('/api/document/<document_id>/confirm', methods=['POST'])
+def confirm_document(document_id):
+    """Strictly confirm total medicines and line-by-line normalized equality.
+
+    Body JSON options:
+      - expected_count: int
+      - expected_lines: [string]
+      - expected_parsed: [ {inn_name,dosage,form,unit_of_issue} ]
+    """
+    try:
+        body = request.get_json(force=True, silent=True) or {}
+
+        if document_id not in parsed_documents:
+            json_path = os.path.join(EXTRACTED_FOLDER, f"{document_id}_extracted.json")
+            if os.path.exists(json_path):
+                with open(json_path, 'r') as f:
+                    parsed_documents[document_id] = json.load(f)
+            else:
+                return jsonify({'error': 'Document not found'}), 404
+
+        doc = parsed_documents[document_id]
+        found_items = doc.get('line_items', [])
+        found_count = len(found_items)
+
+        expected_count = body.get('expected_count')
+        expected_lines = body.get('expected_lines')
+        expected_parsed = body.get('expected_parsed')
+
+        mismatches = []
+
+        found_norm = []
+        for it in found_items:
+            found_norm.append({'line_item_id': it.get('line_item_id'), 'text': _normalize_item_for_compare(it)})
+
+        if expected_parsed:
+            exp_norm = []
+            for e in expected_parsed:
+                exp_norm.append(_normalize_item_for_compare(e))
+        elif expected_lines:
+            exp_norm = [_normalize_text(s) for s in expected_lines]
+        else:
+            exp_norm = None
+
+        confirmed = True
+
+        if expected_count is not None:
+            if int(expected_count) != found_count:
+                confirmed = False
+
+        if exp_norm is not None:
+            if len(exp_norm) != found_count:
+                confirmed = False
+                mismatches.append({'reason': 'count_mismatch', 'expected_count': len(exp_norm), 'found_count': found_count})
+
+            for idx, f in enumerate(found_norm):
+                expected_text = exp_norm[idx] if idx < len(exp_norm) else ''
+                found_text = f['text']
+                if expected_text != found_text:
+                    confirmed = False
+                    mismatches.append({
+                        'line_item_id': f.get('line_item_id'),
+                        'index': idx,
+                        'expected': expected_text,
+                        'found': found_text
+                    })
+
+        result = {
+            'document_id': document_id,
+            'confirmed': confirmed,
+            'expected_count': expected_count,
+            'found_count': found_count,
+            'mismatches': mismatches
+        }
+
+        status = 200 if confirmed else 400
+        return jsonify(result), status
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+
+STRICT_GEMINI_PROMPT = '''
+You are a strict, deterministic validator. Input: a parsed RFQ JSON with 'line_items' (each item has line_item_id, inn_name, dosage, form, unit_of_issue), and 'vendor_requirements'.
+
+Task:
+- Confirm the total number of medicines strictly (integer equality).
+- For each line item, compare the normalized string "INN | DOSAGE | FORM | UNIT" against the parsed line. Return whether it matches exactly (after normalization: lowercase, collapse spaces, remove punctuation except / and %; normalize units: millilitre->ml, milligram->mg, tablet->tab).
+- Classify vendor requirements into categories: legal, technical, financial, documents. Return succinct labels only.
+
+Output: Return ONLY a JSON object (no explanation) with this exact schema:
+{
+  "total": int,
+  "confirmed": bool,
+  "validated_lines": [
+    {"line_item_id": int, "match": bool, "normalized_found": string, "notes": string}
+  ],
+  "classifications": {"legal": [string], "technical": [string], "financial": [string], "documents": [string]}
+}
+
+Be strict: any deviation in normalized text is a non-match. Do not add extra fields.
+'''
+
+
+@app.route('/api/document/<document_id>/classify', methods=['POST'])
+def classify_document(document_id):
+    """Use an external LLM (Gemini) to semantically validate and classify the parsed JSON.
+
+    Expects env var GEMINI_API_KEY and optional GEMINI_API_URL. If missing, returns 400.
+    Body may include: { 'call_model': true } to enforce calling external model.
+    """
+    try:
+        body = request.get_json(force=True, silent=True) or {}
+        call_model = bool(body.get('call_model', True))
+
+        if document_id not in parsed_documents:
+            json_path = os.path.join(EXTRACTED_FOLDER, f"{document_id}_extracted.json")
+            if os.path.exists(json_path):
+                with open(json_path, 'r') as f:
+                    parsed_documents[document_id] = json.load(f)
+            else:
+                return jsonify({'error': 'Document not found'}), 404
+
+        doc = parsed_documents[document_id]
+
+        if not call_model:
+            validator = MedicineValidator()
+            authorized, rejected = validator.filter_authorized_medicines(doc.get('line_items', []), min_confidence=0.7)
+            return jsonify({'total': len(doc.get('line_items', [])), 'authorized_count': len(authorized), 'rejected_count': len(rejected), 'classifications': {}}), 200
+
+        # Delegate to bhau.classifier.call_gemini which knows how to handle
+        # Generative Language vs Vertex endpoints and API-key vs Bearer auth.
+        try:
+            # Ensure project root is on sys.path so sibling package `bhau` can be imported
+            import sys
+            project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
+            if project_root not in sys.path:
+                sys.path.insert(0, project_root)
+            from bhau.classifier import call_gemini
+        except Exception as imp_err:
+            return jsonify({'error': 'Classifier module not available (bhau.classifier).', 'details': str(imp_err), 'sys_path': sys.path[:6]}), 500
+
+        api_key = os.environ.get('GEMINI_API_KEY')
+        api_url = os.environ.get('GEMINI_API_URL')
+        if not api_key or not api_url:
+            return jsonify({'error': 'GEMINI_API_KEY or GEMINI_API_URL not set in environment. Do not send keys in requests.'}), 400
+
+        try:
+            model_json = call_gemini(doc, api_key=api_key, api_url=api_url, timeout=60)
+            return jsonify({'model_response': model_json}), 200
+        except Exception as e:
+            # call_gemini raises RuntimeError with details; forward useful info to client
+            return jsonify({'error': 'Model call failed', 'details': str(e)}), 502
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001, host='0.0.0.0')

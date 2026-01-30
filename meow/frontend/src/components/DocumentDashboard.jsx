@@ -144,7 +144,7 @@ const DocumentDashboard = ({ documentId, onNewUpload }) => {
       <div className="dashboard-header">
         <div className="header-info">
           <h2>📊 RFQ Analysis Dashboard</h2>
-          <p>Document ID: <code>{documentId.substring(0, 8)}...</code></p>
+          <p>Document ID: <code>{documentId}</code></p>
         </div>
         <div className="header-actions">
           <button onClick={handleExportJSON} className="btn-secondary">

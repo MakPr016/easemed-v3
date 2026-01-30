@@ -30,7 +30,7 @@ const DocumentList = ({ documents, onSelectDocument, onRefresh }) => {
             <div className="card-header">
               <h4>{doc.rfq_id || 'Unnamed RFQ'}</h4>
               <span className="doc-id" title={doc.document_id}>
-                {doc.document_id.substring(0, 8)}...
+                {doc.document_id}
               </span>
             </div>
 
