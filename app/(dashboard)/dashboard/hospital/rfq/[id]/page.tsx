@@ -1,9 +1,10 @@
 'use client'
 
-import { use, useState } from 'react'
+import { use, useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
+import { Checkbox } from '@/components/ui/checkbox'
 import {
     MapPin,
     Clock,
@@ -14,9 +15,11 @@ import {
     ArrowLeft,
     Users,
     BarChart3,
-    Eye,
+    Loader2,
+    ArrowRight,
 } from 'lucide-react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
     Table,
     TableBody,
@@ -25,16 +28,17 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
-import { RFQMap } from '@/components/maps/RFQMap'
-import { mockHospitalRFQs, mockReceivedQuotations } from '@/lib/constants'
-import { QuotationDetailDialog } from '@/components/hospital/QuotationDetailDialog'
+import { createClient } from '@/lib/supabase/client'
 
-const formatDate = (dateString: string) => {
+const formatDate = (dateString: string | null) => {
+    if (!dateString) return 'N/A'
     const date = new Date(dateString)
     return date.toLocaleDateString('en-GB', {
         day: '2-digit',
         month: '2-digit',
-        year: 'numeric'
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
     })
 }
 
@@ -44,25 +48,84 @@ export default function HospitalRFQDetailPage({
     params: Promise<{ id: string }>
 }) {
     const { id } = use(params)
-    const rfq = mockHospitalRFQs[id as keyof typeof mockHospitalRFQs]
-    const quotations = mockReceivedQuotations[id] || []
+    const router = useRouter()
+    const [rfq, setRfq] = useState<any>(null)
+    const [lineItems, setLineItems] = useState<any[]>([])
+    const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
+    const [loading, setLoading] = useState(true)
+    const supabase = createClient()
 
-    const [selectedQuotation, setSelectedQuotation] = useState<any>(null)
-    const [detailDialogOpen, setDetailDialogOpen] = useState(false)
+    useEffect(() => {
+        fetchRFQData()
+    }, [id])
 
-    const handleViewQuotation = (quotation: any) => {
-        setSelectedQuotation(quotation)
-        setDetailDialogOpen(true)
+    const fetchRFQData = async () => {
+        try {
+            const { data: rfqData, error: rfqError } = await supabase
+                .from('rfqs')
+                .select('*')
+                .eq('id', id)
+                .single()
+
+            if (rfqError) throw rfqError
+
+            const { data: itemsData, error: itemsError } = await supabase
+                .from('rfq_line_items')
+                .select('*')
+                .eq('rfq_id', id)
+                .order('line_item_id')
+
+            if (itemsError) throw itemsError
+
+            setRfq(rfqData)
+            setLineItems(itemsData || [])
+        } catch (error) {
+            console.error('Error fetching RFQ:', error)
+        } finally {
+            setLoading(false)
+        }
     }
 
-    const handleAward = () => {
-        console.log('Award contract to:', selectedQuotation.vendorName)
-        setDetailDialogOpen(false)
+    const toggleItemSelection = (itemId: string) => {
+        const newSelection = new Set(selectedItems)
+        if (newSelection.has(itemId)) {
+            newSelection.delete(itemId)
+        } else {
+            newSelection.add(itemId)
+        }
+        setSelectedItems(newSelection)
     }
 
-    const handleReject = () => {
-        console.log('Reject quotation from:', selectedQuotation.vendorName)
-        setDetailDialogOpen(false)
+    const toggleSelectAll = () => {
+        if (selectedItems.size === lineItems.length) {
+            setSelectedItems(new Set())
+        } else {
+            setSelectedItems(new Set(lineItems.map(item => item.id)))
+        }
+    }
+
+    const handleProceedToVendorSelection = () => {
+        if (selectedItems.size === 0) {
+            alert('Please select at least one item')
+            return
+        }
+        
+        const selectedItemsArray = lineItems.filter(item => selectedItems.has(item.id))
+        
+        localStorage.setItem('selectedRFQItems', JSON.stringify({
+            rfqId: id,
+            items: selectedItemsArray
+        }))
+        
+        router.push(`/dashboard/hospital/rfq/${id}/vendors`)
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        )
     }
 
     if (!rfq) {
@@ -82,8 +145,10 @@ export default function HospitalRFQDetailPage({
 
     const getStatusColor = (status: string) => {
         switch (status) {
-            case 'active':
+            case 'published':
                 return 'bg-green-100 text-green-700 border-green-200'
+            case 'draft':
+                return 'bg-gray-100 text-gray-700 border-gray-200'
             case 'closed':
                 return 'bg-blue-100 text-blue-700 border-blue-200'
             case 'awarded':
@@ -92,29 +157,6 @@ export default function HospitalRFQDetailPage({
                 return 'bg-gray-100 text-gray-700 border-gray-200'
         }
     }
-
-    const getQuotationStatusColor = (status: string) => {
-        switch (status) {
-            case 'pending':
-                return 'bg-yellow-100 text-yellow-700'
-            case 'under_review':
-                return 'bg-blue-100 text-blue-700'
-            case 'awarded':
-                return 'bg-green-100 text-green-700'
-            case 'rejected':
-                return 'bg-red-100 text-red-700'
-            default:
-                return 'bg-gray-100 text-gray-700'
-        }
-    }
-
-    const lowestPrice = quotations.length > 0
-        ? Math.min(...quotations.map(q => parseFloat(q.totalAmount.replace(/[€,]/g, ''))))
-        : 0
-
-    const avgRating = quotations.length > 0
-        ? (quotations.reduce((sum, q) => sum + q.vendorRating, 0) / quotations.length).toFixed(1)
-        : '0'
 
     return (
         <div className="space-y-6">
@@ -131,16 +173,8 @@ export default function HospitalRFQDetailPage({
                             {rfq.status.charAt(0).toUpperCase() + rfq.status.slice(1)}
                         </Badge>
                     </div>
-                    <p className="text-muted-foreground">{rfq.id}</p>
+                    <p className="text-muted-foreground text-sm">{rfq.id}</p>
                 </div>
-                {quotations.length > 0 && (
-                    <Link href={`/dashboard/hospital/rfq/${id}/analyze`}>
-                        <Button size="lg">
-                            <BarChart3 className="h-4 w-4 mr-2" />
-                            Analyze Quotations
-                        </Button>
-                    </Link>
-                )}
             </div>
 
             <div className="grid gap-4 md:grid-cols-4">
@@ -148,10 +182,10 @@ export default function HospitalRFQDetailPage({
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Quotations</p>
-                                <p className="text-2xl font-bold mt-1">{quotations.length}</p>
+                                <p className="text-sm font-medium text-muted-foreground">Line Items</p>
+                                <p className="text-2xl font-bold mt-1">{lineItems.length}</p>
                             </div>
-                            <Users className="h-8 w-8 text-blue-500 opacity-70" />
+                            <Package className="h-8 w-8 text-blue-500 opacity-70" />
                         </div>
                     </CardContent>
                 </Card>
@@ -159,12 +193,23 @@ export default function HospitalRFQDetailPage({
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Lowest Bid</p>
-                                <p className="text-2xl font-bold mt-1 text-green-600">
-                                    {lowestPrice > 0 ? `€${lowestPrice.toLocaleString()}` : 'N/A'}
+                                <p className="text-sm font-medium text-muted-foreground">Selected</p>
+                                <p className="text-2xl font-bold mt-1">{selectedItems.size}</p>
+                            </div>
+                            <Checkbox className="h-8 w-8" checked={selectedItems.size > 0} />
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Currency</p>
+                                <p className="text-2xl font-bold mt-1">
+                                    {rfq.metadata?.currency || 'USD'}
                                 </p>
                             </div>
-                            <BarChart3 className="h-8 w-8 text-green-500 opacity-70" />
+                            <CreditCard className="h-8 w-8 text-green-500 opacity-70" />
                         </div>
                     </CardContent>
                 </Card>
@@ -172,19 +217,10 @@ export default function HospitalRFQDetailPage({
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Avg. Rating</p>
-                                <p className="text-2xl font-bold mt-1">{avgRating}</p>
-                            </div>
-                            <Users className="h-8 w-8 text-orange-500 opacity-70" />
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="pt-6">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <p className="text-sm font-medium text-muted-foreground">Days Left</p>
-                                <p className="text-2xl font-bold mt-1 text-orange-600">16</p>
+                                <p className="text-sm font-medium text-muted-foreground">Validity</p>
+                                <p className="text-2xl font-bold mt-1">
+                                    {rfq.metadata?.quotation_validity_days || 'N/A'} days
+                                </p>
                             </div>
                             <Clock className="h-8 w-8 text-orange-500 opacity-70" />
                         </div>
@@ -196,124 +232,93 @@ export default function HospitalRFQDetailPage({
                 <div className="lg:col-span-2 space-y-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Received Quotations</CardTitle>
-                            <CardDescription>
-                                {quotations.length === 0
-                                    ? 'No quotations received yet'
-                                    : `${quotations.length} vendors have submitted their quotations`
-                                }
-                            </CardDescription>
+                            <div className="flex items-center justify-between">
+                                <div>
+                                    <CardTitle>Line Items</CardTitle>
+                                    <CardDescription>
+                                        Select items to send to vendors ({selectedItems.size} selected)
+                                    </CardDescription>
+                                </div>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={toggleSelectAll}
+                                >
+                                    {selectedItems.size === lineItems.length ? 'Deselect All' : 'Select All'}
+                                </Button>
+                            </div>
                         </CardHeader>
                         <CardContent>
-                            {quotations.length === 0 ? (
-                                <div className="text-center py-8 text-muted-foreground">
-                                    <Users className="h-12 w-12 mx-auto mb-2 opacity-50" />
-                                    <p>Waiting for vendor submissions</p>
-                                </div>
-                            ) : (
+                            <div className="border rounded-lg overflow-hidden">
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead>Vendor</TableHead>
-                                            <TableHead>Total Amount</TableHead>
-                                            <TableHead>Delivery Time</TableHead>
-                                            <TableHead>Status</TableHead>
-                                            <TableHead className="text-right">Actions</TableHead>
+                                            <TableHead className="w-12"></TableHead>
+                                            <TableHead className="w-16">No.</TableHead>
+                                            <TableHead>INN Name</TableHead>
+                                            <TableHead>Brand</TableHead>
+                                            <TableHead>Dosage</TableHead>
+                                            <TableHead>Form</TableHead>
+                                            <TableHead className="text-right">Quantity</TableHead>
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {quotations.map((quotation) => {
-                                            const isLowest = parseFloat(quotation.totalAmount.replace(/[€,]/g, '')) === lowestPrice
-                                            return (
-                                                <TableRow key={quotation.id}>
-                                                    <TableCell className="font-medium">
-                                                        {quotation.vendorName}
-                                                        {isLowest && (
-                                                            <Badge variant="outline" className="ml-2 bg-green-50 text-green-700 border-green-200">
-                                                                Lowest
-                                                            </Badge>
-                                                        )}
-                                                    </TableCell>
-                                                    <TableCell className={isLowest ? 'font-bold text-green-600' : ''}>
-                                                        {quotation.totalAmount}
-                                                    </TableCell>
-                                                    <TableCell>{quotation.deliveryTime}</TableCell>
+                                        {lineItems.length === 0 ? (
+                                            <TableRow>
+                                                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                                                    No line items found
+                                                </TableCell>
+                                            </TableRow>
+                                        ) : (
+                                            lineItems.map((item) => (
+                                                <TableRow 
+                                                    key={item.id}
+                                                    className={selectedItems.has(item.id) ? 'bg-blue-50' : ''}
+                                                >
                                                     <TableCell>
-                                                        <Badge className={getQuotationStatusColor(quotation.status)}>
-                                                            {quotation.status.replace('_', ' ')}
-                                                        </Badge>
+                                                        <Checkbox
+                                                            checked={selectedItems.has(item.id)}
+                                                            onCheckedChange={() => toggleItemSelection(item.id)}
+                                                        />
+                                                    </TableCell>
+                                                    <TableCell className="font-medium">
+                                                        {item.line_item_id}
+                                                    </TableCell>
+                                                    <TableCell className="font-medium">
+                                                        {item.inn_name}
+                                                    </TableCell>
+                                                    <TableCell className="text-sm">
+                                                        {item.brand_name || 'Generic'}
+                                                    </TableCell>
+                                                    <TableCell className="text-sm text-muted-foreground">
+                                                        {item.dosage || 'N/A'}
+                                                    </TableCell>
+                                                    <TableCell className="text-sm">
+                                                        {item.form || 'N/A'}
                                                     </TableCell>
                                                     <TableCell className="text-right">
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            onClick={() => handleViewQuotation(quotation)}
-                                                        >
-                                                            <Eye className="h-4 w-4" />
-                                                        </Button>
+                                                        {item.quantity} {item.unit_of_issue}
                                                     </TableCell>
                                                 </TableRow>
-                                            )
-                                        })}
+                                            ))
+                                        )}
                                     </TableBody>
                                 </Table>
-                            )}
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Items Required</CardTitle>
-                            <CardDescription>{rfq.items.length} items in this RFQ</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Item Name</TableHead>
-                                        <TableHead>Quantity</TableHead>
-                                        <TableHead>Specification</TableHead>
-                                        <TableHead className="text-right">Est. Price</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {rfq.items.map((item) => (
-                                        <TableRow key={item.id}>
-                                            <TableCell className="font-medium">{item.name}</TableCell>
-                                            <TableCell>
-                                                {item.quantity} {item.unit}
-                                            </TableCell>
-                                            <TableCell className="text-sm text-muted-foreground">
-                                                {item.specification}
-                                            </TableCell>
-                                            <TableCell className="text-right">
-                                                {item.estimatedPrice}
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Delivery Location</CardTitle>
-                            <CardDescription>Region for this order</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="flex items-start gap-3">
-                                <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                                <div>
-                                    <p className="font-semibold">{rfq.location}</p>
-                                </div>
                             </div>
-
-                            <RFQMap
-                                lat={rfq.coordinates.lat}
-                                lng={rfq.coordinates.lng}
-                                location={rfq.location}
-                            />
+                            
+                            {lineItems.length > 0 && (
+                                <div className="mt-4 flex justify-end">
+                                    <Button
+                                        size="lg"
+                                        onClick={handleProceedToVendorSelection}
+                                        disabled={selectedItems.size === 0}
+                                    >
+                                        <Users className="h-4 w-4 mr-2" />
+                                        Select Vendors ({selectedItems.size} items)
+                                        <ArrowRight className="h-4 w-4 ml-2" />
+                                    </Button>
+                                </div>
+                            )}
                         </CardContent>
                     </Card>
                 </div>
@@ -328,29 +333,31 @@ export default function HospitalRFQDetailPage({
                                 <div className="flex items-start gap-3">
                                     <Calendar className="h-5 w-5 text-muted-foreground mt-0.5" />
                                     <div>
-                                        <p className="text-sm text-muted-foreground">Bid Deadline</p>
+                                        <p className="text-sm text-muted-foreground">Submission Deadline</p>
                                         <p className="font-medium">{formatDate(rfq.deadline)}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-3">
-                                    <Clock className="h-5 w-5 text-muted-foreground mt-0.5" />
+                                    <FileText className="h-5 w-5 text-muted-foreground mt-0.5" />
                                     <div>
-                                        <p className="text-sm text-muted-foreground">Delivery Deadline</p>
-                                        <p className="font-medium">{formatDate(rfq.deliveryDeadline)}</p>
+                                        <p className="text-sm text-muted-foreground">RFQ ID</p>
+                                        <p className="font-medium">{rfq.metadata?.rfq_id || 'N/A'}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-3">
                                     <CreditCard className="h-5 w-5 text-muted-foreground mt-0.5" />
                                     <div>
-                                        <p className="text-sm text-muted-foreground">Payment Terms</p>
-                                        <p className="font-medium">{rfq.paymentTerms}</p>
+                                        <p className="text-sm text-muted-foreground">Currency</p>
+                                        <p className="font-medium">{rfq.metadata?.currency || 'USD'}</p>
                                     </div>
                                 </div>
                                 <div className="flex items-start gap-3">
                                     <Package className="h-5 w-5 text-muted-foreground mt-0.5" />
                                     <div>
-                                        <p className="text-sm text-muted-foreground">Category</p>
-                                        <Badge variant="outline">{rfq.category}</Badge>
+                                        <p className="text-sm text-muted-foreground">Contract Type</p>
+                                        <Badge variant="outline">
+                                            {rfq.metadata?.contract_type?.replace(/_/g, ' ') || 'N/A'}
+                                        </Badge>
                                     </div>
                                 </div>
                             </CardContent>
@@ -358,41 +365,36 @@ export default function HospitalRFQDetailPage({
 
                         <Card>
                             <CardHeader>
-                                <CardTitle>Technical Specifications</CardTitle>
+                                <CardTitle>Evaluation Method</CardTitle>
                             </CardHeader>
                             <CardContent>
-                                <p className="text-sm text-muted-foreground">{rfq.specifications}</p>
+                                <p className="text-sm">
+                                    {rfq.metadata?.evaluation_method?.replace(/_/g, ' ')?.replace(/\b\w/g, (l: string) => l.toUpperCase()) || 'Not specified'}
+                                </p>
+                                {rfq.metadata?.vendors_to_select && (
+                                    <p className="text-sm text-muted-foreground mt-2">
+                                        Up to {rfq.metadata.vendors_to_select} vendors will be selected
+                                    </p>
+                                )}
                             </CardContent>
                         </Card>
 
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Required Documents</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-2">
-                                    {rfq.requiredDocuments.map((doc, index) => (
-                                        <li key={index} className="flex items-center gap-2">
-                                            <FileText className="h-4 w-4 text-primary" />
-                                            <span className="text-sm">{doc}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </CardContent>
-                        </Card>
+                        {rfq.metadata?.local_only && (
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Requirements</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="flex items-center gap-2">
+                                        <MapPin className="h-4 w-4 text-primary" />
+                                        <span className="text-sm">Local suppliers only</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        )}
                     </div>
                 </div>
             </div>
-
-            {selectedQuotation && (
-                <QuotationDetailDialog
-                    open={detailDialogOpen}
-                    onOpenChange={setDetailDialogOpen}
-                    quotation={selectedQuotation}
-                    onAward={handleAward}
-                    onReject={handleReject}
-                />
-            )}
         </div>
     )
 }

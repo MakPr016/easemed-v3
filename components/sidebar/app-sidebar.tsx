@@ -1,14 +1,12 @@
 'use client'
 
-import * as React from 'react'
-import { useId } from 'react'
+import * as React from "react"
 import {
     ChevronDown,
     LogOut,
     Bell,
     Settings as SettingsIcon,
-} from 'lucide-react'
-
+} from "lucide-react"
 import {
     Sidebar,
     SidebarContent,
@@ -23,50 +21,54 @@ import {
     SidebarMenuSub,
     SidebarMenuSubButton,
     SidebarMenuSubItem,
-} from '@/components/ui/sidebar'
+} from "@/components/ui/sidebar"
 import {
     Collapsible,
     CollapsibleContent,
     CollapsibleTrigger,
-} from '@/components/ui/collapsible'
+} from "@/components/ui/collapsible"
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
-import { usePathname, useRouter } from 'next/navigation'
-import Link from 'next/link'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { hospitalMenuItems, vendorMenuItems } from '@/lib/constants'
-import { useAuth } from '@/contexts/auth-context'
+} from "@/components/ui/dropdown-menu"
+import { usePathname, useRouter } from "next/navigation"
+import Link from "next/link"
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { hospitalMenuItems, vendorMenuItems } from "@/lib/constants"
+import { useAuth } from "@/contexts/auth-context" // ✅ Changed from useUser
 
 export function AppSidebar() {
     const pathname = usePathname()
     const router = useRouter()
-    const { profile, signOut } = useAuth()
 
-    const userType = profile?.role === 'hospital' ? 'hospital' : 'vendor'
+    // ✅ Use AuthProvider instead of UserProvider
+    const { user, profile, signOut } = useAuth()
+
+    // ✅ Determine userType from profile role
+    const userType = profile?.role === 'vendor' ? 'vendor' : 'hospital'
 
     const menuItems = userType === 'hospital' ? hospitalMenuItems : vendorMenuItems
 
+    // ✅ Create user object for display
     const defaultUser = {
-        name: profile?.full_name || 'John Doe',
-        email: profile?.email || 'john@hospital.com',
-        organization: profile?.organization_name || 'General Hospital',
+        name: profile?.full_name || user?.email?.split('@')[0] || 'User',
+        email: user?.email || 'user@example.com',
+        organization: profile?.organization_name || 'Organization',
         avatar: profile?.avatar_url,
     }
 
     const getRfqIdFromPath = () => {
-        const match = pathname.match(/\/rfq\/([^\/]+)/)
+        const match = pathname.match(/\/rfq\/([^/]+)/)
         return match ? match[1] : null
     }
 
     const getResolvedUrl = (url: string) => {
-        if (url.includes('[id]')) {
+        if (url.includes(':id')) {
             const rfqId = getRfqIdFromPath()
             if (rfqId) {
-                return url.replace('[id]', rfqId)
+                return url.replace(':id', rfqId)
             }
             return url
         }
@@ -74,7 +76,7 @@ export function AppSidebar() {
     }
 
     const isLinkDisabled = (url: string) => {
-        if (url.includes('[id]')) {
+        if (url.includes(':id')) {
             const rfqId = getRfqIdFromPath()
             return !rfqId
         }
@@ -102,10 +104,15 @@ export function AppSidebar() {
             <SidebarHeader>
                 <SidebarMenu>
                     <SidebarMenuItem>
-                        <Link href={userType === 'hospital' ? '/dashboard/hospital' : '/dashboard/vendor'} prefetch={false}>
+                        <Link
+                            href={userType === 'hospital' ? '/dashboard/hospital' : '/dashboard/vendor'}
+                            prefetch={false}
+                        >
                             <div className="flex items-center gap-2 px-2 py-4 cursor-pointer hover:opacity-80 transition-opacity">
                                 <div className="h-8 w-8 rounded-lg bg-primary flex items-center justify-center">
-                                    <span className="text-primary-foreground font-bold text-lg">E</span>
+                                    <span className="text-primary-foreground font-bold text-lg">
+                                        E
+                                    </span>
                                 </div>
                                 <span className="text-xl font-bold">EaseMed</span>
                             </div>
@@ -121,69 +128,77 @@ export function AppSidebar() {
                     </SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {menuItems.map((item) => {
-                                const collapsibleId = useId()
-
-                                return (
-                                    <React.Fragment key={item.title}>
-                                        {item.items ? (
-                                            <Collapsible
-                                                defaultOpen={pathname.startsWith(item.url)}
-                                                className="group/collapsible"
-                                            >
-                                                <SidebarMenuItem>
-                                                    <CollapsibleTrigger asChild>
-                                                        <SidebarMenuButton id={collapsibleId}>
-                                                            {item.icon && typeof item.icon === 'function' && <item.icon className="h-4 w-4" />}
-                                                            <span>{item.title}</span>
-                                                            <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
-                                                        </SidebarMenuButton>
-                                                    </CollapsibleTrigger>
-                                                    <CollapsibleContent>
-                                                        <SidebarMenuSub>
-                                                            {item.items.map((subItem) => {
-                                                                const disabled = isLinkDisabled(subItem.url)
-                                                                const resolvedUrl = getResolvedUrl(subItem.url)
-
-                                                                return (
-                                                                    <SidebarMenuSubItem key={subItem.title}>
-                                                                        <SidebarMenuSubButton
-                                                                            asChild={!disabled}
-                                                                            isActive={!disabled && isPathActive(subItem.url)}
-                                                                            className={disabled ? 'opacity-50 cursor-not-allowed pointer-events-none' : ''}
-                                                                        >
-                                                                            {disabled ? (
-                                                                                <div className="flex items-center">
-                                                                                    {'icon' in subItem && subItem.icon && <subItem.icon className="h-3 w-3 mr-2" />}
-                                                                                    <span>{subItem.title}</span>
-                                                                                </div>
-                                                                            ) : (
-                                                                                <Link href={resolvedUrl} prefetch={false}>
-                                                                                    {'icon' in subItem && subItem.icon && <subItem.icon className="h-3 w-3 mr-2" />}
-                                                                                    <span>{subItem.title}</span>
-                                                                                </Link>
-                                                                            )}
-                                                                        </SidebarMenuSubButton>
-                                                                    </SidebarMenuSubItem>
-                                                                )
-                                                            })}
-                                                        </SidebarMenuSub>
-                                                    </CollapsibleContent>
-                                                </SidebarMenuItem>
-                                            </Collapsible>
-                                        ) : (
+                            {menuItems.map((item) => (
+                                <React.Fragment key={item.title}>
+                                    {item.items ? (
+                                        <Collapsible
+                                            defaultOpen={pathname.startsWith(item.url)}
+                                            className="group/collapsible"
+                                        >
                                             <SidebarMenuItem>
-                                                <SidebarMenuButton asChild isActive={pathname === item.url}>
-                                                    <Link href={item.url} prefetch={false}>
-                                                        {item.icon && typeof item.icon === 'function' && <item.icon className="h-4 w-4" />}
+                                                <CollapsibleTrigger asChild>
+                                                    <SidebarMenuButton>
+                                                        {item.icon && typeof item.icon === 'function' && (
+                                                            <item.icon className="h-4 w-4" />
+                                                        )}
                                                         <span>{item.title}</span>
-                                                    </Link>
-                                                </SidebarMenuButton>
+                                                        <ChevronDown className="ml-auto h-4 w-4 transition-transform group-data-[state=open]/collapsible:rotate-180" />
+                                                    </SidebarMenuButton>
+                                                </CollapsibleTrigger>
+                                                <CollapsibleContent>
+                                                    <SidebarMenuSub>
+                                                        {item.items.map((subItem) => {
+                                                            const disabled = isLinkDisabled(subItem.url)
+                                                            const resolvedUrl = getResolvedUrl(subItem.url)
+
+                                                            return (
+                                                                <SidebarMenuSubItem key={subItem.title}>
+                                                                    <SidebarMenuSubButton
+                                                                        asChild={!disabled}
+                                                                        isActive={!disabled && isPathActive(subItem.url)}
+                                                                        className={
+                                                                            disabled
+                                                                                ? 'opacity-50 cursor-not-allowed pointer-events-none'
+                                                                                : ''
+                                                                        }
+                                                                    >
+                                                                        {disabled ? (
+                                                                            <div className="flex items-center">
+                                                                                {'icon' in subItem && subItem.icon && (
+                                                                                    <subItem.icon className="h-3 w-3 mr-2" />
+                                                                                )}
+                                                                                <span>{subItem.title}</span>
+                                                                            </div>
+                                                                        ) : (
+                                                                            <Link href={resolvedUrl} prefetch={false}>
+                                                                                {'icon' in subItem && subItem.icon && (
+                                                                                    <subItem.icon className="h-3 w-3 mr-2" />
+                                                                                )}
+                                                                                <span>{subItem.title}</span>
+                                                                            </Link>
+                                                                        )}
+                                                                    </SidebarMenuSubButton>
+                                                                </SidebarMenuSubItem>
+                                                            )
+                                                        })}
+                                                    </SidebarMenuSub>
+                                                </CollapsibleContent>
                                             </SidebarMenuItem>
-                                        )}
-                                    </React.Fragment>
-                                )
-                            })}
+                                        </Collapsible>
+                                    ) : (
+                                        <SidebarMenuItem>
+                                            <SidebarMenuButton asChild isActive={pathname === item.url}>
+                                                <Link href={item.url} prefetch={false}>
+                                                    {item.icon && typeof item.icon === 'function' && (
+                                                        <item.icon className="h-4 w-4" />
+                                                    )}
+                                                    <span>{item.title}</span>
+                                                </Link>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    )}
+                                </React.Fragment>
+                            ))}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
@@ -201,7 +216,7 @@ export function AppSidebar() {
                                     </Avatar>
                                     <div className="flex flex-col items-start flex-1 text-left">
                                         <span className="text-sm font-medium">{defaultUser.name}</span>
-                                        <span className="text-xs text-muted-foreground truncate max-w-37.5">
+                                        <span className="text-xs text-muted-foreground">
                                             {defaultUser.organization}
                                         </span>
                                     </div>
@@ -209,13 +224,13 @@ export function AppSidebar() {
                                 </SidebarMenuButton>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end" className="w-56">
-                                <DropdownMenuItem onClick={() => router.push(`/dashboard/${userType}/settings`)}>
-                                    <SettingsIcon className="h-4 w-4 mr-2" />
-                                    Settings
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => router.push(`/dashboard/${userType}/notifications`)}>
+                                <DropdownMenuItem>
                                     <Bell className="h-4 w-4 mr-2" />
                                     Notifications
+                                </DropdownMenuItem>
+                                <DropdownMenuItem>
+                                    <SettingsIcon className="h-4 w-4 mr-2" />
+                                    Settings
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                     className="text-destructive"

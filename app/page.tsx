@@ -28,14 +28,48 @@ export default function HomePage() {
   const { user, profile, loading } = useAuth()
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
+  const [redirecting, setRedirecting] = useState(false)
 
   useEffect(() => {
     setMounted(true)
   }, [])
 
   const getDashboardUrl = () => {
-    if (!profile?.role) return '/dashboard'
-    return profile.role === 'hospital' ? '/dashboard/hospital' : '/dashboard/vendor'
+    console.log('=== DEBUG getDashboardUrl ===')
+    console.log('Profile:', profile)
+    console.log('Profile role:', profile?.role)
+    
+    if (!profile?.role) {
+      console.log('❌ No role, returning /dashboard')
+      return '/dashboard'
+    }
+    
+    const hospitalRoles = ['hospital', 'cpo', 'cfo', 'admin']
+    console.log('Hospital roles:', hospitalRoles)
+    console.log('Checking if role is in hospital roles:', hospitalRoles.includes(profile.role))
+    
+    if (hospitalRoles.includes(profile.role)) {
+      console.log('✅ Hospital role detected, returning /dashboard/hospital')
+      return '/dashboard/hospital'
+    }
+    
+    console.log('✅ Vendor role detected, returning /dashboard/vendor')
+    return '/dashboard/vendor'
+  }
+
+  const handleDashboardClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    
+    if (redirecting) return
+    
+    setRedirecting(true)
+    
+    const url = getDashboardUrl()
+    console.log('🚀 Navigating to:', url)
+    
+    router.push(url)
+    
+    setTimeout(() => setRedirecting(false), 2000)
   }
 
   if (!mounted) {
@@ -59,7 +93,7 @@ export default function HomePage() {
               <Button disabled variant="ghost">
                 <Loader2 className="h-4 w-4 animate-spin" />
               </Button>
-            ) : user ? (
+            ) : user && profile ? (
               <>
                 <span className="text-sm text-muted-foreground hidden sm:inline">
                   {profile?.full_name || user.email}
@@ -67,6 +101,22 @@ export default function HomePage() {
                 <Link href={getDashboardUrl()}>
                   <Button>Go to Dashboard</Button>
                 </Link>
+              </>
+            ) : user ? (
+              <>
+                <span className="text-sm text-muted-foreground hidden sm:inline">
+                  {user.email}
+                </span>
+                <Button onClick={handleDashboardClick} disabled={redirecting}>
+                  {redirecting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                      Loading...
+                    </>
+                  ) : (
+                    'Go to Dashboard'
+                  )}
+                </Button>
               </>
             ) : (
               <>
@@ -92,12 +142,30 @@ export default function HomePage() {
             real-time bidding, and compliance verification.
           </p>
           <div className="flex items-center justify-center gap-4 pt-4">
-            {user ? (
+            {user && profile ? (
               <Link href={getDashboardUrl()}>
                 <Button size="lg" className="gap-2">
                   Go to Dashboard <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
+            ) : user ? (
+              <Button 
+                size="lg" 
+                className="gap-2" 
+                onClick={handleDashboardClick}
+                disabled={redirecting}
+              >
+                {redirecting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    Go to Dashboard <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
             ) : (
               <>
                 <Link href="/signup">
@@ -346,12 +414,31 @@ export default function HomePage() {
             <p className="text-lg mb-8 opacity-90">
               Join hundreds of hospitals and vendors already using EaseMed
             </p>
-            {user ? (
+            {user && profile ? (
               <Link href={getDashboardUrl()}>
                 <Button size="lg" variant="secondary" className="gap-2">
                   Go to Dashboard <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
+            ) : user ? (
+              <Button 
+                size="lg" 
+                variant="secondary" 
+                className="gap-2"
+                onClick={handleDashboardClick}
+                disabled={redirecting}
+              >
+                {redirecting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Loading...
+                  </>
+                ) : (
+                  <>
+                    Go to Dashboard <ArrowRight className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
             ) : (
               <Link href="/signup">
                 <Button size="lg" variant="secondary" className="gap-2">

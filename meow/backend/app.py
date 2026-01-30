@@ -223,9 +223,10 @@ def get_medicines_table(document_id):
                 'INN Name',
                 'Dosage',
                 'Form',
+                'Quantity',
+                'Unit of Issue',
                 'Brand Allowed',
-                'Generic Allowed',
-                'Unit of Issue'
+                'Generic Allowed'
             ]
         }), 200
     
@@ -294,7 +295,7 @@ def export_csv(document_id):
         
         # Build CSV content
         csv_content = []
-        headers = ['Item No', 'INN Name', 'Dosage', 'Form', 'Brand Name', 'Brand Allowed', 'Generic Allowed', 'Unit of Issue']
+        headers = ['Item No', 'INN Name', 'Dosage', 'Form', 'Quantity', 'Brand Name', 'Brand Allowed', 'Generic Allowed', 'Unit of Issue']
         csv_content.append(','.join([f'"{h}"' for h in headers]))
         
         for item in line_items:
@@ -303,6 +304,7 @@ def export_csv(document_id):
                 item.get('inn_name', '').replace('"', '""'),
                 item.get('dosage', '').replace('"', '""'),
                 item.get('form', ''),
+                str(item.get('quantity', 0)),
                 item.get('brand_name', '').replace('"', '""'),
                 str(item.get('brand_allowed', 'True')),
                 str(item.get('generic_allowed', 'True')),

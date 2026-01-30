@@ -1,0 +1,1276 @@
+{
+  "metadata": {
+    "contract_type": "purchase_order",
+    "currency": "USD",
+    "evaluation_method": "lowest_price_per_line_item",
+    "issue_date": "21 August 2024",
+    "local_only": false,
+    "quotation_validity_days": 60,
+    "rfq_id": "4200715401",
+    "submission_deadline": "for the Submission \nof Quotation  25th August 2024 17:00 \nIf any doubt exists as to the time"
+  },
+  "lineitems": [
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "200 mg/5 ml",
+      "form": "Suspension",
+      "generic_allowed": false,
+      "inn_name": "Albendazole Oral suspension",
+      "line_item_id": 1,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "400 mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Albendazole Tablet",
+      "line_item_id": 2,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "20 g",
+      "form": "Cream",
+      "generic_allowed": false,
+      "inn_name": "Antihemorroidal cream containing Lidocaine/Fluocinolone Acetonide",
+      "line_item_id": 3,
+      "unit_of_issue": "Tube"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "5 Mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Amlodipine",
+      "line_item_id": 4,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "10mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Amlodipine",
+      "line_item_id": 5,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "20mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Atorvastatin",
+      "line_item_id": 7,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "75 Mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Aspirin",
+      "line_item_id": 8,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "500mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Azithromycin",
+      "line_item_id": 9,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "200mg/5ml",
+      "form": "Syrup",
+      "generic_allowed": false,
+      "inn_name": "Azithromycin Syrup",
+      "line_item_id": 10,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "25%",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Benzyl Benzoate Lotion",
+      "line_item_id": 11,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "5mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Bisacodyl",
+      "line_item_id": 12,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "5 Mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Bisoprolol Fumarate",
+      "line_item_id": 13,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "8 mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Candesartan cilexetil",
+      "line_item_id": 14,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "16 mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Candesartan cilexetil",
+      "line_item_id": 15,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Calcium and minerals Tablet. Pack of 30 Table 35",
+      "line_item_id": 16,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "100 ml",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Calamine Lotion Bottle of",
+      "line_item_id": 17,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "5 Mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Carbimazole",
+      "line_item_id": 18,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "100 Mg/5 Ml",
+      "form": "Suspension",
+      "generic_allowed": false,
+      "inn_name": "Cefixime",
+      "line_item_id": 19,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "400 mg",
+      "form": "Capsule",
+      "generic_allowed": false,
+      "inn_name": "Cefixime",
+      "line_item_id": 20,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "1g",
+      "form": "Vial",
+      "generic_allowed": false,
+      "inn_name": "Ceftriaxone",
+      "line_item_id": 21,
+      "unit_of_issue": "Vial"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "1%",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Chloramphenicol",
+      "line_item_id": 22,
+      "unit_of_issue": "Tube"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "2mg/5ml",
+      "form": "Syrup",
+      "generic_allowed": false,
+      "inn_name": "Chlorpheniramine Syrup",
+      "line_item_id": 23,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "500mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Ciprofloxacin",
+      "line_item_id": 24,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "0.05%",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "clobetasol propionate",
+      "line_item_id": 25,
+      "unit_of_issue": "Tube"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "75 Mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Clopidogrel",
+      "line_item_id": 26,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "1%",
+      "form": "Cream",
+      "generic_allowed": false,
+      "inn_name": "Clotrimazole Skin Cream",
+      "line_item_id": 27,
+      "unit_of_issue": "Tube"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "156 Mg/5ml",
+      "form": "Suspension",
+      "generic_allowed": false,
+      "inn_name": "Amoxicillin + clavulanic acid",
+      "line_item_id": 28,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "457 Mg/5ml",
+      "form": "Suspension",
+      "generic_allowed": false,
+      "inn_name": "Amoxicillin + clavulanic acid suspension.",
+      "line_item_id": 29,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "625 Mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Amoxicillin + clavulanic acid",
+      "line_item_id": 30,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "1g",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Amoxicillin + clavulanic acid",
+      "line_item_id": 31,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "0.5%",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Docusate Sodium",
+      "line_item_id": 32,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "4mg",
+      "form": "Injection",
+      "generic_allowed": false,
+      "inn_name": "Dexamethasone",
+      "line_item_id": 33,
+      "unit_of_issue": "Injection"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "1%",
+      "form": "Gel",
+      "generic_allowed": false,
+      "inn_name": "Diclofenac Sodium",
+      "line_item_id": 34,
+      "unit_of_issue": "Tube"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "50 Mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Diclofenac Sodium",
+      "line_item_id": 35,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "75mg/3ml",
+      "form": "Injection",
+      "generic_allowed": false,
+      "inn_name": "Diclofenac Sodium",
+      "line_item_id": 36,
+      "unit_of_issue": "Injection"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "10mg",
+      "form": "Suppository",
+      "generic_allowed": false,
+      "inn_name": "Domperidone",
+      "line_item_id": 37,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "200mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Doxycycline",
+      "line_item_id": 38,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "200mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Ferrous Sulphate",
+      "line_item_id": 39,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "150mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Fluconazole",
+      "line_item_id": 40,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "5mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Folic Acid",
+      "line_item_id": 41,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "2%",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Fusidic acid",
+      "line_item_id": 42,
+      "unit_of_issue": "Tube"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "20mg/2ml",
+      "form": "Ampule",
+      "generic_allowed": false,
+      "inn_name": "Furosemide",
+      "line_item_id": 43,
+      "unit_of_issue": "Ampule"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "0.3%",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Gentamicin",
+      "line_item_id": 44,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "5mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Glibenclamide",
+      "line_item_id": 45,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "4 mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Glimepiride",
+      "line_item_id": 46,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Suppository",
+      "generic_allowed": false,
+      "inn_name": "Glycerin suppository childern Pack of 5 Suppositories 30",
+      "line_item_id": 47,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "100mg/5ml",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Ibuprofen",
+      "line_item_id": 48,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "400mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Ibuprofen",
+      "line_item_id": 49,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "500.00 mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "hexamine",
+      "line_item_id": 50,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "25 mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Hydrochlorothiazide",
+      "line_item_id": 51,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "100mg",
+      "form": "Vial",
+      "generic_allowed": false,
+      "inn_name": "Hydrocortisone",
+      "line_item_id": 52,
+      "unit_of_issue": "Vial"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "1%",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Hydrocortisone Acetate Ointment",
+      "line_item_id": 53,
+      "unit_of_issue": "Tube"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "10 mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Hyoscine Butylbromide",
+      "line_item_id": 54,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "20 mg",
+      "form": "Ampule",
+      "generic_allowed": false,
+      "inn_name": "Hyoscine Butylbromide",
+      "line_item_id": 55,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "3.35g/5mL",
+      "form": "Syrup",
+      "generic_allowed": false,
+      "inn_name": "Lactulose syrup",
+      "line_item_id": 56,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "100 mcg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Levothyroxine",
+      "line_item_id": 57,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "5mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Chlordiazepoxide",
+      "line_item_id": 58,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "2mg",
+      "form": "Capsule",
+      "generic_allowed": false,
+      "inn_name": "Loperamide",
+      "line_item_id": 59,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "10mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Loratadine",
+      "line_item_id": 60,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "500 Mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Metformin",
+      "line_item_id": 61,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "850 Mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Metformin",
+      "line_item_id": 62,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "10mg",
+      "form": "Injection",
+      "generic_allowed": false,
+      "inn_name": "Metoclopramide",
+      "line_item_id": 63,
+      "unit_of_issue": "Injection"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "125 Mg/5ml",
+      "form": "Suspension",
+      "generic_allowed": false,
+      "inn_name": "Metronidazole",
+      "line_item_id": 64,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "500mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Metronidazole",
+      "line_item_id": 65,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "2%",
+      "form": "Cream",
+      "generic_allowed": false,
+      "inn_name": "Miconazole Vaginal Cream",
+      "line_item_id": 66,
+      "unit_of_issue": "Tube"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "120 ml",
+      "form": "Syrup",
+      "generic_allowed": false,
+      "inn_name": "Multivitamins Children Syrup Bottle",
+      "line_item_id": 67,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Multivitamins",
+      "line_item_id": 68,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "15 ml",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Naphazoline hydrochloride+ Chlorpheniramine maleate eye/Nasal drops",
+      "line_item_id": 69,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "000 IU",
+      "form": "Suspension",
+      "generic_allowed": false,
+      "inn_name": "Nystatin Suspension 100",
+      "line_item_id": 70,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "0.9%",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Normal saline",
+      "line_item_id": 71,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "40 mg",
+      "form": "Vial",
+      "generic_allowed": false,
+      "inn_name": "Omeprazole",
+      "line_item_id": 72,
+      "unit_of_issue": "Vial"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "40 mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Omeprazole",
+      "line_item_id": 73,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "ORS (oral rehydration salt) Pack of 10 sach 50",
+      "line_item_id": 74,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "1000mg /100ml",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Paracetamol",
+      "line_item_id": 75,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "125mg",
+      "form": "Suppository",
+      "generic_allowed": false,
+      "inn_name": "Paracetamol",
+      "line_item_id": 76,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "250mg/5 ml",
+      "form": "Suspension",
+      "generic_allowed": false,
+      "inn_name": "Paracetamol",
+      "line_item_id": 77,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "500 Mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Paracetamol",
+      "line_item_id": 78,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Paracetamol, chlorpheniramine, and phenylephrine",
+      "line_item_id": 79,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "450 mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Paracetamol",
+      "line_item_id": 80,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "5 Mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Prednisolone",
+      "line_item_id": 81,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "500 mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Sodium Valproate",
+      "line_item_id": 82,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "0.1 Mg",
+      "form": "Inhaler",
+      "generic_allowed": false,
+      "inn_name": "Salbutamol",
+      "line_item_id": 83,
+      "unit_of_issue": "Inhaler"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "15 ml",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Simethicone Oral Drops Bottle",
+      "line_item_id": 84,
+      "unit_of_issue": "Bottle"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Sulphur Soap Singel Pack 300",
+      "line_item_id": 85,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "10ml",
+      "form": "Injection",
+      "generic_allowed": false,
+      "inn_name": "Sterile Water For Injection",
+      "line_item_id": 86,
+      "unit_of_issue": "Injection"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "0.4mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Tamsulosin",
+      "line_item_id": 87,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Injection",
+      "generic_allowed": false,
+      "inn_name": "Tetanus antitoxin injection Single",
+      "line_item_id": 88,
+      "unit_of_issue": "Injection"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "4mg/2ml",
+      "form": "Ampule",
+      "generic_allowed": false,
+      "inn_name": "Thiocolchicoside",
+      "line_item_id": 89,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Vitamin B Complex",
+      "line_item_id": 90,
+      "unit_of_issue": "Tablet"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Injection",
+      "generic_allowed": false,
+      "inn_name": "Vitamin B Complex IM Injection Pack of 5 Amp 30",
+      "line_item_id": 91,
+      "unit_of_issue": "Injection"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "500mg",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Vitamin C (Ascorbic Acid)",
+      "line_item_id": 92,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "0.05%",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Xylometazoline",
+      "line_item_id": 93,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "0.1%",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Xylometazoline",
+      "line_item_id": 94,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "75%",
+      "form": "Solution",
+      "generic_allowed": false,
+      "inn_name": "Alcohol solution",
+      "line_item_id": 95,
+      "unit_of_issue": "Solution"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Alcohol medical swabs Pack of 100 10",
+      "line_item_id": 96,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "500 g",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Absorbent Cotton Wool",
+      "line_item_id": 98,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Biohazard Bags 10 L Roll of 10 14",
+      "line_item_id": 99,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "28G",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Blood Lancet for Glucometer",
+      "line_item_id": 100,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "35 g",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Disposable non -woven Bed sheets -30-",
+      "line_item_id": 101,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Elastic Crepe Bandages 10 cm X 4m Roll 500",
+      "line_item_id": 102,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Gauze bandage roll 10 cm cmx 4.5 m Roll 200",
+      "line_item_id": 103,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Infusion giving set,sterile EA 200",
+      "line_item_id": 104,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "22G",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Cannula IV short",
+      "line_item_id": 105,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "20G",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Cannula IV short",
+      "line_item_id": 106,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Nebulizer Masks (Adult size) EA 20",
+      "line_item_id": 107,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Nebulizer Masks (Pediatric size) EA 20",
+      "line_item_id": 108,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Powder",
+      "generic_allowed": false,
+      "inn_name": "Medical Nitrile examination Gloves, Powder free, dipsosable",
+      "line_item_id": 109,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Paraffin Dressing Gauze 10cm X10 Cm Pack of 10 10",
+      "line_item_id": 111,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "10%",
+      "form": "Solution",
+      "generic_allowed": false,
+      "inn_name": "Povidone Iodine",
+      "line_item_id": 112,
+      "unit_of_issue": "Solution"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Pregnancy Rapid Test Kit EA 40",
+      "line_item_id": 113,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Sterile Surgical Blades no 22 Pack of 100 4",
+      "line_item_id": 115,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Surgical gown Reinforced sterile size L EA 35",
+      "line_item_id": 116,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Sterile surgical gloves size 7.5 50 Pair 2",
+      "line_item_id": 117,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "1ml",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Syringes Insulin U -100",
+      "line_item_id": 118,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "3ml",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Syringe,",
+      "line_item_id": 119,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "5ml",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Syringe,",
+      "line_item_id": 120,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "10ml",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Syringe,",
+      "line_item_id": 121,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Wooden Tongue depressor (Sterile) Pack of 100 10",
+      "line_item_id": 122,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "500ml",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Portable cool Box 45 Liter with four",
+      "line_item_id": 123,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Glucometer test strips . Pack of 50 strips 10",
+      "line_item_id": 128,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Professional Diagnostic Led, Medical Penlight. Single unit 4",
+      "line_item_id": 130,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Disposable Otoscope Specula 4mm. Single unit 200",
+      "line_item_id": 132,
+      "unit_of_issue": "Box"
+    },
+    {
+      "brand_allowed": true,
+      "brand_name": "Generic allowed",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "generic_allowed": false,
+      "inn_name": "Vendor Information Sheet.xlsx",
+      "line_item_id": 1,
+      "unit_of_issue": "Box"
+    }
+  ],
+  "vendorrequirements": {
+    "financial_requirements": [
+      "prices_inclusive_vat",
+      {
+        "days": 30,
+        "percentage": 100,
+        "type": "payment_term"
+      }
+    ],
+    "legal_requirements": [],
+    "mandatory_documents": [
+      "quotation_submission_form",
+      "technical_financial_offer"
+    ],
+    "technical_requirements": []
+  },
+  "deliveryrequirements": {
+    "transport_mode": "land"
+  },
+  "evaluationcriteria": {
+    "compliance_factors": [
+      "full_compliance_with_requirements",
+      "acceptance_of_general_conditions",
+      "completeness_of_offer"
+    ],
+    "primary_criteria": "lowest_price_substantially_compliant"
+  },
+  "stats": {
+    "total": 135,
+    "valid": 123,
+    "rejected": 12
+  }
+}

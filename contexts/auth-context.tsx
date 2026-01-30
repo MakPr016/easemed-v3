@@ -32,25 +32,29 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const fetchProfile = async (userId: string) => {
         try {
+            console.log('🔍 Fetching profile for user:', userId)
+            
             const { data, error } = await supabase
                 .from('profiles')
                 .select('*')
                 .eq('id', userId)
-                .maybeSingle() // This is the key change - allows null results
+                .maybeSingle()
 
-            // maybeSingle returns null for no rows, which is fine
             if (error) {
-                console.error('Error fetching profile:', error)
+                console.error('❌ Error fetching profile:', error)
+                setProfile(null) // ✅ Set to null on error
                 return null
             }
 
+            console.log('✅ Profile fetched:', data)
+            setProfile(data) // ✅ ACTUALLY SET THE PROFILE!
             return data
         } catch (error: any) {
-            console.log('Profile fetch failed:', error)
+            console.error('❌ Profile fetch failed:', error)
+            setProfile(null) // ✅ Set to null on error
             return null
         }
     }
-
 
     const refreshProfile = async () => {
         if (user) {
@@ -61,17 +65,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     useEffect(() => {
         // Get initial session
         supabase.auth.getSession().then(({ data: { session } }) => {
+            console.log('📝 Initial session:', session?.user?.email)
             setUser(session?.user ?? null)
             if (session?.user) {
-                fetchProfile(session.user.id)
+                fetchProfile(session.user.id).finally(() => {
+                    setLoading(false)
+                })
+            } else {
+                setLoading(false)
             }
-            setLoading(false)
         })
 
         // Listen for auth changes
         const {
             data: { subscription },
         } = supabase.auth.onAuthStateChange((_event, session) => {
+            console.log('🔄 Auth state changed:', _event, session?.user?.email)
             setUser(session?.user ?? null)
             if (session?.user) {
                 fetchProfile(session.user.id)
@@ -82,7 +91,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         })
 
         return () => subscription.unsubscribe()
-    }, [])
+    }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
     const signOut = async () => {
         await supabase.auth.signOut()

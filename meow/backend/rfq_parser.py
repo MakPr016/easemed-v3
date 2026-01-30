@@ -9,6 +9,7 @@ from typing import Dict, List, Any, Optional
 from datetime import datetime
 import PyPDF2
 
+
 class RFQParser:
     def __init__(self):
         self.text = ""
@@ -191,10 +192,7 @@ class RFQParser:
         """Extract medicines/requirements table (line items) - Enhanced for complex tables"""
         line_items = []
         
-        # Enhanced multi-line pattern that handles table rows split across lines
-        # Matches: Item# Medicine-Name Dosage/Strength Unit BrandName
-        
-        # First, try to find the table section
+        # Find the table section
         table_markers = [
             'Technical Specifications',
             'Schedule of Requirements',
@@ -211,7 +209,6 @@ class RFQParser:
                 break
         
         if table_start == -1:
-            # No table found, return empty
             return line_items
         
         # Extract large section after table start
@@ -226,7 +223,6 @@ class RFQParser:
         """Multi-pass parser for medicine tables with complex formatting"""
         items = []
         
-        # Strategy: Look for lines starting with digits (item numbers)
         lines = text.split('\n')
         
         current_item = None
@@ -235,20 +231,19 @@ class RFQParser:
         for line in lines:
             line_stripped = line.strip()
             
-            # Skip empty lines and headers
             if not line_stripped:
                 continue
             if any(header in line_stripped.lower() for header in [
                 'item no', 'international', 'nonproprietary', 'generic name',
-                'dosage form', 'unit of issue', 'brand name', 'strength per'
+                'dosage form', 'unit of issue', 'brand name', 'strength per', 'total qty'
             ]):
                 continue
             
-            # Check if line starts with a number (potential item number)
-            item_num_match = re.match(r'^(\d{1,3})\s+(.+)$', line_stripped)
+            # Enhanced pattern to capture: "1 Albendazole... 30" (item# + description + quantity)
+            item_num_match = re.match(r'^(\d{1,3})\s+(.+?)(?:\s+(\d{1,5}))?\s*$', line_stripped)
             
             if item_num_match:
-                # Save previous item if exists
+                # Save previous item
                 if current_item and item_buffer:
                     parsed = self._parse_item_buffer(current_item, item_buffer)
                     if parsed:
@@ -257,21 +252,24 @@ class RFQParser:
                 # Start new item
                 item_num = int(item_num_match.group(1))
                 rest_of_line = item_num_match.group(2).strip()
+                quantity_at_end = item_num_match.group(3)
                 
                 current_item = item_num
                 item_buffer = [rest_of_line]
+                
+                # If quantity found at end of line, add it to buffer
+                if quantity_at_end:
+                    item_buffer.append(f"Qty {quantity_at_end}")
             
             elif current_item is not None:
-                # Continuation of current item (multi-line entry)
                 item_buffer.append(line_stripped)
             
-            # Stop if we've moved past the medicine table (detected by finding unrelated content)
             if len(items) > 150 and any(marker in line_stripped.lower() for marker in [
                 'payment terms', 'evaluation method', 'annex 2', 'vendor requirements'
             ]):
                 break
         
-        # Don't forget the last item
+        # Last item
         if current_item and item_buffer:
             parsed = self._parse_item_buffer(current_item, item_buffer)
             if parsed:
@@ -287,10 +285,23 @@ class RFQParser:
         # Combine all buffer lines
         combined = ' '.join(buffer)
         
-        # Extract components
-        # Pattern: MedicineName DosageInfo UnitType BrandName
+        # Extract quantity - look for standalone numbers at the end or after "Qty"
+        quantity = 0
+        qty_patterns = [
+            r'(?:Qty|Quantity)[:\s]+(\d+)',  # Explicit "Qty: 30" or "Quantity: 100"
+            r'\s+(\d{1,5})$',  # Number at the end of line (common in tables)
+            r'(?:Total|Req)[:\s]+(\d+)',  # "Total: 50" or "Req: 100"
+        ]
         
-        # Try to identify dosage/strength patterns
+        for pattern in qty_patterns:
+            qty_match = re.search(pattern, combined, re.IGNORECASE)
+            if qty_match:
+                quantity = int(qty_match.group(1))
+                # Remove quantity from combined text to avoid confusion
+                combined = combined[:qty_match.start()] + combined[qty_match.end():]
+                break
+        
+        # Extract dosage/strength patterns
         dosage_patterns = [
             r'(\d+\.?\d*\s*(?:mg|ml|mcg|IU|U|g|%|units?)(?:\s*/\s*\d+\.?\d*\s*(?:mg|ml|mcg|IU|U|g|units?))?)',
             r'(\d+\.?\d*\s*(?:mg|ml|mcg|IU|U))',
@@ -301,13 +312,12 @@ class RFQParser:
         for pattern in dosage_patterns:
             matches = list(re.finditer(pattern, combined, re.IGNORECASE))
             if matches:
-                # Take the first significant dosage match
                 dosage_match = matches[0]
                 dosage_info = dosage_match.group(0).strip()
                 break
         
         # Extract unit of issue (Box, Bottle, Vial, Ampule, Tablet, etc.)
-        unit_pattern = r'\b(box|bottle|vial|ampule|tablet|injection|inhaler|pen|tube|patch|sachet|spray|solution)\b'
+        unit_pattern = r'\b(box|bottle|vial|ampule|tablet|injection|inhaler|pen|tube|patch|sachet|spray|solution|pack)\b'
         unit_match = re.search(unit_pattern, combined, re.IGNORECASE)
         unit_of_issue = unit_match.group(1).capitalize() if unit_match else 'Box'
         
@@ -315,15 +325,14 @@ class RFQParser:
         if dosage_match:
             name_part = combined[:dosage_match.start()].strip()
         else:
-            # No dosage found, split by common keywords
             name_part = re.split(r'\s+(box|bottle|vial|ampule|tablet)\s+', combined, 1, re.IGNORECASE)[0].strip()
         
-        # Clean up name (remove numbers, extra spaces)
+        # Clean up name
         name_cleaned = re.sub(r'\s+', ' ', name_part).strip()
         if not name_cleaned or len(name_cleaned) < 3:
-            name_cleaned = combined[:50]  # Fallback
+            name_cleaned = combined[:50]
         
-        # Extract brand name (usually after unit or at end, contains "or any other")
+        # Extract brand name
         brand_pattern = r'([A-Z][A-Za-z\-\s]+?)(?:\s+or\s+any\s+other|$)'
         brand_matches = list(re.finditer(brand_pattern, combined))
         brand_name = brand_matches[-1].group(1).strip() if brand_matches else 'Generic allowed'
@@ -335,6 +344,7 @@ class RFQParser:
             'dosage': dosage_info,
             'form': self._extract_form(combined),
             'unit_of_issue': unit_of_issue,
+            'quantity': quantity,
             'brand_name': brand_name,
             'brand_allowed': True,
             'generic_allowed': 'alternative' in combined.lower() or 'generic' in combined.lower()
@@ -366,7 +376,7 @@ class RFQParser:
             if re.search(pattern, text, re.IGNORECASE):
                 return form_name.capitalize()
         
-        return 'Tablet'  # Default
+        return 'Tablet'
     
     def _extract_delivery_requirements(self) -> Dict[str, Any]:
         """Extract delivery terms, location, packaging, etc."""
@@ -453,7 +463,7 @@ class RFQParser:
     def to_csv_format(self) -> tuple:
         """Convert line items to CSV-compatible format"""
         csv_data = []
-        headers = ['Item No', 'INN Name', 'Dosage', 'Form', 'Brand Name', 'Unit of Issue']
+        headers = ['Item No', 'INN Name', 'Dosage', 'Form', 'Quantity', 'Unit of Issue', 'Brand Name']
         
         for item in self.line_items:
             csv_data.append([
@@ -461,8 +471,9 @@ class RFQParser:
                 item.get('inn_name', ''),
                 item.get('dosage', ''),
                 item.get('form', ''),
-                item.get('brand_allowed', ''),
-                item.get('unit_of_issue', '')
+                item.get('quantity', 0),
+                item.get('unit_of_issue', ''),
+                item.get('brand_name', '')
             ])
         
         return headers, csv_data

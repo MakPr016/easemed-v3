@@ -1,20 +1,23 @@
 'use client'
 
-import { useState, use } from 'react'
+import { useState, use, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
 import {
-    CheckCircle2,
-    XCircle,
     Edit2,
     Save,
     Trash2,
     Plus,
     ArrowRight,
-    AlertCircle
+    AlertCircle,
+    Loader2,
+    ArrowLeft,
+    CheckCircle2,
+    ChevronLeft,
+    ChevronRight
 } from 'lucide-react'
 import {
     Table,
@@ -24,132 +27,253 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from '@/components/ui/pagination'
+import { createClient } from '@/lib/supabase/client'
+import Link from 'next/link'
 
 interface LineItem {
+    id: string
     line_item_id: number
     inn_name: string
     brand_name: string
     dosage: string
     form: string
     unit_of_issue: string
-    quantity?: number
-    generic_allowed: boolean
-    brand_allowed: boolean
+    quantity: number
 }
+
+const ITEMS_PER_PAGE = 10
 
 export default function RFQReviewPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params)
     const router = useRouter()
-    const [editingId, setEditingId] = useState<number | null>(null)
-    const [loading, setLoading] = useState(false)
+    const supabase = createClient()
 
-    // Mock parsed data - in real app, fetch based on resolvedParams.id
-    const [rfqInfo] = useState({
-        id: resolvedParams.id,
-        title: 'Medical Supplies Q1 2026',
-        description: 'Quarterly medical supplies procurement',
-        deadline: '2026-02-15T23:59',
-        status: 'draft',
-        uploaded_at: new Date().toISOString(),
-    })
+    const [editingId, setEditingId] = useState<string | null>(null)
+    const [loading, setLoading] = useState(true)
+    const [saving, setSaving] = useState(false)
+    const [rfqInfo, setRfqInfo] = useState<any>(null)
+    const [lineItems, setLineItems] = useState<LineItem[]>([])
+    const [currentPage, setCurrentPage] = useState(1)
 
-    const [lineItems, setLineItems] = useState<LineItem[]>([
-        {
-            line_item_id: 1,
-            inn_name: 'Acetylsalicylic acid',
-            brand_name: 'Aspirin',
-            dosage: '81 mg',
-            form: 'Tablet',
-            unit_of_issue: 'Tablet',
-            quantity: 1000,
-            generic_allowed: true,
-            brand_allowed: true,
-        },
-        {
-            line_item_id: 2,
-            inn_name: 'Acetaminophen',
-            brand_name: 'Panadol Syrup',
-            dosage: '100 ml',
-            form: 'Syrup',
-            unit_of_issue: 'Bottle',
-            quantity: 500,
-            generic_allowed: true,
-            brand_allowed: true,
-        },
-        {
-            line_item_id: 3,
-            inn_name: 'Adrenalin inj',
-            brand_name: 'Ampule Adre',
-            dosage: '1mg/ 1ml',
-            form: 'Injection',
-            unit_of_issue: 'Injection',
-            quantity: 200,
-            generic_allowed: true,
-            brand_allowed: true,
-        },
-    ])
+    useEffect(() => {
+        fetchRFQData()
+    }, [resolvedParams.id])
 
-    const [deliveryRequirements] = useState({
-        min_expiry_months: 12,
-        packaging: 'standard',
-        transport_mode: 'land',
-    })
-
-    const handleEdit = (id: number) => {
-        setEditingId(id)
-    }
-
-    const handleSave = (id: number) => {
-        setEditingId(null)
-        // TODO: Save changes
-    }
-
-    const handleDelete = (id: number) => {
-        setLineItems(lineItems.filter(item => item.line_item_id !== id))
-    }
-
-    const handleChange = (id: number, field: keyof LineItem, value: any) => {
-        setLineItems(lineItems.map(item =>
-            item.line_item_id === id ? { ...item, [field]: value } : item
-        ))
-    }
-
-    const handleAddItem = () => {
-        const newId = Math.max(...lineItems.map(i => i.line_item_id), 0) + 1
-        setLineItems([...lineItems, {
-            line_item_id: newId,
-            inn_name: '',
-            brand_name: '',
-            dosage: '',
-            form: '',
-            unit_of_issue: '',
-            quantity: 0,
-            generic_allowed: true,
-            brand_allowed: true,
-        }])
-        setEditingId(newId)
-    }
-
-    const handleProceed = async () => {
-        setLoading(true)
+    const fetchRFQData = async () => {
         try {
-            // TODO: Save confirmed data and proceed to vendor matching
-            await new Promise(resolve => setTimeout(resolve, 1000))
-            router.push(`/dashboard/hospital/rfq/${resolvedParams.id}/vendors`)
+            const { data: rfqData, error: rfqError } = await supabase
+                .from('rfqs')
+                .select('*')
+                .eq('id', resolvedParams.id)
+                .single()
+
+            if (rfqError) throw rfqError
+
+            const { data: itemsData, error: itemsError } = await supabase
+                .from('rfq_line_items')
+                .select('*')
+                .eq('rfq_id', resolvedParams.id)
+                .order('line_item_id')
+
+            if (itemsError) throw itemsError
+
+            setRfqInfo(rfqData)
+            setLineItems(itemsData || [])
         } catch (error) {
-            console.error('Error:', error)
+            console.error('Error fetching RFQ:', error)
         } finally {
             setLoading(false)
         }
     }
 
+    const handleEdit = (id: string) => {
+        setEditingId(id)
+    }
+
+    const handleSave = async (id: string) => {
+        const item = lineItems.find(i => i.id === id)
+        if (!item) return
+
+        try {
+            setSaving(true)
+            const { error } = await supabase
+                .from('rfq_line_items')
+                .update({
+                    inn_name: item.inn_name,
+                    brand_name: item.brand_name,
+                    dosage: item.dosage,
+                    form: item.form,
+                    unit_of_issue: item.unit_of_issue,
+                    quantity: item.quantity,
+                })
+                .eq('id', id)
+
+            if (error) throw error
+
+            console.log('✅ Item saved successfully')
+            setEditingId(null)
+        } catch (error) {
+            console.error('Error saving item:', error)
+            alert('Failed to save changes')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const handleDelete = async (id: string) => {
+        if (!confirm('Are you sure you want to delete this item?')) return
+
+        try {
+            setSaving(true)
+            const { error } = await supabase
+                .from('rfq_line_items')
+                .delete()
+                .eq('id', id)
+
+            if (error) throw error
+
+            console.log('✅ Item deleted successfully')
+
+            // Update local state
+            const updatedItems = lineItems.filter(item => item.id !== id)
+            setLineItems(updatedItems)
+
+            // Adjust current page if needed
+            const newTotalPages = Math.ceil(updatedItems.length / ITEMS_PER_PAGE)
+            if (currentPage > newTotalPages && newTotalPages > 0) {
+                setCurrentPage(newTotalPages)
+            }
+
+        } catch (error) {
+            console.error('Error deleting item:', error)
+            alert('Failed to delete item')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const handleChange = (id: string, field: keyof LineItem, value: any) => {
+        setLineItems(lineItems.map(item =>
+            item.id === id ? { ...item, [field]: value } : item
+        ))
+    }
+
+    const handleAddItem = async () => {
+        const newLineItemId = Math.max(...lineItems.map(i => i.line_item_id), 0) + 1
+
+        try {
+            setSaving(true)
+            const { data, error } = await supabase
+                .from('rfq_line_items')
+                .insert({
+                    rfq_id: resolvedParams.id,
+                    line_item_id: newLineItemId,
+                    inn_name: '',
+                    brand_name: '',
+                    dosage: '',
+                    form: '',
+                    unit_of_issue: '',
+                    quantity: 0,
+                })
+                .select()
+                .single()
+
+            if (error) throw error
+
+            if (data) {
+                console.log('✅ Item added successfully')
+                setLineItems([...lineItems, data])
+                setEditingId(data.id)
+                // Navigate to last page if new item is added
+                const totalPages = Math.ceil((lineItems.length + 1) / ITEMS_PER_PAGE)
+                setCurrentPage(totalPages)
+            }
+        } catch (error) {
+            console.error('Error adding item:', error)
+            alert('Failed to add item')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    const handleProceed = async () => {
+        setSaving(true)
+        try {
+            const { error } = await supabase
+                .from('rfqs')
+                .update({ status: 'published' })
+                .eq('id', resolvedParams.id)
+
+            if (error) throw error
+
+            console.log('✅ RFQ published successfully')
+            router.push(`/dashboard/hospital/rfq/${resolvedParams.id}/vendors`)
+        } catch (error) {
+            console.error('Error publishing RFQ:', error)
+            alert('Failed to publish RFQ')
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    // Pagination calculations
+    const totalPages = Math.ceil(lineItems.length / ITEMS_PER_PAGE)
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+    const endIndex = startIndex + ITEMS_PER_PAGE
+    const currentItems = lineItems.slice(startIndex, endIndex)
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page)
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center min-h-screen">
+                <Loader2 className="h-8 w-8 animate-spin" />
+            </div>
+        )
+    }
+
+    if (!rfqInfo) {
+        return (
+            <div className="space-y-6">
+                <Card>
+                    <CardContent className="p-12 text-center">
+                        <h3 className="text-lg font-semibold mb-2">RFQ Not Found</h3>
+                        <Link href="/dashboard/hospital/rfq/upload">
+                            <Button>Back to Upload</Button>
+                        </Link>
+                    </CardContent>
+                </Card>
+            </div>
+        )
+    }
+
+    const parsingStats = rfqInfo.metadata?.parsing_stats
+
     return (
         <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Review RFQ</h1>
-                <p className="text-muted-foreground">
-                    Review and edit the extracted requirements before sending to vendors
-                </p>
+            <div className="flex items-center gap-4">
+                <Link href="/dashboard/hospital/rfq/upload">
+                    <Button variant="ghost" size="icon">
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                </Link>
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Review RFQ</h1>
+                    <p className="text-muted-foreground">
+                        Review and edit the extracted requirements before sending to vendors
+                    </p>
+                </div>
             </div>
 
             <Card>
@@ -164,12 +288,12 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">RFQ ID</p>
-                            <p className="font-medium">#{rfqInfo.id}</p>
+                            <p className="font-medium">{rfqInfo.metadata?.rfq_id || 'N/A'}</p>
                         </div>
                         <div>
                             <p className="text-sm text-muted-foreground">Deadline</p>
                             <p className="font-medium">
-                                {new Date(rfqInfo.deadline).toLocaleString()}
+                                {rfqInfo.deadline ? new Date(rfqInfo.deadline).toLocaleString() : 'N/A'}
                             </p>
                         </div>
                         <div>
@@ -180,209 +304,264 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
                 </CardContent>
             </Card>
 
+            {parsingStats && (
+                <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2">
+                            <CheckCircle2 className="h-5 w-5 text-green-600" />
+                            Parsing Summary
+                        </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <div className="grid grid-cols-3 gap-4">
+                            <div className="text-center">
+                                <p className="text-sm text-muted-foreground mb-1">Total Extracted</p>
+                                <p className="text-3xl font-bold text-blue-600">
+                                    {parsingStats.total || 0}
+                                </p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-sm text-muted-foreground mb-1">Valid Items</p>
+                                <p className="text-3xl font-bold text-green-600">
+                                    {parsingStats.valid || lineItems.length}
+                                </p>
+                            </div>
+                            <div className="text-center">
+                                <p className="text-sm text-muted-foreground mb-1">Filtered Out</p>
+                                <p className="text-3xl font-bold text-orange-600">
+                                    {parsingStats.rejected || 0}
+                                </p>
+                            </div>
+                        </div>
+                    </CardContent>
+                </Card>
+            )}
+
             <Card>
                 <CardHeader>
                     <div className="flex items-center justify-between">
                         <div>
                             <CardTitle>Line Items ({lineItems.length})</CardTitle>
                             <CardDescription>
-                                Review each item and make corrections if needed
+                                Showing {startIndex + 1}-{Math.min(endIndex, lineItems.length)} of {lineItems.length} items
                             </CardDescription>
                         </div>
-                        <Button onClick={handleAddItem} variant="outline" size="sm" className="gap-2">
+                        <Button
+                            onClick={handleAddItem}
+                            variant="outline"
+                            size="sm"
+                            className="gap-2"
+                            disabled={saving}
+                        >
                             <Plus className="h-4 w-4" />
                             Add Item
                         </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="border rounded-lg">
+                    <div className="border rounded-lg overflow-x-auto">
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="w-12">#</TableHead>
-                                    <TableHead>Generic Name</TableHead>
-                                    <TableHead>Brand Name</TableHead>
-                                    <TableHead>Dosage</TableHead>
-                                    <TableHead>Form</TableHead>
-                                    <TableHead>Unit</TableHead>
-                                    <TableHead>Quantity</TableHead>
-                                    <TableHead>Options</TableHead>
-                                    <TableHead className="w-24">Actions</TableHead>
+                                    <TableHead className="w-16">#</TableHead>
+                                    <TableHead className="min-w-50">Generic Name</TableHead>
+                                    <TableHead className="min-w-50">Brand Name</TableHead>
+                                    <TableHead className="min-w-30">Dosage</TableHead>
+                                    <TableHead className="min-w-25">Form</TableHead>
+                                    <TableHead className="min-w-25">Unit</TableHead>
+                                    <TableHead className="min-w-25">Quantity</TableHead>
+                                    <TableHead className="w-32 sticky right-0 bg-background">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {lineItems.map((item) => (
-                                    <TableRow key={item.line_item_id}>
-                                        <TableCell className="font-medium">
-                                            {item.line_item_id}
-                                        </TableCell>
-                                        <TableCell>
-                                            {editingId === item.line_item_id ? (
-                                                <Input
-                                                    value={item.inn_name}
-                                                    onChange={(e) => handleChange(item.line_item_id, 'inn_name', e.target.value)}
-                                                    className="h-8"
-                                                />
-                                            ) : (
-                                                item.inn_name
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {editingId === item.line_item_id ? (
-                                                <Input
-                                                    value={item.brand_name}
-                                                    onChange={(e) => handleChange(item.line_item_id, 'brand_name', e.target.value)}
-                                                    className="h-8"
-                                                />
-                                            ) : (
-                                                item.brand_name
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {editingId === item.line_item_id ? (
-                                                <Input
-                                                    value={item.dosage}
-                                                    onChange={(e) => handleChange(item.line_item_id, 'dosage', e.target.value)}
-                                                    className="h-8"
-                                                />
-                                            ) : (
-                                                item.dosage
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {editingId === item.line_item_id ? (
-                                                <Input
-                                                    value={item.form}
-                                                    onChange={(e) => handleChange(item.line_item_id, 'form', e.target.value)}
-                                                    className="h-8"
-                                                />
-                                            ) : (
-                                                item.form
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {editingId === item.line_item_id ? (
-                                                <Input
-                                                    value={item.unit_of_issue}
-                                                    onChange={(e) => handleChange(item.line_item_id, 'unit_of_issue', e.target.value)}
-                                                    className="h-8"
-                                                />
-                                            ) : (
-                                                item.unit_of_issue
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {editingId === item.line_item_id ? (
-                                                <Input
-                                                    type="number"
-                                                    value={item.quantity || ''}
-                                                    onChange={(e) => handleChange(item.line_item_id, 'quantity', parseInt(e.target.value))}
-                                                    className="h-8 w-24"
-                                                />
-                                            ) : (
-                                                item.quantity
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex gap-1">
-                                                {item.generic_allowed && (
-                                                    <Badge variant="secondary" className="text-xs">Generic</Badge>
-                                                )}
-                                                {item.brand_allowed && (
-                                                    <Badge variant="secondary" className="text-xs">Brand</Badge>
-                                                )}
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-1">
-                                                {editingId === item.line_item_id ? (
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="h-8 w-8"
-                                                        onClick={() => handleSave(item.line_item_id)}
-                                                    >
-                                                        <Save className="h-4 w-4" />
-                                                    </Button>
-                                                ) : (
-                                                    <Button
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="h-8 w-8"
-                                                        onClick={() => handleEdit(item.line_item_id)}
-                                                    >
-                                                        <Edit2 className="h-4 w-4" />
-                                                    </Button>
-                                                )}
-                                                <Button
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    className="h-8 w-8 text-destructive"
-                                                    onClick={() => handleDelete(item.line_item_id)}
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                </Button>
-                                            </div>
+                                {currentItems.length === 0 ? (
+                                    <TableRow>
+                                        <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                                            No line items found
                                         </TableCell>
                                     </TableRow>
-                                ))}
+                                ) : (
+                                    currentItems.map((item) => (
+                                        <TableRow key={item.id}>
+                                            <TableCell className="font-medium">
+                                                {item.line_item_id}
+                                            </TableCell>
+                                            <TableCell>
+                                                {editingId === item.id ? (
+                                                    <Input
+                                                        value={item.inn_name}
+                                                        onChange={(e) => handleChange(item.id, 'inn_name', e.target.value)}
+                                                        className="h-8 min-w-45"
+                                                    />
+                                                ) : (
+                                                    <div className="max-w-50 truncate" title={item.inn_name}>
+                                                        {item.inn_name}
+                                                    </div>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                {editingId === item.id ? (
+                                                    <Input
+                                                        value={item.brand_name}
+                                                        onChange={(e) => handleChange(item.id, 'brand_name', e.target.value)}
+                                                        className="h-8 min-w-32.5"
+                                                    />
+                                                ) : (
+                                                    <div className="max-w-37.5 truncate" title={item.brand_name}>
+                                                        {item.brand_name}
+                                                    </div>
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                {editingId === item.id ? (
+                                                    <Input
+                                                        value={item.dosage}
+                                                        onChange={(e) => handleChange(item.id, 'dosage', e.target.value)}
+                                                        className="h-8 min-w-25"
+                                                    />
+                                                ) : (
+                                                    item.dosage
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                {editingId === item.id ? (
+                                                    <Input
+                                                        value={item.form}
+                                                        onChange={(e) => handleChange(item.id, 'form', e.target.value)}
+                                                        className="h-8 min-w-20"
+                                                    />
+                                                ) : (
+                                                    item.form
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                {editingId === item.id ? (
+                                                    <Input
+                                                        value={item.unit_of_issue}
+                                                        onChange={(e) => handleChange(item.id, 'unit_of_issue', e.target.value)}
+                                                        className="h-8 min-w-20"
+                                                    />
+                                                ) : (
+                                                    item.unit_of_issue
+                                                )}
+                                            </TableCell>
+                                            <TableCell>
+                                                {editingId === item.id ? (
+                                                    <Input
+                                                        type="number"
+                                                        value={item.quantity || 0}
+                                                        onChange={(e) => handleChange(item.id, 'quantity', parseInt(e.target.value) || 0)}
+                                                        className="h-8 w-20"
+                                                    />
+                                                ) : (
+                                                    item.quantity || 0
+                                                )}
+                                            </TableCell>
+                                            <TableCell className="sticky right-0 bg-background">
+                                                <div className="flex items-center gap-1">
+                                                    {editingId === item.id ? (
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-8 w-8"
+                                                            onClick={() => handleSave(item.id)}
+                                                            disabled={saving}
+                                                        >
+                                                            {saving ? (
+                                                                <Loader2 className="h-4 w-4 animate-spin" />
+                                                            ) : (
+                                                                <Save className="h-4 w-4" />
+                                                            )}
+                                                        </Button>
+                                                    ) : (
+                                                        <Button
+                                                            size="icon"
+                                                            variant="ghost"
+                                                            className="h-8 w-8"
+                                                            onClick={() => handleEdit(item.id)}
+                                                            disabled={saving}
+                                                        >
+                                                            <Edit2 className="h-4 w-4" />
+                                                        </Button>
+                                                    )}
+                                                    <Button
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="h-8 w-8 text-destructive"
+                                                        onClick={() => handleDelete(item.id)}
+                                                        disabled={saving}
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </Button>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
                             </TableBody>
                         </Table>
                     </div>
+
+                    {totalPages > 1 && (
+                        <div className="flex items-center justify-center gap-2 mt-4">
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                                disabled={currentPage === 1}
+                            >
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                Previous
+                            </Button>
+
+                            <div className="flex items-center gap-1">
+                                {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                    <Button
+                                        key={page}
+                                        variant={currentPage === page ? 'default' : 'outline'}
+                                        size="sm"
+                                        onClick={() => handlePageChange(page)}
+                                        className="w-8 h-8"
+                                    >
+                                        {page}
+                                    </Button>
+                                ))}
+                            </div>
+
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                                disabled={currentPage === totalPages}
+                            >
+                                Next
+                                <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>Delivery Requirements</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <div className="grid grid-cols-3 gap-4">
-                        <div>
-                            <p className="text-sm text-muted-foreground">Minimum Expiry</p>
-                            <p className="font-medium">{deliveryRequirements.min_expiry_months} months</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Packaging</p>
-                            <p className="font-medium capitalize">{deliveryRequirements.packaging}</p>
-                        </div>
-                        <div>
-                            <p className="text-sm text-muted-foreground">Transport Mode</p>
-                            <p className="font-medium capitalize">{deliveryRequirements.transport_mode}</p>
-                        </div>
-                    </div>
-                </CardContent>
-            </Card>
-
-            <div className="bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-4">
-                <div className="flex gap-3">
-                    <AlertCircle className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
-                    <div>
-                        <p className="font-medium text-blue-900 dark:text-blue-100">
-                            Ready to proceed?
-                        </p>
-                        <p className="text-sm text-blue-700 dark:text-blue-300 mt-1">
-                            Once you proceed, we'll match suitable vendors for each requirement and send them the RFQ.
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex items-center justify-between">
-                <Button
-                    variant="outline"
-                    onClick={() => router.back()}
-                >
-                    Back to Upload
-                </Button>
+            <div className="flex justify-end gap-3">
+                <Link href="/dashboard/hospital/rfq/upload">
+                    <Button variant="outline">Cancel</Button>
+                </Link>
                 <Button
                     onClick={handleProceed}
-                    disabled={loading || lineItems.length === 0}
                     className="gap-2"
+                    disabled={saving || lineItems.length === 0}
                 >
-                    {loading ? 'Processing...' : 'Find Vendors'}
-                    <ArrowRight className="h-4 w-4" />
+                    {saving ? (
+                        <>
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                            Publishing...
+                        </>
+                    ) : (
+                        <>
+                            Proceed to Select Vendors
+                            <ArrowRight className="h-4 w-4" />
+                        </>
+                    )}
                 </Button>
             </div>
         </div>

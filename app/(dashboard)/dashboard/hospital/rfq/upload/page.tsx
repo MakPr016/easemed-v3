@@ -1,245 +1,286 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Upload, FileText, X, CheckCircle2, Loader2 } from 'lucide-react'
+import { Label } from '@/components/ui/label'
+import { Upload, FileText, Loader2, AlertCircle, Calendar } from 'lucide-react'
+import { Alert, AlertDescription } from '@/components/ui/alert'
+
+const FASTAPI_URL = process.env.NEXT_PUBLIC_FASTAPI_URL || 'http://localhost:5001'
 
 export default function RFQUploadPage() {
-    const router = useRouter()
-    const [file, setFile] = useState<File | null>(null)
-    const [dragActive, setDragActive] = useState(false)
-    const [uploading, setUploading] = useState(false)
-    const [rfqData, setRfqData] = useState({
-        title: '',
-        description: '',
-        deadline: '',
-    })
+  const router = useRouter()
+  const [file, setFile] = useState<File | null>(null)
+  const [title, setTitle] = useState('')
+  const [deadline, setDeadline] = useState('')
+  const [uploading, setUploading] = useState(false)
+  const [parsing, setParsing] = useState(false)
+  const [error, setError] = useState('')
+  const [uploadProgress, setUploadProgress] = useState(0)
 
-    const handleDrag = useCallback((e: React.DragEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        if (e.type === 'dragenter' || e.type === 'dragover') {
-            setDragActive(true)
-        } else if (e.type === 'dragleave') {
-            setDragActive(false)
-        }
-    }, [])
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const selectedFile = e.target.files[0]
+      if (selectedFile.type !== 'application/pdf') {
+        setError('Please select a PDF file')
+        return
+      }
+      setFile(selectedFile)
+      setError('')
+      
+      // Auto-populate title from filename if empty
+      if (!title) {
+        const fileName = selectedFile.name.replace('.pdf', '')
+        setTitle(fileName)
+      }
+    }
+  }
 
-    const handleDrop = useCallback((e: React.DragEvent) => {
-        e.preventDefault()
-        e.stopPropagation()
-        setDragActive(false)
-
-        if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            setFile(e.dataTransfer.files[0])
-        }
-    }, [])
-
-    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        if (e.target.files && e.target.files[0]) {
-            setFile(e.target.files[0])
-        }
+  const handleUpload = async () => {
+    if (!file) {
+      setError('Please select a file')
+      return
     }
 
-    const handleRemoveFile = () => {
-        setFile(null)
+    if (!title.trim()) {
+      setError('Please enter a title')
+      return
     }
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-        if (!file) return
-
-        setUploading(true)
-
-        try {
-            // TODO: Upload file and call ML parsing API
-            const formData = new FormData()
-            formData.append('file', file)
-            formData.append('title', rfqData.title)
-            formData.append('description', rfqData.description)
-            formData.append('deadline', rfqData.deadline)
-
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000))
-
-            // Mock RFQ ID after successful upload
-            const rfqId = 'rfq-' + Date.now()
-
-            // Navigate to review page
-            router.push(`/dashboard/hospital/rfq/${rfqId}/review`)
-        } catch (error) {
-            console.error('Upload error:', error)
-        } finally {
-            setUploading(false)
-        }
+    if (!deadline) {
+      setError('Please select a deadline')
+      return
     }
 
-    const formatFileSize = (bytes: number) => {
-        if (bytes === 0) return '0 Bytes'
-        const k = 1024
-        const sizes = ['Bytes', 'KB', 'MB', 'GB']
-        const i = Math.floor(Math.log(bytes) / Math.log(k))
-        return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i]
-    }
+    try {
+      setUploading(true)
+      setError('')
+      setUploadProgress(0)
 
-    return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Upload RFQ</h1>
-                <p className="text-muted-foreground">
-                    Upload your RFQ document and our AI will extract all requirements
-                </p>
+      // Step 1: Upload to FastAPI
+      const formData = new FormData()
+      formData.append('file', file)
+
+      setUploadProgress(20)
+
+      const uploadResponse = await fetch(`${FASTAPI_URL}/api/upload`, {
+        method: 'POST',
+        body: formData,
+      })
+
+      if (!uploadResponse.ok) {
+        throw new Error('Upload failed')
+      }
+
+      const uploadData = await uploadResponse.json()
+      const documentId = uploadData.document_id
+
+      setUploadProgress(40)
+
+      // Step 2: Parse the PDF
+      setParsing(true)
+      const parseResponse = await fetch(`${FASTAPI_URL}/api/parse/${documentId}`, {
+        method: 'POST',
+      })
+
+      if (!parseResponse.ok) {
+        throw new Error('Parsing failed')
+      }
+
+      const parseData = await parseResponse.json()
+      setUploadProgress(60)
+
+      // Step 3: Save to database with title and deadline
+      const saveResponse = await fetch('/api/rfq/save', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          documentId,
+          title,
+          deadline,
+          data: parseData.data,
+        }),
+      })
+
+      if (!saveResponse.ok) {
+        throw new Error('Failed to save RFQ')
+      }
+
+      const saveData = await saveResponse.json()
+      setUploadProgress(100)
+
+      // Redirect to review page
+      setTimeout(() => {
+        router.push(`/dashboard/hospital/rfq/${documentId}/review`)
+      }, 500)
+
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong')
+      setUploadProgress(0)
+    } finally {
+      setUploading(false)
+      setParsing(false)
+    }
+  }
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">Upload RFQ Document</h1>
+        <p className="text-muted-foreground">
+          Upload a PDF RFQ to extract requirements and send to vendors
+        </p>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>RFQ Information</CardTitle>
+          <CardDescription>Provide the basic details for this RFQ</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Title and Deadline Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="title">
+                RFQ Title <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="title"
+                placeholder="e.g., Medical Supplies Q1 2026"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                disabled={uploading || parsing}
+              />
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Basic Information</CardTitle>
-                        <CardDescription>
-                            Provide basic details about your RFQ
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="space-y-2">
-                            <Label htmlFor="title">RFQ Title *</Label>
-                            <Input
-                                id="title"
-                                placeholder="e.g., Medical Supplies Q1 2026"
-                                value={rfqData.title}
-                                onChange={(e) => setRfqData({ ...rfqData, title: e.target.value })}
-                                required
-                            />
-                        </div>
+            <div className="space-y-2">
+              <Label htmlFor="deadline">
+                Submission Deadline <span className="text-red-500">*</span>
+              </Label>
+              <div className="relative">
+                <Input
+                  id="deadline"
+                  type="date"
+                  value={deadline}
+                  onChange={(e) => setDeadline(e.target.value)}
+                  disabled={uploading || parsing}
+                  min={new Date().toISOString().split('T')[0]}
+                />
+                <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+              </div>
+            </div>
+          </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="description">Description</Label>
-                            <Textarea
-                                id="description"
-                                placeholder="Additional details about this procurement request..."
-                                rows={4}
-                                value={rfqData.description}
-                                onChange={(e) => setRfqData({ ...rfqData, description: e.target.value })}
-                            />
-                        </div>
+          {/* File Upload */}
+          <div className="space-y-2">
+            <Label htmlFor="file">
+              PDF Document <span className="text-red-500">*</span>
+            </Label>
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <Input
+                  id="file"
+                  type="file"
+                  accept=".pdf"
+                  onChange={handleFileChange}
+                  disabled={uploading || parsing}
+                  className="cursor-pointer"
+                />
+                {file && (
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <FileText className="h-4 w-4" />
+                    <span>{file.name}</span>
+                    <span className="text-xs">
+                      ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                    </span>
+                  </div>
+                )}
+              </div>
 
-                        <div className="space-y-2">
-                            <Label htmlFor="deadline">Submission Deadline *</Label>
-                            <Input
-                                id="deadline"
-                                type="datetime-local"
-                                value={rfqData.deadline}
-                                onChange={(e) => setRfqData({ ...rfqData, deadline: e.target.value })}
-                                required
-                            />
-                        </div>
-                    </CardContent>
-                </Card>
+              {file && (
+                <Button
+                  onClick={handleUpload}
+                  disabled={uploading || parsing}
+                  className="w-full md:w-auto"
+                  size="lg"
+                >
+                  {uploading || parsing ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      {parsing ? 'Parsing Document...' : 'Uploading...'}
+                    </>
+                  ) : (
+                    <>
+                      <Upload className="mr-2 h-4 w-4" />
+                      Upload & Process
+                    </>
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Upload RFQ Document</CardTitle>
-                        <CardDescription>
-                            Supported formats: PDF, Excel (.xlsx, .xls), Word (.docx, .doc)
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {!file ? (
-                            <div
-                                className={`border-2 border-dashed rounded-lg p-12 text-center transition-colors ${dragActive
-                                        ? 'border-primary bg-primary/5'
-                                        : 'border-border hover:border-primary/50'
-                                    }`}
-                                onDragEnter={handleDrag}
-                                onDragLeave={handleDrag}
-                                onDragOver={handleDrag}
-                                onDrop={handleDrop}
-                            >
-                                <div className="flex flex-col items-center gap-4">
-                                    <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                                        <Upload className="h-8 w-8 text-primary" />
-                                    </div>
-                                    <div>
-                                        <p className="text-lg font-medium">
-                                            Drag and drop your file here
-                                        </p>
-                                        <p className="text-sm text-muted-foreground mt-1">
-                                            or click to browse
-                                        </p>
-                                    </div>
-                                    <Input
-                                        type="file"
-                                        id="file-upload"
-                                        className="hidden"
-                                        accept=".pdf,.xlsx,.xls,.docx,.doc"
-                                        onChange={handleFileChange}
-                                    />
-                                    <Button
-                                        type="button"
-                                        variant="outline"
-                                        onClick={() => document.getElementById('file-upload')?.click()}
-                                    >
-                                        Browse Files
-                                    </Button>
-                                </div>
-                            </div>
-                        ) : (
-                            <div className="border rounded-lg p-4">
-                                <div className="flex items-start gap-4">
-                                    <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                                        <FileText className="h-6 w-6 text-primary" />
-                                    </div>
-                                    <div className="flex-1 min-w-0">
-                                        <p className="font-medium truncate">{file.name}</p>
-                                        <p className="text-sm text-muted-foreground">
-                                            {formatFileSize(file.size)}
-                                        </p>
-                                    </div>
-                                    <Button
-                                        type="button"
-                                        variant="ghost"
-                                        size="icon"
-                                        onClick={handleRemoveFile}
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
+          {/* Progress Bar */}
+          {uploadProgress > 0 && uploadProgress < 100 && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-sm">
+                <span className="text-muted-foreground">Processing...</span>
+                <span className="font-medium">{uploadProgress}%</span>
+              </div>
+              <div className="h-2 bg-secondary rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-primary transition-all duration-300"
+                  style={{ width: `${uploadProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
 
-                <div className="flex items-center justify-between">
-                    <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => router.back()}
-                    >
-                        Cancel
-                    </Button>
-                    <Button
-                        type="submit"
-                        disabled={!file || !rfqData.title || !rfqData.deadline || uploading}
-                        className="gap-2"
-                    >
-                        {uploading ? (
-                            <>
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                                Processing...
-                            </>
-                        ) : (
-                            <>
-                                <CheckCircle2 className="h-4 w-4" />
-                                Upload & Parse
-                            </>
-                        )}
-                    </Button>
-                </div>
-            </form>
-        </div>
-    )
+          {/* Error Alert */}
+          {error && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Instructions Card */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Instructions</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <ul className="space-y-2 text-sm text-muted-foreground">
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-1">•</span>
+              <span>Upload a PDF file containing the RFQ requirements and medicine list</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-1">•</span>
+              <span>Provide a descriptive title to identify this RFQ</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-1">•</span>
+              <span>Set the submission deadline for vendor responses</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-1">•</span>
+              <span>The system will automatically extract line items, requirements, and metadata</span>
+            </li>
+            <li className="flex items-start gap-2">
+              <span className="text-primary mt-1">•</span>
+              <span>You can review and edit the extracted data before sending to vendors</span>
+            </li>
+          </ul>
+        </CardContent>
+      </Card>
+    </div>
+  )
 }
