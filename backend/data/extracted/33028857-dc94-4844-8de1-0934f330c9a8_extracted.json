@@ -1,0 +1,24 @@
+{
+  "document_id": "33028857-dc94-4844-8de1-0934f330c9a8",
+  "original_filename": "rfq-4200715401.pdf",
+  "line_items": [
+    {
+      "inn_name": "Amoxicillin",
+      "quantity": 500,
+      "dosage": "500mg",
+      "form": "Tablet"
+    },
+    {
+      "inn_name": "Paracetamol",
+      "quantity": 1000,
+      "dosage": "650mg",
+      "form": "Tablet"
+    },
+    {
+      "inn_name": "Ibuprofen",
+      "quantity": 200,
+      "dosage": "400mg",
+      "form": "Capsule"
+    }
+  ]
+}

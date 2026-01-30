@@ -1,0 +1,816 @@
+{
+  "document_id": "a16e397e-2140-46a2-af05-c5e204db7243",
+  "original_filename": "rfq-4200715401.pdf",
+  "line_items": [
+    {
+      "inn_name": "Albendazole Oral suspension 200 mg/5 ml",
+      "quantity": 30,
+      "form": "10 ml Bottle",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Albendazole Tablet 400 mg.",
+      "quantity": 30,
+      "form": "Pack of one Tablet",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Antihemorroidal cream containing Lidocaine/Fluocinolone Acetonide",
+      "quantity": 40,
+      "form": "20 g Tube",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Amlodipine 5 Mg Tablet",
+      "quantity": 120,
+      "form": "Pack of 28 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Amlodipine 10mg Tablet",
+      "quantity": 100,
+      "form": "Pack of 28 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Atorvastatin 20mg Tablet",
+      "quantity": 55,
+      "form": "Pack of 30 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Aspirin 75 Mg Tablet",
+      "quantity": 60,
+      "form": "Pack of 56 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Azithromycin 500mg Tablet",
+      "quantity": 100,
+      "form": "Pack of 3 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Azithromycin Syrup 200mg/5ml",
+      "quantity": 60,
+      "form": "Bottle of 15 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Benzyl Benzoate Lotion 25%",
+      "quantity": 300,
+      "form": "Bottle of 125 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Bisacodyl 5mg Tablet",
+      "quantity": 30,
+      "form": "Pack of 30 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Bisoprolol Fumarate 5 Mg",
+      "quantity": 50,
+      "form": "Pack of 28 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Candesartan cilexetil 8 mg",
+      "quantity": 40,
+      "form": "Pack of 28 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Candesartan cilexetil 16 mg",
+      "quantity": 40,
+      "form": "Pack of 28 tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Calcium and minerals Tablet.",
+      "quantity": 35,
+      "form": "Pack of 30 Table",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Calamine Lotion",
+      "quantity": 100,
+      "form": "Bottle of 100 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Carbimazole 5 Mg Tablet",
+      "quantity": 20,
+      "form": "Pack of 100 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Cefixime 100 Mg/5 Ml Suspension",
+      "quantity": 60,
+      "form": "Bottle 30 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Cefixime 400 mg Capsule",
+      "quantity": 80,
+      "form": "Pack of 5 Cap",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Ceftriaxone 1g IM/IV",
+      "quantity": 60,
+      "form": "Pack of 1 Vial",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Chloramphenicol 1% Eye Ointment",
+      "quantity": 30,
+      "form": "5g Tube",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Chlorpheniramine Syrup 2mg/5ml",
+      "quantity": 60,
+      "form": "Bottle 100 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Ciprofloxacin 500mg Tablet",
+      "quantity": 150,
+      "form": "Pack of 10 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "clobetasol propionate 0.05% ointment",
+      "quantity": 80,
+      "form": "Tube of 25 gram",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Clopidogrel 75 Mg Tablet",
+      "quantity": 10,
+      "form": "Pack of 28 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Clotrimazole Skin Cream 1%",
+      "quantity": 140,
+      "form": "20 g Tube",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Amoxicillin + clavulanic acid 156 Mg/5ml suspension.",
+      "quantity": 50,
+      "form": "Bottle 100 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Amoxicillin + clavulanic acid suspension. 457 Mg/5ml",
+      "quantity": 50,
+      "form": "Bottle 70 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Amoxicillin + clavulanic acid 625 Mg Tablet",
+      "quantity": 250,
+      "form": "Pack of 20 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Amoxicillin + clavulanic acid 1g Tablet",
+      "quantity": 200,
+      "form": "Pack of 14 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Docusate Sodium 0.5% ear drops",
+      "quantity": 15,
+      "form": "Bottle 10 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Diclofenac Sodium 1% Gel",
+      "quantity": 200,
+      "form": "30 g Gel Tube",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Diclofenac Sodium 50 Mg Tablet",
+      "quantity": 1000,
+      "form": "Pack of 20 Tablet",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Diclofenac Sodium 75mg/3ml Injection",
+      "quantity": 40,
+      "form": "Pack of 5 Amp",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Domperidone 10mg suppository",
+      "quantity": 20,
+      "form": "Pack of 5 Supp",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Doxycycline 200mg Tablet.",
+      "quantity": 50,
+      "form": "Pack of 8 Tablet",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Ferrous Sulphate 200mg Tablet",
+      "quantity": 150,
+      "form": "Pack of 30 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Fluconazole 150mg Tablet",
+      "quantity": 20,
+      "form": "Pack of 1 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Folic Acid 5mg Tablet",
+      "quantity": 100,
+      "form": "Pack of 28 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Fusidic acid 2% ointment",
+      "quantity": 150,
+      "form": "15 g Tube",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Furosemide 20mg/2ml Ampule.",
+      "quantity": 1,
+      "form": "Pack of 10 Amp",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Gentamicin 0.3% Eye Drops",
+      "quantity": 90,
+      "form": "5 ml bottle",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Glibenclamide 5mg Tablet",
+      "quantity": 150,
+      "form": "Pack of 60 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Glimepiride 4 mg tablet",
+      "quantity": 100,
+      "form": "Pack of 30 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Glycerin suppository childern",
+      "quantity": 30,
+      "form": "Unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Ibuprofen 100mg/5ml",
+      "quantity": 100,
+      "form": "Bottle 100 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Ibuprofen 400mg Film Coated",
+      "quantity": 200,
+      "form": "Pack of 24 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "hexamine 500.00 mg . Piperazine citrate 190.00 mg . Khellin 1.83 mg Combination",
+      "quantity": 200,
+      "form": "Pack of 12 sach",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Hydrochlorothiazide 25 mg Tablet",
+      "quantity": 10,
+      "form": "Pack of 20 Tablet",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Hydrocortisone 100mg Vial",
+      "quantity": 20,
+      "form": "Vial",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Hydrocortisone Acetate Ointment 1%",
+      "quantity": 200,
+      "form": "15 g Tube",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Hyoscine Butylbromide 10 mg Tablet",
+      "quantity": 100,
+      "form": "Pack of 20 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Hyoscine Butylbromide 20 mg/ml",
+      "quantity": 10,
+      "form": "Pack of 6 Amp",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Lactulose syrup 3.35g/5mL",
+      "quantity": 60,
+      "form": "Bottle of 200 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Levothyroxine 100 mcg Tablet",
+      "quantity": 65,
+      "form": "Pack of 50 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Chlordiazepoxide 5mg /2.5 clidinium bromide Tablet",
+      "quantity": 50,
+      "form": "Pack of 30 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Loperamide 2mg Capsule",
+      "quantity": 40,
+      "form": "Pack of 10 Capsule",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Metformin 500 Mg Tablet",
+      "quantity": 75,
+      "form": "Pack of 30 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Metformin 850 Mg Tablet",
+      "quantity": 100,
+      "form": "Pack of 56 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Metoclopramide 10mg Injection",
+      "quantity": 6,
+      "form": "Pack of 10 Amp",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Metronidazole 125 Mg/5ml Suspension",
+      "quantity": 75,
+      "form": "Bottle 100 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Metronidazole 500mg Tablet",
+      "quantity": 125,
+      "form": "Pack of 30 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Miconazole Vaginal Cream 2%",
+      "quantity": 100,
+      "form": "50 g Tube",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Multivitamins Children Syrup",
+      "quantity": 100,
+      "form": "Bottle 120 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Multivitamins Tablet",
+      "quantity": 150,
+      "form": "Pack of 50 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Naphazoline hydrochloride+ Chlorpheniramine maleate eye/Nasal drops",
+      "quantity": 100,
+      "form": "Unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Nystatin Suspension 100 000 IU/ ml",
+      "quantity": 40,
+      "form": "Bottle of 30 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Normal saline 0.9% infusion.",
+      "quantity": 120,
+      "form": "Bag of 500 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Omeprazole 40 mg Vial",
+      "quantity": 40,
+      "form": "Pack of 1 vial",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Omeprazole 40 mg Tablet",
+      "quantity": 600,
+      "form": "Pack of 28 Tablet",
+      "dosage": ""
+    },
+    {
+      "inn_name": "ORS (oral rehydration salt)",
+      "quantity": 50,
+      "form": "Pack of 10 sach",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Paracetamol 1000mg /100ml Infusion",
+      "quantity": 40,
+      "form": "100 ml Pack",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Paracetamol 125mg Suppository",
+      "quantity": 100,
+      "form": "Pack of 10 Supp",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Paracetamol 250mg/5 ml Suspension",
+      "quantity": 320,
+      "form": "Bottle 100 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Paracetamol 500 Mg Tablet",
+      "quantity": 175,
+      "form": "Pack of 100 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Paracetamol, chlorpheniramine, and phenylephrine Tablet combination",
+      "quantity": 150,
+      "form": "Pack of 20 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Paracetamol 450 mg & Orphenadrine Citrate 35 mg/Tab",
+      "quantity": 175,
+      "form": "Pack of 20 Tablet",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Prednisolone 5 Mg Tablet",
+      "quantity": 20,
+      "form": "Pack of 20 Tablet",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Sodium Valproate 500 mg Tablet",
+      "quantity": 12,
+      "form": "Pack of 40 Tablet",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Salbutamol 0.1 Mg/Dose Inhaler",
+      "quantity": 45,
+      "form": "200 Doses Inhaler",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Simethicone Oral Drops",
+      "quantity": 40,
+      "form": "Bottle 15 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Sulphur Soap",
+      "quantity": 300,
+      "form": "Singel Pack",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Sterile Water For Injection 10ml ampoule",
+      "quantity": 6,
+      "form": "Pack of 50 Ampoule",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Tetanus antitoxin injection",
+      "quantity": 20,
+      "form": "Single Ampule",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Thiocolchicoside 4mg/2ml",
+      "quantity": 14,
+      "form": "Pack of 6 Amp",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Vitamin B Complex Tablet",
+      "quantity": 120,
+      "form": "Pack of 30 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Vitamin B Complex IM Injection",
+      "quantity": 30,
+      "form": "Pack of 5 Amp",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Vitamin C (Ascorbic Acid) 500mg",
+      "quantity": 200,
+      "form": "Pack of 20 Tab",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Xylometazoline 0.05% Nasal Drops",
+      "quantity": 100,
+      "form": "Singel Pack",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Xylometazoline 0.1% Nasal Drops",
+      "quantity": 100,
+      "form": "Singel Pack",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Alcohol solution 75%",
+      "quantity": 10,
+      "form": "1000 ml Bottle",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Alcohol medical swabs",
+      "quantity": 10,
+      "form": "Pack of 100",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Adhesive non woven wound dressing 10 m x 15 cm Roll",
+      "quantity": 24,
+      "form": "Roll",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Absorbent Cotton Wool",
+      "quantity": 18,
+      "form": "500 g Roll",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Biohazard Bags 10 L",
+      "quantity": 14,
+      "form": "Roll of 10",
+      "dosage": ""
+    },
+    {
+      "inn_name": "100",
+      "quantity": 7,
+      "form": "Pack of 100",
+      "dosage": ""
+    },
+    {
+      "inn_name": "101",
+      "quantity": 300,
+      "form": "EA",
+      "dosage": ""
+    },
+    {
+      "inn_name": "102",
+      "quantity": 500,
+      "form": "Roll",
+      "dosage": ""
+    },
+    {
+      "inn_name": "103",
+      "quantity": 200,
+      "form": "Roll",
+      "dosage": ""
+    },
+    {
+      "inn_name": "104",
+      "quantity": 200,
+      "form": "EA",
+      "dosage": ""
+    },
+    {
+      "inn_name": "105",
+      "quantity": 100,
+      "form": "EA",
+      "dosage": ""
+    },
+    {
+      "inn_name": "106",
+      "quantity": 100,
+      "form": "EA",
+      "dosage": ""
+    },
+    {
+      "inn_name": "107",
+      "quantity": 20,
+      "form": "EA",
+      "dosage": ""
+    },
+    {
+      "inn_name": "108",
+      "quantity": 20,
+      "form": "EA",
+      "dosage": ""
+    },
+    {
+      "inn_name": "109",
+      "quantity": 40,
+      "form": "Box of 100",
+      "dosage": ""
+    },
+    {
+      "inn_name": "110",
+      "quantity": 50,
+      "form": "Pack of 100",
+      "dosage": ""
+    },
+    {
+      "inn_name": "111",
+      "quantity": 10,
+      "form": "Pack of 10",
+      "dosage": ""
+    },
+    {
+      "inn_name": "112",
+      "quantity": 10,
+      "form": "Bottle of 1000 ml",
+      "dosage": ""
+    },
+    {
+      "inn_name": "113",
+      "quantity": 40,
+      "form": "EA",
+      "dosage": ""
+    },
+    {
+      "inn_name": "114",
+      "quantity": 30,
+      "form": "Pack of 100",
+      "dosage": ""
+    },
+    {
+      "inn_name": "115",
+      "quantity": 4,
+      "form": "Pack of 100",
+      "dosage": ""
+    },
+    {
+      "inn_name": "116",
+      "quantity": 35,
+      "form": "EA",
+      "dosage": ""
+    },
+    {
+      "inn_name": "117",
+      "quantity": 2,
+      "form": "50 Pair",
+      "dosage": ""
+    },
+    {
+      "inn_name": "118",
+      "quantity": 200,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "119",
+      "quantity": 200,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "121",
+      "quantity": 400,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "122",
+      "quantity": 10,
+      "form": "Pack of 100",
+      "dosage": ""
+    },
+    {
+      "inn_name": "123",
+      "quantity": 5,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "124",
+      "quantity": 2,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "125",
+      "quantity": 2,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "126",
+      "quantity": 2,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "127",
+      "quantity": 2,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "128",
+      "quantity": 10,
+      "form": "Pack of 50 strips",
+      "dosage": ""
+    },
+    {
+      "inn_name": "129",
+      "quantity": 4,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "130",
+      "quantity": 4,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "131",
+      "quantity": 2,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "132",
+      "quantity": 200,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "133",
+      "quantity": 1,
+      "form": "Single unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "RFQ reference:",
+      "quantity": 4200715401,
+      "form": "RFQ reference:",
+      "dosage": ""
+    },
+    {
+      "inn_name": "RFQ reference:",
+      "quantity": 4200715401,
+      "form": "RFQ reference:",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Click or tap here to enter text.",
+      "quantity": 1,
+      "form": "Unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Click or tap here to enter text.",
+      "quantity": 2,
+      "form": "Unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Click or tap here to enter text.",
+      "quantity": 3,
+      "form": "Unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Click or tap here to enter text.",
+      "quantity": 4,
+      "form": "Unit",
+      "dosage": ""
+    },
+    {
+      "inn_name": "Click or tap here to enter text.",
+      "quantity": 5,
+      "form": "Unit",
+      "dosage": ""
+    }
+  ]
+}
