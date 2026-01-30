@@ -2,14 +2,16 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent } from '@/components/ui/card'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Progress } from '@/components/ui/progress'
 import { CheckCircle2, Building2, User, MapPin, Bell, Package } from 'lucide-react'
+import { EUROPEAN_COUNTRIES, getEuropeanCitiesByCountry } from '@/lib/constants'
 
 interface HospitalOnboardingProps {
   email: string
@@ -17,8 +19,11 @@ interface HospitalOnboardingProps {
 
 export default function HospitalOnboarding({ email }: HospitalOnboardingProps) {
   const router = useRouter()
+  const supabase = createClient()
   const [step, setStep] = useState(1)
   const [loading, setLoading] = useState(false)
+  const [availableCities, setAvailableCities] = useState<string[]>([])
+  const [errors, setErrors] = useState<Record<string, string>>({})
 
   const [formData, setFormData] = useState({
     name: '',
@@ -29,7 +34,7 @@ export default function HospitalOnboarding({ email }: HospitalOnboardingProps) {
     phone: '',
     city: '',
     state: '',
-    country: 'Germany',
+    country: 'France',
     notificationEmail: true,
     notificationBid: true,
     notificationSMS: false,
@@ -45,6 +50,11 @@ export default function HospitalOnboarding({ email }: HospitalOnboardingProps) {
 
   const totalSteps = 2
   const progress = (step / totalSteps) * 100
+
+  const handleCountryChange = (country: string) => {
+    setFormData({ ...formData, country, city: '' })
+    setAvailableCities(getEuropeanCitiesByCountry(country))
+  }
 
   const handleNext = () => {
     if (step < totalSteps) {
@@ -62,12 +72,49 @@ export default function HospitalOnboarding({ email }: HospitalOnboardingProps) {
 
   const handleComplete = async () => {
     setLoading(true)
+    setErrors({})
+
     try {
-      console.log('Hospital onboarding data:', formData)
-      await new Promise(resolve => setTimeout(resolve, 1500))
-      router.push('/dashboard')
-    } catch (error) {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) throw new Error('No user found')
+
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: user.id,
+          email: user.email!,
+          full_name: formData.name,
+          role: 'hospital',
+          organization_name: formData.organizationName,
+          phone: formData.phone,
+          city: formData.city,
+          state: formData.state,
+          country: formData.country
+        })
+
+      if (profileError) throw profileError
+
+      const { error: hospitalError } = await supabase
+        .from('hospitals')
+        .insert({
+          user_id: user.id,
+          hospital_name: formData.organizationName,
+          registration_number: formData.registrationNumber,
+          hospital_type: formData.organizationType,
+          contact_person: formData.name,
+          contact_email: user.email,
+          contact_phone: formData.phone,
+          city: formData.city,
+          state: formData.state
+        })
+
+      if (hospitalError) throw hospitalError
+
+      router.push('/dashboard/hospital')
+      router.refresh()
+    } catch (error: any) {
       console.error('Onboarding error:', error)
+      setErrors({ general: error.message || 'Failed to complete onboarding' })
     } finally {
       setLoading(false)
     }
@@ -102,6 +149,12 @@ export default function HospitalOnboarding({ email }: HospitalOnboardingProps) {
         </div>
         <Progress value={progress} className="h-2" />
       </div>
+
+      {errors.general && (
+        <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+          <p className="text-sm text-destructive">{errors.general}</p>
+        </div>
+      )}
 
       {step === 1 && (
         <div className="space-y-8">
@@ -207,7 +260,7 @@ export default function HospitalOnboarding({ email }: HospitalOnboardingProps) {
                     <Input
                       id="phone"
                       type="tel"
-                      placeholder="+1 (555) 000-0000"
+                      placeholder="+33 1 23 45 67 89"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                     />
@@ -225,55 +278,60 @@ export default function HospitalOnboarding({ email }: HospitalOnboardingProps) {
               </div>
               
               <div className="space-y-4">
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="city">City *</Label>
-                    <Input
-                      id="city"
-                      placeholder="City"
-                      value={formData.city}
-                      onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="state">State/Province *</Label>
-                    <Input
-                      id="state"
-                      placeholder="State"
-                      value={formData.state}
-                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
-                    />
-                  </div>
-                </div>
-
                 <div className="space-y-2">
                   <Label htmlFor="country">Country *</Label>
-                  <Select value={formData.country} onValueChange={(value) => setFormData({ ...formData, country: value })}>
+                  <Select value={formData.country} onValueChange={handleCountryChange}>
                     <SelectTrigger id="country">
                       <SelectValue placeholder="Select country" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Germany">Germany</SelectItem>
-                      <SelectItem value="France">France</SelectItem>
-                      <SelectItem value="Italy">Italy</SelectItem>
-                      <SelectItem value="Spain">Spain</SelectItem>
-                      <SelectItem value="United Kingdom">United Kingdom</SelectItem>
-                      <SelectItem value="Netherlands">Netherlands</SelectItem>
-                      <SelectItem value="Belgium">Belgium</SelectItem>
-                      <SelectItem value="Austria">Austria</SelectItem>
-                      <SelectItem value="Switzerland">Switzerland</SelectItem>
-                      <SelectItem value="Poland">Poland</SelectItem>
-                      <SelectItem value="Sweden">Sweden</SelectItem>
-                      <SelectItem value="Denmark">Denmark</SelectItem>
-                      <SelectItem value="Norway">Norway</SelectItem>
-                      <SelectItem value="Finland">Finland</SelectItem>
-                      <SelectItem value="Portugal">Portugal</SelectItem>
-                      <SelectItem value="Greece">Greece</SelectItem>
-                      <SelectItem value="Czech Republic">Czech Republic</SelectItem>
-                      <SelectItem value="Ireland">Ireland</SelectItem>
+                      {EUROPEAN_COUNTRIES.map((country) => (
+                        <SelectItem key={country} value={country}>
+                          {country}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="city">City *</Label>
+                    {availableCities.length > 0 ? (
+                      <Select
+                        value={formData.city}
+                        onValueChange={(value) => setFormData({ ...formData, city: value })}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select city" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableCities.map((city) => (
+                            <SelectItem key={city} value={city}>
+                              {city}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Input
+                        id="city"
+                        placeholder="Enter city name"
+                        value={formData.city}
+                        onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                      />
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="state">State/Province</Label>
+                    <Input
+                      id="state"
+                      placeholder="State/Region"
+                      value={formData.state}
+                      onChange={(e) => setFormData({ ...formData, state: e.target.value })}
+                    />
+                  </div>
                 </div>
               </div>
             </CardContent>

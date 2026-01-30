@@ -1,3 +1,314 @@
+-- Enable UUID extension
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- Create enum types
+CREATE TYPE user_role AS ENUM ('hospital', 'vendor', 'admin', 'cfo', 'cpo');
+CREATE TYPE rfq_status AS ENUM ('draft', 'published', 'closed', 'awarded', 'rejected');
+CREATE TYPE quotation_status AS ENUM ('pending', 'under_review', 'awarded', 'rejected');
+CREATE TYPE order_status AS ENUM ('pending', 'confirmed', 'in_transit', 'delivered', 'cancelled');
+CREATE TYPE payment_status AS ENUM ('pending', 'partial', 'paid');
+
+-- Users table (extends Supabase auth.users)
+CREATE TABLE public.profiles (
+    id UUID PRIMARY KEY REFERENCES auth.users(id) ON DELETE CASCADE,
+    email TEXT UNIQUE NOT NULL,
+    full_name TEXT NOT NULL,
+    role user_role NOT NULL,
+    organization_name TEXT,
+    phone TEXT,
+    address TEXT,
+    city TEXT,
+    state TEXT,
+    country TEXT DEFAULT 'India',
+    postal_code TEXT,
+    avatar_url TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Hospitals table
+CREATE TABLE public.hospitals (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+    hospital_name TEXT NOT NULL,
+    registration_number TEXT UNIQUE,
+    hospital_type TEXT,
+    bed_capacity INTEGER,
+    license_number TEXT,
+    accreditation TEXT,
+    contact_person TEXT,
+    contact_email TEXT,
+    contact_phone TEXT,
+    address TEXT,
+    city TEXT,
+    state TEXT,
+    postal_code TEXT,
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    is_verified BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Vendors table
+CREATE TABLE public.vendors (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+    vendor_name TEXT NOT NULL,
+    company_registration TEXT UNIQUE,
+    gst_number TEXT,
+    vendor_type TEXT,
+    rating DECIMAL(3, 2) DEFAULT 0,
+    total_orders INTEGER DEFAULT 0,
+    completed_orders INTEGER DEFAULT 0,
+    contact_person TEXT,
+    contact_email TEXT,
+    contact_phone TEXT,
+    address TEXT,
+    city TEXT,
+    state TEXT,
+    postal_code TEXT,
+    bank_name TEXT,
+    bank_account TEXT,
+    bank_ifsc TEXT,
+    is_verified BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- RFQs table
+CREATE TABLE public.rfqs (
+    id TEXT PRIMARY KEY,
+    title TEXT NOT NULL,
+    description TEXT,
+    hospital_id UUID REFERENCES public.hospitals(id),
+    created_by UUID REFERENCES public.profiles(id),
+    status rfq_status DEFAULT 'draft',
+    deadline TIMESTAMP WITH TIME ZONE NOT NULL,
+    delivery_deadline TIMESTAMP WITH TIME ZONE,
+    location TEXT,
+    latitude DECIMAL(10, 8),
+    longitude DECIMAL(11, 8),
+    document_url TEXT,
+    terms_and_conditions TEXT,
+    special_instructions TEXT,
+    is_approved_by_cpo BOOLEAN DEFAULT false,
+    approved_by UUID REFERENCES public.profiles(id),
+    approved_at TIMESTAMP WITH TIME ZONE,
+    rejection_reason TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- RFQ Items table
+CREATE TABLE public.rfq_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    rfq_id TEXT REFERENCES public.rfqs(id) ON DELETE CASCADE,
+    item_name TEXT NOT NULL,
+    description TEXT,
+    quantity INTEGER NOT NULL,
+    unit TEXT NOT NULL,
+    specification TEXT,
+    estimated_price DECIMAL(12, 2),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Quotations table
+CREATE TABLE public.quotations (
+    id TEXT PRIMARY KEY,
+    rfq_id TEXT REFERENCES public.rfqs(id) ON DELETE CASCADE,
+    vendor_id UUID REFERENCES public.vendors(id),
+    total_amount DECIMAL(12, 2) NOT NULL,
+    delivery_time_days INTEGER NOT NULL,
+    valid_until TIMESTAMP WITH TIME ZONE NOT NULL,
+    status quotation_status DEFAULT 'pending',
+    notes TEXT,
+    terms TEXT,
+    document_url TEXT,
+    submitted_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    reviewed_at TIMESTAMP WITH TIME ZONE,
+    reviewed_by UUID REFERENCES public.profiles(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Quotation Items table
+CREATE TABLE public.quotation_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    quotation_id TEXT REFERENCES public.quotations(id) ON DELETE CASCADE,
+    rfq_item_id UUID REFERENCES public.rfq_items(id),
+    item_name TEXT NOT NULL,
+    quantity INTEGER NOT NULL,
+    unit TEXT NOT NULL,
+    unit_price DECIMAL(12, 2) NOT NULL,
+    total_price DECIMAL(12, 2) NOT NULL,
+    brand TEXT,
+    manufacturer TEXT,
+    specifications TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Purchase Orders table
+CREATE TABLE public.purchase_orders (
+    id TEXT PRIMARY KEY,
+    rfq_id TEXT REFERENCES public.rfqs(id),
+    quotation_id TEXT REFERENCES public.quotations(id),
+    hospital_id UUID REFERENCES public.hospitals(id),
+    vendor_id UUID REFERENCES public.vendors(id),
+    order_date TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    delivery_date TIMESTAMP WITH TIME ZONE,
+    total_amount DECIMAL(12, 2) NOT NULL,
+    status order_status DEFAULT 'pending',
+    payment_status payment_status DEFAULT 'pending',
+    payment_terms TEXT,
+    delivery_address TEXT,
+    special_instructions TEXT,
+    created_by UUID REFERENCES public.profiles(id),
+    approved_by UUID REFERENCES public.profiles(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Order Items table
+CREATE TABLE public.order_items (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    order_id TEXT REFERENCES public.purchase_orders(id) ON DELETE CASCADE,
+    item_name TEXT NOT NULL,
+    quantity INTEGER NOT NULL,
+    unit TEXT NOT NULL,
+    unit_price DECIMAL(12, 2) NOT NULL,
+    total_price DECIMAL(12, 2) NOT NULL,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Notifications table
+CREATE TABLE public.notifications (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    user_id UUID REFERENCES public.profiles(id) ON DELETE CASCADE,
+    title TEXT NOT NULL,
+    message TEXT NOT NULL,
+    type TEXT NOT NULL,
+    reference_id TEXT,
+    reference_type TEXT,
+    is_read BOOLEAN DEFAULT false,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Create indexes for better performance
+CREATE INDEX idx_profiles_role ON public.profiles(role);
+CREATE INDEX idx_profiles_email ON public.profiles(email);
+CREATE INDEX idx_hospitals_user_id ON public.hospitals(user_id);
+CREATE INDEX idx_vendors_user_id ON public.vendors(user_id);
+CREATE INDEX idx_rfqs_hospital_id ON public.rfqs(hospital_id);
+CREATE INDEX idx_rfqs_status ON public.rfqs(status);
+CREATE INDEX idx_rfqs_created_by ON public.rfqs(created_by);
+CREATE INDEX idx_quotations_rfq_id ON public.quotations(rfq_id);
+CREATE INDEX idx_quotations_vendor_id ON public.quotations(vendor_id);
+CREATE INDEX idx_quotations_status ON public.quotations(status);
+CREATE INDEX idx_purchase_orders_hospital_id ON public.purchase_orders(hospital_id);
+CREATE INDEX idx_purchase_orders_vendor_id ON public.purchase_orders(vendor_id);
+CREATE INDEX idx_notifications_user_id ON public.notifications(user_id);
+CREATE INDEX idx_notifications_is_read ON public.notifications(is_read);
+
+-- Enable Row Level Security
+ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.hospitals ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.vendors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.rfqs ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.rfq_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.quotations ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.quotation_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.purchase_orders ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.order_items ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+-- RLS Policies for profiles
+CREATE POLICY "Users can view own profile" ON public.profiles
+    FOR SELECT USING (auth.uid() = id);
+
+CREATE POLICY "Users can update own profile" ON public.profiles
+    FOR UPDATE USING (auth.uid() = id);
+
+-- RLS Policies for hospitals
+CREATE POLICY "Hospitals can view own data" ON public.hospitals
+    FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "Hospitals can update own data" ON public.hospitals
+    FOR UPDATE USING (user_id = auth.uid());
+
+-- RLS Policies for vendors
+CREATE POLICY "Vendors can view own data" ON public.vendors
+    FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "Vendors can update own data" ON public.vendors
+    FOR UPDATE USING (user_id = auth.uid());
+
+-- RLS Policies for RFQs
+CREATE POLICY "Hospitals can view own RFQs" ON public.rfqs
+    FOR SELECT USING (created_by = auth.uid());
+
+CREATE POLICY "Vendors can view published RFQs" ON public.rfqs
+    FOR SELECT USING (status = 'published');
+
+CREATE POLICY "Hospitals can create RFQs" ON public.rfqs
+    FOR INSERT WITH CHECK (created_by = auth.uid());
+
+CREATE POLICY "Hospitals can update own RFQs" ON public.rfqs
+    FOR UPDATE USING (created_by = auth.uid());
+
+-- RLS Policies for quotations
+CREATE POLICY "Vendors can view own quotations" ON public.quotations
+    FOR SELECT USING (
+        vendor_id IN (SELECT id FROM public.vendors WHERE user_id = auth.uid())
+    );
+
+CREATE POLICY "Hospitals can view quotations for own RFQs" ON public.quotations
+    FOR SELECT USING (
+        rfq_id IN (SELECT id FROM public.rfqs WHERE created_by = auth.uid())
+    );
+
+CREATE POLICY "Vendors can create quotations" ON public.quotations
+    FOR INSERT WITH CHECK (
+        vendor_id IN (SELECT id FROM public.vendors WHERE user_id = auth.uid())
+    );
+
+-- RLS Policies for notifications
+CREATE POLICY "Users can view own notifications" ON public.notifications
+    FOR SELECT USING (user_id = auth.uid());
+
+CREATE POLICY "Users can update own notifications" ON public.notifications
+    FOR UPDATE USING (user_id = auth.uid());
+
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Create triggers for updated_at
+CREATE TRIGGER update_profiles_updated_at BEFORE UPDATE ON public.profiles
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_hospitals_updated_at BEFORE UPDATE ON public.hospitals
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_vendors_updated_at BEFORE UPDATE ON public.vendors
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_rfqs_updated_at BEFORE UPDATE ON public.rfqs
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_quotations_updated_at BEFORE UPDATE ON public.quotations
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+CREATE TRIGGER update_purchase_orders_updated_at BEFORE UPDATE ON public.purchase_orders
+    FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+
+
 -- ============================================
 -- STEP 1: DISABLE RLS TEMPORARILY
 -- ============================================

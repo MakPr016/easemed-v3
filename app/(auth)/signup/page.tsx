@@ -1,20 +1,21 @@
-// app/(auth)/signup/page.tsx
 'use client'
 
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Building2, ShoppingBag, ArrowLeft } from 'lucide-react'
 import type { UserType } from '@/lib/types/auth'
 
 function SignupContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const supabase = createClient()
   const [userType, setUserType] = useState<UserType>('hospital')
   const [formData, setFormData] = useState({
     email: '',
@@ -31,47 +32,43 @@ function SignupContent() {
     }
   }, [searchParams])
 
-  const validateForm = () => {
-    const newErrors: Record<string, string> = {}
-
-    if (!formData.email) {
-      newErrors.email = 'Email is required'
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = 'Invalid email format'
-    }
-
-    if (!formData.password) {
-      newErrors.password = 'Password is required'
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Password must be at least 8 characters'
-    }
+  const handleSignup = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setLoading(true)
+    setErrors({})
 
     if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = 'Passwords do not match'
+      setErrors({ confirmPassword: 'Passwords do not match' })
+      setLoading(false)
+      return
     }
 
-    setErrors(newErrors)
-    return Object.keys(newErrors).length === 0
-  }
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
-    if (!validateForm()) return
-
-    setLoading(true)
+    if (formData.password.length < 8) {
+      setErrors({ password: 'Password must be at least 8 characters' })
+      setLoading(false)
+      return
+    }
 
     try {
-      // TODO: Implement Supabase signup
-      console.log('Signup data:', { ...formData, userType })
+      const { data, error } = await supabase.auth.signUp({
+        email: formData.email,
+        password: formData.password,
+        options: {
+          data: {
+            role: userType
+          },
+          emailRedirectTo: `${window.location.origin}/auth/callback`
+        }
+      })
 
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      if (error) throw error
 
-      // Navigate to OTP verification
       router.push(`/verify-otp?email=${encodeURIComponent(formData.email)}&type=${userType}`)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup error:', error)
+      setErrors({ 
+        general: error.message || 'Failed to create account. Please try again.' 
+      })
     } finally {
       setLoading(false)
     }
@@ -80,7 +77,6 @@ function SignupContent() {
   return (
     <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-b from-background to-secondary/20">
       <div className="w-full max-w-md space-y-6">
-        {/* Back Button */}
         <Link href="/">
           <Button variant="ghost" className="gap-2">
             <ArrowLeft className="h-4 w-4" /> Back to Home
@@ -103,7 +99,7 @@ function SignupContent() {
           </CardHeader>
 
           <CardContent>
-            <Tabs value={userType} onValueChange={(v: string) => setUserType(v as UserType)} className="mb-6">
+            <Tabs value={userType} onValueChange={(v) => setUserType(v as UserType)} className="mb-6">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="hospital" className="gap-2">
                   <Building2 className="h-4 w-4" />
@@ -116,7 +112,13 @@ function SignupContent() {
               </TabsList>
             </Tabs>
 
-            <form onSubmit={handleSubmit} className="space-y-4">
+            {errors.general && (
+              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                <p className="text-sm text-destructive">{errors.general}</p>
+              </div>
+            )}
+
+            <form onSubmit={handleSignup} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
                 <Input
@@ -125,11 +127,9 @@ function SignupContent() {
                   placeholder="your.email@example.com"
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className={errors.email ? 'border-destructive' : ''}
+                  required
+                  disabled={loading}
                 />
-                {errors.email && (
-                  <p className="text-sm text-destructive">{errors.email}</p>
-                )}
               </div>
 
               <div className="space-y-2">
@@ -140,7 +140,8 @@ function SignupContent() {
                   placeholder="••••••••"
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className={errors.password ? 'border-destructive' : ''}
+                  required
+                  disabled={loading}
                 />
                 {errors.password && (
                   <p className="text-sm text-destructive">{errors.password}</p>
@@ -155,7 +156,8 @@ function SignupContent() {
                   placeholder="••••••••"
                   value={formData.confirmPassword}
                   onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                  className={errors.confirmPassword ? 'border-destructive' : ''}
+                  required
+                  disabled={loading}
                 />
                 {errors.confirmPassword && (
                   <p className="text-sm text-destructive">{errors.confirmPassword}</p>
@@ -163,25 +165,14 @@ function SignupContent() {
               </div>
 
               <Button type="submit" className="w-full" size="lg" disabled={loading}>
-                {loading ? 'Creating account...' : 'Continue'}
+                {loading ? 'Creating account...' : 'Create account'}
               </Button>
-
-              <p className="text-xs text-center text-muted-foreground">
-                By signing up, you agree to our{' '}
-                <Link href="/terms" className="underline hover:text-primary">
-                  Terms of Service
-                </Link>{' '}
-                and{' '}
-                <Link href="/privacy" className="underline hover:text-primary">
-                  Privacy Policy
-                </Link>
-              </p>
             </form>
 
             <div className="mt-6 text-center text-sm">
               Already have an account?{' '}
               <Link href={`/login?type=${userType}`} className="text-primary hover:underline font-medium">
-                Log in
+                Sign in
               </Link>
             </div>
           </CardContent>
@@ -193,7 +184,14 @@ function SignupContent() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
       <SignupContent />
     </Suspense>
   )

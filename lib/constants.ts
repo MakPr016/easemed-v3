@@ -49,6 +49,209 @@ export const cityToCountryMap: { [key: string]: string } = {
     'Geneva': 'Switzerland',
 }
 
+// European Countries List
+export const EUROPEAN_COUNTRIES = [
+    'Austria',
+    'Belgium',
+    'Bulgaria',
+    'Croatia',
+    'Cyprus',
+    'Czechia',
+    'Denmark',
+    'Estonia',
+    'Finland',
+    'France',
+    'Germany',
+    'Greece',
+    'Hungary',
+    'Ireland',
+    'Italy',
+    'Latvia',
+    'Lithuania',
+    'Luxembourg',
+    'Malta',
+    'Netherlands',
+    'Norway',
+    'Poland',
+    'Portugal',
+    'Romania',
+    'Slovakia',
+    'Slovenia',
+    'Spain',
+    'Sweden',
+    'Switzerland',
+    'United Kingdom',
+] as const
+
+export type EuropeanCountry = typeof EUROPEAN_COUNTRIES[number]
+
+// European City to Country Mapping
+export const EUROPEAN_CITY_COUNTRY_MAP: { [key: string]: string } = {
+    // United Kingdom
+    'London': 'United Kingdom',
+    'Manchester': 'United Kingdom',
+    'Birmingham': 'United Kingdom',
+    'Leeds': 'United Kingdom',
+    'Glasgow': 'United Kingdom',
+    'Edinburgh': 'United Kingdom',
+
+    // France
+    'Paris': 'France',
+    'Lyon': 'France',
+    'Marseille': 'France',
+    'Toulouse': 'France',
+    'Nice': 'France',
+    'Nantes': 'France',
+    'Strasbourg': 'France',
+    'Bordeaux': 'France',
+
+    // Germany
+    'Berlin': 'Germany',
+    'Munich': 'Germany',
+    'Hamburg': 'Germany',
+    'Frankfurt': 'Germany',
+    'Cologne': 'Germany',
+    'Stuttgart': 'Germany',
+    'Düsseldorf': 'Germany',
+    'Dortmund': 'Germany',
+
+    // Italy
+    'Rome': 'Italy',
+    'Milan': 'Italy',
+    'Naples': 'Italy',
+    'Turin': 'Italy',
+    'Florence': 'Italy',
+    'Venice': 'Italy',
+    'Bologna': 'Italy',
+    'Genoa': 'Italy',
+
+    // Spain
+    'Madrid': 'Spain',
+    'Barcelona': 'Spain',
+    'Valencia': 'Spain',
+    'Seville': 'Spain',
+    'Zaragoza': 'Spain',
+    'Málaga': 'Spain',
+    'Bilbao': 'Spain',
+
+    // Netherlands
+    'Amsterdam': 'Netherlands',
+    'Rotterdam': 'Netherlands',
+    'The Hague': 'Netherlands',
+    'Utrecht': 'Netherlands',
+    'Eindhoven': 'Netherlands',
+
+    // Belgium
+    'Brussels': 'Belgium',
+    'Antwerp': 'Belgium',
+    'Ghent': 'Belgium',
+    'Bruges': 'Belgium',
+    'Liège': 'Belgium',
+
+    // Austria
+    'Vienna': 'Austria',
+    'Salzburg': 'Austria',
+    'Graz': 'Austria',
+    'Innsbruck': 'Austria',
+
+    // Poland
+    'Warsaw': 'Poland',
+    'Krakow': 'Poland',
+    'Wrocław': 'Poland',
+    'Poznań': 'Poland',
+    'Gdańsk': 'Poland',
+
+    // Czechia
+    'Prague': 'Czechia',
+    'Brno': 'Czechia',
+    'Ostrava': 'Czechia',
+
+    // Hungary
+    'Budapest': 'Hungary',
+    'Debrecen': 'Hungary',
+    'Szeged': 'Hungary',
+
+    // Romania
+    'Bucharest': 'Romania',
+    'Cluj-Napoca': 'Romania',
+    'Timișoara': 'Romania',
+    'Iași': 'Romania',
+
+    // Greece
+    'Athens': 'Greece',
+    'Thessaloniki': 'Greece',
+    'Patras': 'Greece',
+
+    // Portugal
+    'Lisbon': 'Portugal',
+    'Porto': 'Portugal',
+    'Braga': 'Portugal',
+    'Coimbra': 'Portugal',
+
+    // Sweden
+    'Stockholm': 'Sweden',
+    'Gothenburg': 'Sweden',
+    'Malmö': 'Sweden',
+    'Uppsala': 'Sweden',
+
+    // Norway
+    'Oslo': 'Norway',
+    'Bergen': 'Norway',
+    'Trondheim': 'Norway',
+
+    // Denmark
+    'Copenhagen': 'Denmark',
+    'Aarhus': 'Denmark',
+    'Odense': 'Denmark',
+
+    // Finland
+    'Helsinki': 'Finland',
+    'Espoo': 'Finland',
+    'Tampere': 'Finland',
+    'Turku': 'Finland',
+
+    // Ireland
+    'Dublin': 'Ireland',
+    'Cork': 'Ireland',
+    'Limerick': 'Ireland',
+    'Galway': 'Ireland',
+
+    // Switzerland
+    'Zurich': 'Switzerland',
+    'Geneva': 'Switzerland',
+    'Basel': 'Switzerland',
+    'Bern': 'Switzerland',
+    'Lausanne': 'Switzerland',
+
+    // Others
+    'Sofia': 'Bulgaria',
+    'Zagreb': 'Croatia',
+    'Nicosia': 'Cyprus',
+    'Tallinn': 'Estonia',
+    'Riga': 'Latvia',
+    'Vilnius': 'Lithuania',
+    'Luxembourg City': 'Luxembourg',
+    'Valletta': 'Malta',
+    'Bratislava': 'Slovakia',
+    'Ljubljana': 'Slovenia',
+}
+
+// Get cities by country
+export const getEuropeanCitiesByCountry = (country: string): string[] => {
+    return Object.entries(EUROPEAN_CITY_COUNTRY_MAP)
+        .filter(([_, countryName]) => countryName === country)
+        .map(([city, _]) => city)
+        .sort()
+}
+
+// Get country by city
+export const getCountryByEuropeanCity = (city: string): string | undefined => {
+    return EUROPEAN_CITY_COUNTRY_MAP[city]
+}
+
+// Major European Cities (sorted alphabetically)
+export const MAJOR_EUROPEAN_CITIES = Object.keys(EUROPEAN_CITY_COUNTRY_MAP).sort()
+
 
 // Hospital RFQ Requirements
 export interface Requirement {
@@ -526,12 +729,12 @@ export const hospitalMenuItems: MenuItem[] = [
         icon: FileText,
         url: '/dashboard/hospital/rfq',
         items: [
-            { title: 'All RFQs', url: '/dashboard/hospital/rfq' },
-            { title: 'Create RFQ', url: '/dashboard/hospital/rfq/upload' },
-            { title: 'Awaiting Responses', url: '/dashboard/hospital/rfq/awaiting' },
-            { title: 'Under Review', url: '/dashboard/hospital/rfq/under-review' },
-            { title: 'Awarded', url: '/dashboard/hospital/rfq/awarded' },
-            { title: 'Closed', url: '/dashboard/hospital/rfq/closed' },
+            { title: 'All RFQs', url: '/dashboard/hospital/rfq', icon: FileText },
+            { title: 'Create RFQ', url: '/dashboard/hospital/rfq/upload', icon: Upload },
+            { title: 'Awaiting Responses', url: '/dashboard/hospital/rfq/awaiting', icon: Clock },
+            { title: 'Under Review', url: '/dashboard/hospital/rfq/under-review', icon: Eye },
+            { title: 'Awarded', url: '/dashboard/hospital/rfq/awarded', icon: Award },
+            { title: 'Closed', url: '/dashboard/hospital/rfq/closed', icon: CheckCircle2 },
         ],
     },
     {
@@ -543,6 +746,16 @@ export const hospitalMenuItems: MenuItem[] = [
             { title: 'Pending', url: '/dashboard/hospital/orders?status=pending' },
             { title: 'In Transit', url: '/dashboard/hospital/orders?status=in_transit' },
             { title: 'Delivered', url: '/dashboard/hospital/orders?status=delivered' },
+        ],
+    },
+    {
+        title: 'Vendors',
+        icon: Users,
+        url: '/dashboard/hospital/vendors',
+        items: [
+            { title: 'All Vendors', url: '/dashboard/hospital/vendors' },
+            { title: 'Verified', url: '/dashboard/hospital/vendors?status=verified' },
+            { title: 'Pending Approval', url: '/dashboard/hospital/vendors?status=pending' },
         ],
     },
     {

@@ -41,3 +41,21 @@ export interface VendorOnboardingData {
   companySize?: string
   industry?: string
 }
+
+export type Profile = {
+  id: string
+  email: string
+  full_name: string
+  role: 'hospital' | 'vendor' | 'admin' | 'cpo' | 'cfo'
+  organization_name?: string
+  phone?: string
+  address?: string
+  city?: string
+  state?: string
+  country?: string
+  postal_code?: string
+  avatar_url?: string
+  is_active: boolean
+  created_at: string
+  updated_at: string
+}

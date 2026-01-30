@@ -38,20 +38,23 @@ import { usePathname, useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { hospitalMenuItems, vendorMenuItems } from '@/lib/constants'
-import { useUser } from '@/lib/contexts/user-context'
+import { useAuth } from '@/contexts/auth-context' // Changed import
 
 export function AppSidebar() {
     const pathname = usePathname()
     const router = useRouter()
-    const { user, userType, logout } = useUser()
+    const { profile, signOut } = useAuth() // Changed from useUser
+
+    // Determine userType from profile role
+    const userType = profile?.role === 'hospital' ? 'hospital' : 'vendor'
 
     const menuItems = userType === 'hospital' ? hospitalMenuItems : vendorMenuItems
 
     const defaultUser = {
-        name: user?.name || 'John Doe',
-        email: user?.email || 'john@hospital.com',
-        organization: user?.organization || 'General Hospital',
-        avatar: user?.avatar,
+        name: profile?.full_name || 'John Doe',
+        email: profile?.email || 'john@hospital.com',
+        organization: profile?.organization_name || 'General Hospital',
+        avatar: profile?.avatar_url,
     }
 
     const getRfqIdFromPath = () => {
@@ -89,8 +92,8 @@ export function AppSidebar() {
         return pathname === resolvedUrl
     }
 
-    const handleLogout = () => {
-        logout()
+    const handleLogout = async () => {
+        await signOut() // Changed from logout()
         router.push('/login')
     }
 

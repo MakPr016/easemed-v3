@@ -3,20 +3,20 @@
 import { useState, useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Building2, ShoppingBag, ArrowLeft } from 'lucide-react'
-import { useUser } from '@/lib/contexts/user-context'
 import type { UserType } from '@/lib/types/auth'
 
 function LoginContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { setUser, setUserType } = useUser()
-  const [selectedUserType, setSelectedUserType] = useState<UserType>('hospital')
+  const supabase = createClient()
+  const [userType, setUserType] = useState<UserType>('hospital')
   const [formData, setFormData] = useState({
     email: '',
     password: ''
@@ -27,41 +27,67 @@ function LoginContent() {
   useEffect(() => {
     const type = searchParams.get('type')
     if (type === 'hospital' || type === 'vendor') {
-      setSelectedUserType(type)
+      setUserType(type)
     }
   }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setErrors({})
 
     try {
-      console.log('Login data:', { ...formData, userType: selectedUserType })
-
-      await new Promise(resolve => setTimeout(resolve, 1000))
-
-      const mockUser = {
-        id: '1',
-        name: selectedUserType === 'hospital' ? 'John Doe' : 'Sarah Smith',
+      // Sign in with Supabase
+      const { data, error } = await supabase.auth.signInWithPassword({
         email: formData.email,
-        organization: selectedUserType === 'hospital' ? 'General Hospital' : 'PharmaCorp Ltd',
-        type: selectedUserType,
+        password: formData.password,
+      })
+
+      if (error) throw error
+
+      // Fetch user profile to verify role
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', data.user.id)
+        .single()
+
+      if (profileError) throw profileError
+
+      // Verify user type matches selected role
+      if (userType === 'hospital' && profile?.role !== 'hospital') {
+        await supabase.auth.signOut()
+        throw new Error('This account is not registered as a Hospital. Please select the correct account type.')
+      }
+      if (userType === 'vendor' && profile?.role !== 'vendor') {
+        await supabase.auth.signOut()
+        throw new Error('This account is not registered as a Vendor. Please select the correct account type.')
       }
 
-      setUser(mockUser)
-      setUserType(selectedUserType)
+      // Redirect based on role
+      if (profile?.role === 'hospital') {
+        router.push('/dashboard/hospital')
+      } else if (profile?.role === 'vendor') {
+        router.push('/dashboard/vendor')
+      } else if (profile?.role === 'cpo' || profile?.role === 'cfo' || profile?.role === 'admin') {
+        router.push('/dashboard/admin')
+      } else {
+        router.push('/dashboard')
+      }
 
-      router.push(`/dashboard/${selectedUserType}`)
-    } catch (error) {
+      router.refresh()
+    } catch (error: any) {
       console.error('Login error:', error)
-      setErrors({ general: 'Invalid email or password' })
+      setErrors({ 
+        general: error.message || 'Invalid email or password. Please try again.' 
+      })
     } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-linear-to-b from-background to-secondary/20">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-b from-background to-secondary/20">
       <div className="w-full max-w-md space-y-6">
         <Link href="/">
           <Button variant="ghost" className="gap-2">
@@ -85,7 +111,7 @@ function LoginContent() {
           </CardHeader>
 
           <CardContent>
-            <Tabs value={selectedUserType} onValueChange={(v) => setSelectedUserType(v as UserType)} className="mb-6">
+            <Tabs value={userType} onValueChange={(v) => setUserType(v as UserType)} className="mb-6">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="hospital" className="gap-2">
                   <Building2 className="h-4 w-4" />
@@ -114,6 +140,7 @@ function LoginContent() {
                   value={formData.email}
                   onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -131,6 +158,7 @@ function LoginContent() {
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -141,7 +169,7 @@ function LoginContent() {
 
             <div className="mt-6 text-center text-sm">
               Don't have an account?{' '}
-              <Link href={`/signup?type=${selectedUserType}`} className="text-primary hover:underline font-medium">
+              <Link href={`/signup?type=${userType}`} className="text-primary hover:underline font-medium">
                 Sign up
               </Link>
             </div>
@@ -154,7 +182,14 @@ function LoginContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
       <LoginContent />
     </Suspense>
   )

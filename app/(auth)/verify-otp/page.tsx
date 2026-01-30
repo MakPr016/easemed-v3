@@ -1,19 +1,21 @@
-// app/(auth)/verify-otp/page.tsx
 'use client'
 
 import { useState, useEffect, useRef, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Link from 'next/link'
+import { createClient } from '@/lib/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ArrowLeft, Mail } from 'lucide-react'
+import { ArrowLeft, Mail, CheckCircle } from 'lucide-react'
 
 function VerifyOTPContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const supabase = createClient()
   const [otp, setOtp] = useState(['', '', '', '', '', '', '', ''])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
   const [resendCooldown, setResendCooldown] = useState(0)
   const inputRefs = useRef<(HTMLInputElement | null)[]>([])
 
@@ -26,6 +28,10 @@ function VerifyOTPContent() {
       return () => clearTimeout(timer)
     }
   }, [resendCooldown])
+
+  useEffect(() => {
+    inputRefs.current[0]?.focus()
+  }, [])
 
   const handleOtpChange = (index: number, value: string) => {
     if (!/^[a-zA-Z0-9]*$/.test(value)) return
@@ -70,16 +76,27 @@ function VerifyOTPContent() {
 
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
-      console.log('Verifying OTP:', otpString, 'for email:', email)
+      const { data, error } = await supabase.auth.verifyOtp({
+        email: email,
+        token: otpString,
+        type: 'signup'
+      })
 
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      if (error) throw error
 
-      router.push(`/onboarding?email=${encodeURIComponent(email)}&type=${userType}`)
-    } catch (error) {
+      setSuccess('Email verified successfully!')
+      
+      setTimeout(() => {
+        router.push(`/onboarding?email=${encodeURIComponent(email)}&type=${userType}`)
+      }, 1000)
+    } catch (error: any) {
       console.error('OTP verification error:', error)
-      setError('Invalid code. Please try again.')
+      setError(error.message || 'Invalid code. Please try again.')
+      setOtp(['', '', '', '', '', '', '', ''])
+      inputRefs.current[0]?.focus()
     } finally {
       setLoading(false)
     }
@@ -88,16 +105,24 @@ function VerifyOTPContent() {
   const handleResend = async () => {
     if (resendCooldown > 0) return
 
+    setError('')
+    setSuccess('')
+
     try {
-      console.log('Resending OTP to:', email)
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: email
+      })
 
-      await new Promise(resolve => setTimeout(resolve, 500))
+      if (error) throw error
 
+      setSuccess('Verification code resent successfully!')
       setResendCooldown(60)
       setOtp(['', '', '', '', '', '', '', ''])
       inputRefs.current[0]?.focus()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Resend error:', error)
+      setError(error.message || 'Failed to resend code')
     }
   }
 
@@ -128,24 +153,37 @@ function VerifyOTPContent() {
           </CardHeader>
 
           <CardContent className="space-y-6">
+            {success && (
+              <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+                <p className="text-sm text-green-700 flex items-center gap-2">
+                  <CheckCircle className="h-4 w-4" />
+                  {success}
+                </p>
+              </div>
+            )}
+
+            {error && (
+              <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                <p className="text-sm text-destructive">{error}</p>
+              </div>
+            )}
+
             <div>
               <div className="flex gap-2 justify-center" onPaste={handlePaste}>
                 {otp.map((digit, index) => (
                   <input
                     key={index}
-                    ref={(el) => { inputRefs.current[index] = el; }}
+                    ref={(el) => { inputRefs.current[index] = el }}
                     type="text"
                     maxLength={1}
                     value={digit}
                     onChange={(e) => handleOtpChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
-                    className="w-10 h-12 text-center text-xl font-semibold border rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase"
+                    disabled={loading}
+                    className="w-10 h-12 text-center text-xl font-semibold border-2 rounded-lg focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none transition-all uppercase disabled:opacity-50 disabled:cursor-not-allowed"
                   />
                 ))}
               </div>
-              {error && (
-                <p className="text-sm text-destructive text-center mt-4">{error}</p>
-              )}
             </div>
 
             <Button 
@@ -180,7 +218,14 @@ function VerifyOTPContent() {
 
 export default function VerifyOTPPage() {
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="h-8 w-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto"></div>
+          <p className="mt-2 text-sm text-muted-foreground">Loading...</p>
+        </div>
+      </div>
+    }>
       <VerifyOTPContent />
     </Suspense>
   )
