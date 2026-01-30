@@ -1,0 +1,64 @@
+{
+  "metadata": {
+    "rfq_id": "RFQPROC",
+    "issue_date": "02 May 2023",
+    "submission_deadline": "for the Submission \nof Quotation  17 May 2023 4:00PM",
+    "currency": "USD",
+    "contract_type": "long_term_agreement",
+    "quotation_validity_days": 90,
+    "evaluation_method": "lowest_price_per_line_item",
+    "vendors_to_select": 2,
+    "local_only": true
+  },
+  "vendor_requirements": {
+    "legal_requirements": [
+      "cGMP_certification",
+      "ISO_9001",
+      "product_registration"
+    ],
+    "technical_requirements": [
+      {
+        "type": "min_years_experience",
+        "value": 1
+      },
+      {
+        "type": "required_references",
+        "count": 3
+      }
+    ],
+    "financial_requirements": [
+      "prices_inclusive_vat",
+      {
+        "type": "payment_term",
+        "percentage": 100,
+        "days": 30
+      }
+    ],
+    "mandatory_documents": [
+      "quotation_submission_form",
+      "technical_financial_offer",
+      "qms_certificate",
+      "product_registration_certificate"
+    ]
+  },
+  "line_items": [],
+  "delivery_requirements": {
+    "transport_mode": "land",
+    "min_expiry_months": 12,
+    "packaging": "standard"
+  },
+  "evaluation_criteria": {
+    "primary_criteria": "lowest_price_substantially_compliant",
+    "compliance_factors": [
+      "full_compliance_with_requirements",
+      "acceptance_of_general_conditions",
+      "completeness_of_offer"
+    ]
+  },
+  "extracted_at": "2026-01-30T05:02:30.924947",
+  "summary": {
+    "total_line_items": 0,
+    "total_mandatory_documents": 4,
+    "vendor_selection_method": "lowest_price_per_line_item"
+  }
+}

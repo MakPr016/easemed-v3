@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "rfq_id": "4200715401",
+    "issue_date": "21 August 2024",
+    "submission_deadline": "for the Submission \nof Quotation  25th August 2024 17:00 \nIf any doubt exists as to the time",
+    "currency": "USD",
+    "contract_type": "purchase_order",
+    "quotation_validity_days": 60,
+    "evaluation_method": "lowest_price_per_line_item",
+    "local_only": false
+  },
+  "vendor_requirements": {
+    "legal_requirements": [],
+    "technical_requirements": [],
+    "financial_requirements": [
+      "prices_inclusive_vat",
+      {
+        "type": "payment_term",
+        "percentage": 100,
+        "days": 30
+      }
+    ],
+    "mandatory_documents": [
+      "quotation_submission_form",
+      "technical_financial_offer"
+    ]
+  },
+  "line_items": [],
+  "delivery_requirements": {
+    "transport_mode": "land"
+  },
+  "evaluation_criteria": {
+    "primary_criteria": "lowest_price_substantially_compliant",
+    "compliance_factors": [
+      "full_compliance_with_requirements",
+      "acceptance_of_general_conditions",
+      "completeness_of_offer"
+    ]
+  },
+  "extracted_at": "2026-01-30T05:12:08.832186",
+  "summary": {
+    "total_line_items": 0,
+    "total_mandatory_documents": 2,
+    "vendor_selection_method": "lowest_price_per_line_item"
+  }
+}

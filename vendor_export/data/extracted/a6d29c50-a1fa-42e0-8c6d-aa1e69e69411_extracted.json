@@ -1,0 +1,1695 @@
+{
+  "metadata": {
+    "rfq_id": "RFQPROC",
+    "issue_date": "02 May 2023",
+    "submission_deadline": "for the Submission \nof Quotation  17 May 2023 4:00PM",
+    "currency": "USD",
+    "contract_type": "long_term_agreement",
+    "quotation_validity_days": 90,
+    "evaluation_method": "lowest_price_per_line_item",
+    "vendors_to_select": 2,
+    "local_only": true
+  },
+  "vendor_requirements": {
+    "legal_requirements": [
+      "cGMP_certification",
+      "ISO_9001",
+      "product_registration"
+    ],
+    "technical_requirements": [
+      {
+        "type": "min_years_experience",
+        "value": 1
+      },
+      {
+        "type": "required_references",
+        "count": 3
+      }
+    ],
+    "financial_requirements": [
+      "prices_inclusive_vat",
+      {
+        "type": "payment_term",
+        "percentage": 100,
+        "days": 30
+      }
+    ],
+    "mandatory_documents": [
+      "quotation_submission_form",
+      "technical_financial_offer",
+      "qms_certificate",
+      "product_registration_certificate"
+    ]
+  },
+  "line_items": [
+    {
+      "line_item_id": 9,
+      "inn_name": "May 2023. Responses to request for clarification will be communicated by email by 10 May 2023. 4 Evaluation method \u2612The contract will be awarded to the lowest price substantially compliant offer per line item . Up to two (2) to three (3) vendors will be selected. \u2610 Other Click or tap here to enter text. Evaluation criteria \u2612Full compliance with all requirements as specified in Annex 1 \u2612Full acceptance of the General Conditions of Contract \u2612Completeness of Offer \u2610Earliest Delivery /shortest lead time \u2610Others Post -qualification IOM reserves the right to undertake a post -qualification assessment, aimed at determining, to its satisfaction, the validity of the information provided by the bidder. Such exercise shall be fully documented and may include, but need not be limited to, all or any combination of the following: a. Verification of accuracy, correctness and authenticity of the information provided by the bidder; b. Validation of the extent of compliance to the RFQ requirements and evaluation criteria based on what has so far been found by the evaluation team; c. Inquiry and reference checking with Government entities with jurisdiction over the bidder, or with previous clients, or any other entity that may have done business with the bidder. d. Inquiry and reference checking with pre vious clients on the performance on ongoing or completed contracts, including physical inspections of previous works, as deemed necessary. e. physical inspection of the bidder\u2019s offices, branches or other places where business transpires, with or without noti ce to the bidder. f. Other means that IOM may deem appropriate, at any stage within the selection process, prior to awarding the contract Right not to accept any quotation IOM is not bound to accept any quotation, nor award a contract or Purchase Order Right to vary requirement at time of award Not applicable Type of Contract to be awarded Recurring Supply and Delivery Contract Expected date for contract award. 15 June 2023 Policies and procedures This RFQ is conducted in accordance with Policies and Procedures of IOM UNGM registration IOM is encouraging all suppliers to register at the United Nations Global Marketplace (UNGM) website at www.ungm.org . The Bidder may still submit a quotation even if not registered with the UNGM, however, if the Bidder is selected for Cont ract award of USD 100,000 and above , the Bidder is recommended to register on the UNGM prior to contract signature . For vendors who do not have the technical means to register in UNGM, the UNGM has implemented an assisted vendor registration functionality that allows IOM procurement personnel to add local vendors to the UNGM. 5 ANNEX 1: SCHEDULE OF REQUIREMENTS Required documents to be submitted along with the duly accomplished forms A. Conformity with Quality Management Systems (QMS) and other relevant certificates Suppliers or Manufacturers shall conform to at least one of the following: 1. If Manufacturer, Current Good Manufacturing Practice (cGMP) 2. If Manufacturers and suppliers and resellers/ traders : ISO 9001 Quality Management systems \u2013 requirements for regulatory purposes or national equivalent or internal/inhouse quality documents B. Pharmaceutical products must be registered at the Ministry of Public Health. If MOPH list is not updated in their official website, Certificate of Product Registration per offered item or equivalent national standard must be provided. Technical Specificat ions for Goods : dosage unit",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Generic allowed",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 1,
+      "inn_name": "Acetylsalicylic acid",
+      "dosage": "81 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Aspirin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 2,
+      "inn_name": "Acetylsalicylic acid",
+      "dosage": "100 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Aspirin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 3,
+      "inn_name": "Acetylsalicylic acid",
+      "dosage": "325 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Aspirin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 4,
+      "inn_name": "Acetaminophen",
+      "dosage": "100 ml",
+      "form": "Syrup",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Panadol Syrup",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 5,
+      "inn_name": "Acetaminophen",
+      "dosage": "125 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Paracetamol or Adol suppository",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 6,
+      "inn_name": "Acetaminophen",
+      "dosage": "500 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Panadol",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 7,
+      "inn_name": "Actarapid",
+      "dosage": "100U",
+      "form": "Injection",
+      "unit_of_issue": "Vial",
+      "brand_name": "Generic allowed",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 8,
+      "inn_name": "Activated charcoal",
+      "dosage": "25g",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Bottle",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 9,
+      "inn_name": "Activated charcoal",
+      "dosage": "100g",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Bottle",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 10,
+      "inn_name": "Adrenalin inj",
+      "dosage": "1mg/ 1ml",
+      "form": "Injection",
+      "unit_of_issue": "Injection",
+      "brand_name": "Ampule  Adre",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 11,
+      "inn_name": "Albendazole",
+      "dosage": "400 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Albenda",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 12,
+      "inn_name": "Allopurinol",
+      "dosage": "100 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Zyloric",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 13,
+      "inn_name": "Alprazolam",
+      "dosage": "0.5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Box Xanax",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 14,
+      "inn_name": "Amiodarone",
+      "dosage": "200 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Box Cordarone",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 15,
+      "inn_name": "Amiodarone",
+      "dosage": "150 mg/3ml",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Ampule  Cordarone",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 16,
+      "inn_name": "Amlodipine",
+      "dosage": "5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Tablet  Amlocard",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 17,
+      "inn_name": "Amlodipine Besylate",
+      "dosage": "5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Amlorine",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 18,
+      "inn_name": "Amoxicillin + Calvunate potassium",
+      "dosage": "642.9mg/5ml",
+      "form": "Syrup",
+      "unit_of_issue": "Box",
+      "brand_name": "Syrup  Augmentin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 19,
+      "inn_name": "Amoxicillin + Calvunate potassium",
+      "dosage": "1g",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Augmentin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 20,
+      "inn_name": "Atorvastatin",
+      "dosage": "40 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Lipitor",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 21,
+      "inn_name": "Atropine adult",
+      "dosage": "1 mg/1ml",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Ampule  Atropine",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 22,
+      "inn_name": "Atrovent -N puff metered aerosol",
+      "dosage": "20mcg",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Inhaler  Atrovent N inhaler",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 23,
+      "inn_name": "Bisoprolol",
+      "dosage": "5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Tablet  Concor",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 24,
+      "inn_name": "Bromazepam",
+      "dosage": "1.5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Tablet  Lexotanil",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 25,
+      "inn_name": "Bromazepam",
+      "dosage": "3 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Tablet  Lexotanil",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 26,
+      "inn_name": "Budesonide",
+      "dosage": "0.5ml/ 2ml",
+      "form": "Suspension",
+      "unit_of_issue": "Solution",
+      "brand_name": "Box Pulmicort",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 27,
+      "inn_name": "Budesonide",
+      "dosage": "320 mcg",
+      "form": "Solution",
+      "unit_of_issue": "Solution",
+      "brand_name": "Solution  Pulmicort solution",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 28,
+      "inn_name": "Budesonide and Formoterol fumarat e dihydrate",
+      "dosage": "160 mg",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Inhaler  Symbicort",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 29,
+      "inn_name": "Captopril",
+      "dosage": "25 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Tablet  Captace",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 30,
+      "inn_name": "Carbamazepine",
+      "dosage": "400 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Tegretol",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 31,
+      "inn_name": "Clidinium Bromide/Chlordiazepoxide 2.5/",
+      "dosage": "5mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Tegretol",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 32,
+      "inn_name": "Clonazepam",
+      "dosage": "2 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Klonopin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 33,
+      "inn_name": "Clopidogrel",
+      "dosage": "75 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Plavix",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 34,
+      "inn_name": "Clotrimazole (antifungal), Neomycin (antibiotic) and Betamethasone (steroid)",
+      "dosage": "15 g",
+      "form": "Cream",
+      "unit_of_issue": "Tube",
+      "brand_name": "Tube  Quadriderm cream",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 35,
+      "inn_name": "Dexamethasone",
+      "dosage": "10 mg",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Ampule  Dexamed",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 36,
+      "inn_name": "Dexamethasone + Dexchlopheniramine",
+      "dosage": "0.25mg/ 2mg",
+      "form": "Syrup",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Histamid F syrup",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 37,
+      "inn_name": "Dexamethasone, dexachlorphenaramine maleat, fluphenazine hydrochloride",
+      "dosage": "0.25 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Histamed -F tab",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 38,
+      "inn_name": "Dexamethasone, dexachlorphenaramine maleat, fluphenazine hydrochloride",
+      "dosage": "0.25 mg",
+      "form": "Syrup",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Histamed -F syrup",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 39,
+      "inn_name": "Diazepam",
+      "dosage": "10 mg/2ml",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Ampule  Valium",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 40,
+      "inn_name": "Diazepam",
+      "dosage": "5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Valium",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 41,
+      "inn_name": "Diclofenac",
+      "dosage": "75 mg/3 ml",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Dolonil",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 42,
+      "inn_name": "Diclofenac",
+      "dosage": "75 mg",
+      "form": "Injection",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Diclo",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 43,
+      "inn_name": "Diclofenac",
+      "dosage": "30g",
+      "form": "Gel",
+      "unit_of_issue": "Tube",
+      "brand_name": "Tube  Airtal  Gel",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 44,
+      "inn_name": "Dimenhydrinate",
+      "dosage": "90 ml",
+      "form": "Syrup",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Gravol",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 45,
+      "inn_name": "Dimenhydrinate",
+      "dosage": "50 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Gravol",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 46,
+      "inn_name": "Dimenhydrinate syrup",
+      "dosage": "15mg/5ml",
+      "form": "Syrup",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Gravol  kids",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 47,
+      "inn_name": "Diphenhydramine",
+      "dosage": "10 mg",
+      "form": "Vial",
+      "unit_of_issue": "Vial",
+      "brand_name": "Vial Benadryl",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 48,
+      "inn_name": "Diphenhydramine",
+      "dosage": "50 mg",
+      "form": "Vial",
+      "unit_of_issue": "Vial",
+      "brand_name": "Vial Benadryl",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 49,
+      "inn_name": "Distilled water for injection",
+      "dosage": "10ml",
+      "form": "Injection",
+      "unit_of_issue": "Injection",
+      "brand_name": "Solution",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 50,
+      "inn_name": "Diovan",
+      "dosage": "160 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Valsartan",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 51,
+      "inn_name": "Doxofylline",
+      "dosage": "400mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Ansimar",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 52,
+      "inn_name": "Enoxaparin sodium",
+      "dosage": "40 mg",
+      "form": "Injection",
+      "unit_of_issue": "Injection",
+      "brand_name": "Injection  Lovenox",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 53,
+      "inn_name": "Enoxaparin sodium 4,",
+      "dosage": "000 IU",
+      "form": "Injection",
+      "unit_of_issue": "Injection",
+      "brand_name": "IU inj  Injection  Lovenox",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 54,
+      "inn_name": "Epinephrine",
+      "dosage": "1 mg/1ml",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Adrenaline",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 55,
+      "inn_name": "EpiPen",
+      "dosage": "0.3 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Pen",
+      "brand_name": "Pen Adrenaline",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 56,
+      "inn_name": "EpiPen Jr.",
+      "dosage": "0.15 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Pen",
+      "brand_name": "Pen Adrenaline",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 57,
+      "inn_name": "Furosemide",
+      "dosage": "20 mg/2ml",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Ampule  Lasix",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 58,
+      "inn_name": "Gliclazide",
+      "dosage": "60 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Diamicron",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 59,
+      "inn_name": "Glimepiride",
+      "dosage": "2mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Amaryl",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 60,
+      "inn_name": "Glucose",
+      "dosage": "50%",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Generic allowed",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 50,
+      "inn_name": "ml amp",
+      "dosage": "N/A",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Ampule  Glucose",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 61,
+      "inn_name": "Glucose sodium chloride, potassium chloride, and sodium citrate Sachet ORS sachet or any other alternative",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "unit_of_issue": "Sachet",
+      "brand_name": "Sachet  ORS sachet",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 62,
+      "inn_name": "Haloperidol",
+      "dosage": "5mg",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Ampule  Haldol",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 63,
+      "inn_name": "Haloperidol",
+      "dosage": "5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Haldol",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 64,
+      "inn_name": "Haloperidol",
+      "dosage": "5mg",
+      "form": "Injection",
+      "unit_of_issue": "Injection",
+      "brand_name": "Ampule  Haldol",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 65,
+      "inn_name": "Heparin",
+      "dosage": "5000 IU",
+      "form": "Vial",
+      "unit_of_issue": "Vial",
+      "brand_name": "Vial Hep",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 66,
+      "inn_name": "Hydrocortisone",
+      "dosage": "250mg",
+      "form": "Injection",
+      "unit_of_issue": "Injection",
+      "brand_name": "Ampule  Solu -Cortef",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 67,
+      "inn_name": "Hydrocortisone",
+      "dosage": "100 mg/2ml",
+      "form": "Vial",
+      "unit_of_issue": "Vial",
+      "brand_name": "Vial Solu -Cortef",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 68,
+      "inn_name": "Ibuprofen",
+      "dosage": "110 ml",
+      "form": "Syrup",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Profinal  Syrup",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 69,
+      "inn_name": "Ibuprofen",
+      "dosage": "400 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Profinal",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 70,
+      "inn_name": "Insulin rapid",
+      "dosage": "100 U",
+      "form": "Injection",
+      "unit_of_issue": "Injection",
+      "brand_name": "Injection",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 71,
+      "inn_name": "Insulin aspart",
+      "dosage": "100U",
+      "form": "Injection",
+      "unit_of_issue": "Pen",
+      "brand_name": "Pen Novorapid",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 72,
+      "inn_name": "Insulin glargine",
+      "dosage": "100U",
+      "form": "Injection",
+      "unit_of_issue": "Pen",
+      "brand_name": "Pen Lantus",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 73,
+      "inn_name": "Ipratropium bromide",
+      "dosage": "0.5 mg/ 2ml",
+      "form": "Solution",
+      "unit_of_issue": "Solution",
+      "brand_name": "Solution  Atrovent",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 74,
+      "inn_name": "Ipratropium bromide",
+      "dosage": "500mcg/2 ml",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Inhaler  Atrovent N inhaler",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 75,
+      "inn_name": "Ipratropium bromide",
+      "dosage": "20mcg",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Inhaler  Atrovent comp HFA",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 76,
+      "inn_name": "Ipratropium bromide",
+      "dosage": "50mcg",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Inhaler  Atrovent comp HFA",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 77,
+      "inn_name": "Ipratropium bromide",
+      "dosage": "200 mcg",
+      "form": "Solution",
+      "unit_of_issue": "Solution",
+      "brand_name": "Solution  Atrovent",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 78,
+      "inn_name": "Ibuprofen",
+      "dosage": "100mg/ 5ml",
+      "form": "Suspension",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Profen",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 79,
+      "inn_name": "Irbesartan",
+      "dosage": "150 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Aprovel or",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 80,
+      "inn_name": "Irbesartan Hydrochlorothiazide 300/12,",
+      "dosage": "5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Co -approvel",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 81,
+      "inn_name": "Iron Supplement Tab Eurofer CF or any other alternative medication of same generic",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Iron Supplement  Tab  Eurofer CF",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 82,
+      "inn_name": "Iron / Ferrous Sulfate",
+      "dosage": "30mg/ 5 ml",
+      "form": "Syrup",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Pediafer",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 83,
+      "inn_name": "Isosorbid Dinitrate",
+      "dosage": "5mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Isordil",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 84,
+      "inn_name": "Jardiance",
+      "dosage": "5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Empagliflozin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 85,
+      "inn_name": "Kepcitam",
+      "dosage": "500 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 86,
+      "inn_name": "Lanoxin",
+      "dosage": "250 mcg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Tablet  Digoxin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 87,
+      "inn_name": "Levetiracetam",
+      "dosage": "250 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Keppra any other alternative medication of same generic",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 88,
+      "inn_name": "Levetiracetam",
+      "dosage": "500 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Keppra any other alternative medication of same generic",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 89,
+      "inn_name": "Levetiracetam 1,",
+      "dosage": "000 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Keppra any other alternative medication of same generic",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 90,
+      "inn_name": "Levothyroxine",
+      "dosage": "25 mcg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Euthyrox",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 91,
+      "inn_name": "Levothyroxine",
+      "dosage": "50 mcg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Euthyrox",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 92,
+      "inn_name": "Linagliptin",
+      "dosage": "5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Trajenta",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 93,
+      "inn_name": "Metformin",
+      "dosage": "850 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Glucophage",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 94,
+      "inn_name": "Metformin XR",
+      "dosage": "1000 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Glucophage",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 95,
+      "inn_name": "Metoclopramide",
+      "dosage": "10 mg/2ml",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Primperan",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 96,
+      "inn_name": "Metoclopramide",
+      "dosage": "20 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Primperan",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 97,
+      "inn_name": "Metoclopramide Hydrochloride",
+      "dosage": "10mg/2 ml",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Metoram",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 98,
+      "inn_name": "Montelukast",
+      "dosage": "10 mg",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Singulair",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 99,
+      "inn_name": "Moxonidine",
+      "dosage": "0.2 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Cynt",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 100,
+      "inn_name": "Moxonidine",
+      "dosage": "0.4 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Cynt",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 101,
+      "inn_name": "Moxifloxacin",
+      "dosage": "400 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Em-flox",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 102,
+      "inn_name": "Naloxone",
+      "dosage": "0.4 mg",
+      "form": "Vial",
+      "unit_of_issue": "Vial",
+      "brand_name": "Vial Narcan",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 103,
+      "inn_name": "Natural seawater nasal care Spray Spray Physiomer nasal spray or any other alternative brand",
+      "dosage": "N/A",
+      "form": "Spray",
+      "unit_of_issue": "Spray",
+      "brand_name": "Natural seawater nasal care  Spray  Spray  Physiomer  nasal spray",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 104,
+      "inn_name": "Nefilat",
+      "dosage": "30 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Adalat",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 105,
+      "inn_name": "Novomix",
+      "dosage": "100U",
+      "form": "Injection",
+      "unit_of_issue": "Box",
+      "brand_name": "Generic allowed",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 106,
+      "inn_name": "Olanzapine",
+      "dosage": "10 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Zyprexa",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 107,
+      "inn_name": "Omeprazole",
+      "dosage": "40 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Nexium",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 108,
+      "inn_name": "Omeprazole",
+      "dosage": "20 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Nexium",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 109,
+      "inn_name": "Oxytocin",
+      "dosage": "10 IU",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Ampule  Oxytocin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 110,
+      "inn_name": "Paracetamol",
+      "dosage": "100 ml",
+      "form": "Syrup",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Panadol Syrup",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 111,
+      "inn_name": "Paracetamol",
+      "dosage": "120mg/ 5ml",
+      "form": "Syrup",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Panadol Syrup",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 112,
+      "inn_name": "Paracetamol",
+      "dosage": "125 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Adol suppository",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 113,
+      "inn_name": "Paracetamol",
+      "dosage": "500 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Panadol",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 114,
+      "inn_name": "Paracetamol Joint",
+      "dosage": "665mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Panadol",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 115,
+      "inn_name": "Perindopril and Indapamide 5/",
+      "dosage": "1.25mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Preterax",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 116,
+      "inn_name": "Phloroglucinol hydrated, Trimethylphloroglucinol",
+      "dosage": "80mg/ 80mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Tablet  Spasfon",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 117,
+      "inn_name": "Povidone Iodine",
+      "dosage": "120 ml",
+      "form": "Tablet",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Betadine",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 118,
+      "inn_name": "Prednisone",
+      "dosage": "10 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 119,
+      "inn_name": "Prednisone",
+      "dosage": "20 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Generic allowed",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 120,
+      "inn_name": "Promethazine",
+      "dosage": "25mg",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Ampule  Phenergan",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 121,
+      "inn_name": "Ramipril",
+      "dosage": "5mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Tritace",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 122,
+      "inn_name": "Ranitidine",
+      "dosage": "50mg/2ml",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Ampule  Zantac",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 123,
+      "inn_name": "Reserpine + Dihydralazine + Hydrochlorothiazide",
+      "dosage": "25 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Esidrex",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 124,
+      "inn_name": "Risperidone",
+      "dosage": "2mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Risperdal",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 125,
+      "inn_name": "Risperidone",
+      "dosage": "30 ml",
+      "form": "Syrup",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Risperdal",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 126,
+      "inn_name": "Rosuvastatin",
+      "dosage": "5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Crestor",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 127,
+      "inn_name": "Rosuvastatin",
+      "dosage": "20 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Crestor",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 128,
+      "inn_name": "Salbutamol",
+      "dosage": "2.5 mg",
+      "form": "Solution",
+      "unit_of_issue": "Solution",
+      "brand_name": "Solution  Ventolin solution",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 129,
+      "inn_name": "Salbutamol",
+      "dosage": "100 mcg",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Inhaler  Ventolin solution",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 130,
+      "inn_name": "Salbutamol",
+      "dosage": "200 mcg",
+      "form": "Solution",
+      "unit_of_issue": "Solution",
+      "brand_name": "Solution  Ventolin solution",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 131,
+      "inn_name": "Salbutamol Sulfate",
+      "dosage": "0.5%",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Inhaler  Ventolin inhaler",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 132,
+      "inn_name": "Salbutamol nebulizer solution",
+      "dosage": "5 mg/2.5 ml",
+      "form": "Solution",
+      "unit_of_issue": "Solution",
+      "brand_name": "Solution  Ventolin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 133,
+      "inn_name": "Salmeterol and Fluticasone propionate",
+      "dosage": "250 mcg",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Inhaler  Seroflo",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 134,
+      "inn_name": "Salmeterol and Fluticasone propionate",
+      "dosage": "500 mcg",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Inhaler  Seroflo",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 135,
+      "inn_name": "Salmeterol",
+      "dosage": "50 mcg",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Generic allowed",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 136,
+      "inn_name": "Serratiopeptidase",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Serratiopeptidase  Tablet  Tablet  Maxilaise",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 137,
+      "inn_name": "Silvederma",
+      "dosage": "50 g",
+      "form": "Tablet",
+      "unit_of_issue": "Tube",
+      "brand_name": "Generic allowed",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 138,
+      "inn_name": "Sitagliptin/Metformin 50/",
+      "dosage": "1000 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Janumet",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 139,
+      "inn_name": "Sodium Chloride",
+      "dosage": "0.9%",
+      "form": "Tablet",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Liter  Bottle",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 140,
+      "inn_name": "Sodium Chloride",
+      "dosage": "0.9%",
+      "form": "Injection",
+      "unit_of_issue": "Injection",
+      "brand_name": "For injection  Ampule",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 141,
+      "inn_name": "Sodium Chloride",
+      "dosage": "0.9%",
+      "form": "Ampule",
+      "unit_of_issue": "Solution",
+      "brand_name": "Generic allowed",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 10,
+      "inn_name": "ml Ampule",
+      "dosage": "N/A",
+      "form": "Ampule",
+      "unit_of_issue": "Ampule",
+      "brand_name": "Ampule",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 142,
+      "inn_name": "Sodium Fusidate",
+      "dosage": "20 mg",
+      "form": "Cream",
+      "unit_of_issue": "Tube",
+      "brand_name": "Tube  Fucidin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 143,
+      "inn_name": "Solotik",
+      "dosage": "50 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Zoloft",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 144,
+      "inn_name": "Solpadeine",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Solpadeine  Tablet  Box",
+      "brand_allowed": true,
+      "generic_allowed": false
+    },
+    {
+      "line_item_id": 145,
+      "inn_name": "Spironolactone",
+      "dosage": "25 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Aldacton",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 146,
+      "inn_name": "Transdermal nitroglycerin",
+      "dosage": "5mg",
+      "form": "Patch",
+      "unit_of_issue": "Patch",
+      "brand_name": "Patch  Discotrine  patch",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 147,
+      "inn_name": "Telmisartan/HCTZ 80/",
+      "dosage": "12.5 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Micardis HCT",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 148,
+      "inn_name": "Telmisartan",
+      "dosage": "40 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Micardis",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 149,
+      "inn_name": "Telmisartan",
+      "dosage": "80 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Micardis",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 150,
+      "inn_name": "Tiotropium bromide",
+      "dosage": "18 mcg",
+      "form": "Capsule",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Spiriva",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 151,
+      "inn_name": "Tritace",
+      "dosage": "10 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Ramipril",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 152,
+      "inn_name": "Trinitrine",
+      "dosage": "5mg",
+      "form": "Patch",
+      "unit_of_issue": "Patch",
+      "brand_name": "Generic allowed",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 153,
+      "inn_name": "Umeclidinium bromide + Vilanterol (as trifenatate)",
+      "dosage": "62.5 mcg/25 mcg",
+      "form": "Inhaler",
+      "unit_of_issue": "Inhaler",
+      "brand_name": "Inhaler  Anoro inhaler",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 154,
+      "inn_name": "Valproic acid",
+      "dosage": "500 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Tablet  Depakin  tab",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 155,
+      "inn_name": "Valproic acid Propylvaleric acid",
+      "dosage": "500 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Tablet",
+      "brand_name": "Tablet  Depakin tab",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 156,
+      "inn_name": "Valproic acid Propylvaleric acid",
+      "dosage": "57.64 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Bottle",
+      "brand_name": "Bottle  Depakin tab",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 157,
+      "inn_name": "Verapamil",
+      "dosage": "80 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Isoptin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 158,
+      "inn_name": "Verapamil",
+      "dosage": "120 mg",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Box Isoptin",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 159,
+      "inn_name": "Vitamin D 10,",
+      "dosage": "000 IU",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Euro D",
+      "brand_allowed": true,
+      "generic_allowed": true
+    },
+    {
+      "line_item_id": 12,
+      "inn_name": "months (1 year) expiry date . In case of immediate requirements, medications with less than 12 months expiration shall be subject to IOM\u2019s acceptance of goods.",
+      "dosage": "N/A",
+      "form": "Tablet",
+      "unit_of_issue": "Box",
+      "brand_name": "Generic allowed",
+      "brand_allowed": true,
+      "generic_allowed": false
+    }
+  ],
+  "delivery_requirements": {
+    "transport_mode": "land",
+    "min_expiry_months": 12,
+    "packaging": "standard"
+  },
+  "evaluation_criteria": {
+    "primary_criteria": "lowest_price_substantially_compliant",
+    "compliance_factors": [
+      "full_compliance_with_requirements",
+      "acceptance_of_general_conditions",
+      "completeness_of_offer"
+    ]
+  },
+  "extracted_at": "2026-01-29T14:44:08.979053",
+  "summary": {
+    "total_line_items": 163,
+    "total_mandatory_documents": 4,
+    "vendor_selection_method": "lowest_price_per_line_item"
+  }
+}
