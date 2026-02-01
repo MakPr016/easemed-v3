@@ -16,4 +16,4 @@ COPY --chown=user . .
 # Ensure the data directory exists and has permissions
 RUN mkdir -p data/uploaded
 
-CMD ["uvicorn main:app --host 0.0.0.0 --port 7860"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "7860"]

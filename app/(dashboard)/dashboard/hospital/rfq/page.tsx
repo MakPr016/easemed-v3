@@ -3,18 +3,20 @@ import { redirect } from 'next/navigation'
 import HospitalRFQClient from './client'
 
 export default async function HospitalRFQPage({
-  searchParams
+  searchParams,
 }: {
-  searchParams: { status?: string }
+  searchParams: Promise<{ status?: string }>
 }) {
   const supabase = await createClient()
-  
+
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) {
     redirect('/login')
   }
 
-  const statusFilter = searchParams.status || 'all'
+  // Await searchParams for Next.js 15 compatibility
+  const params = await searchParams
+  const statusFilter = params.status || 'all'
 
   let rfqsQuery = supabase
     .from('rfqs')
@@ -31,15 +33,20 @@ export default async function HospitalRFQPage({
   const { data: rfqs } = await rfqsQuery
 
   const rfqIds = rfqs?.map((rfq: any) => rfq.id) || []
-  const { data: lineItems } = await supabase
-    .from('rfq_line_items')
-    .select('rfq_id')
-    .in('rfq_id', rfqIds)
 
-  const itemCountMap = lineItems?.reduce((acc: Record<string, number>, item: any) => {
-    acc[item.rfq_id] = (acc[item.rfq_id] || 0) + 1
-    return acc
-  }, {} as Record<string, number>) || {}
+  // Only fetch line items if we have RFQs
+  let itemCountMap: Record<string, number> = {}
+  if (rfqIds.length > 0) {
+    const { data: lineItems } = await supabase
+      .from('rfq_line_items')
+      .select('rfq_id')
+      .in('rfq_id', rfqIds)
+
+    itemCountMap = lineItems?.reduce((acc: Record<string, number>, item: any) => {
+      acc[item.rfq_id] = (acc[item.rfq_id] || 0) + 1
+      return acc
+    }, {} as Record<string, number>) || {}
+  }
 
   // Get total count across all statuses (not filtered)
   const { count: totalCount } = await supabase

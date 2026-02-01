@@ -2,10 +2,17 @@
 
 import { useState, useEffect, use } from 'react'
 import { useRouter } from 'next/navigation'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Badge } from '@/components/ui/badge'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import {
   Edit2,
   Save,
@@ -14,7 +21,6 @@ import {
   ArrowRight,
   Loader2,
   ArrowLeft,
-  CheckCircle2,
   ChevronLeft,
   ChevronRight,
   FileCheck,
@@ -39,6 +45,7 @@ interface LineItem {
   form: string
   unit_of_issue: string
   quantity: number
+  item_type: string
 }
 
 const ITEMS_PER_PAGE = 10
@@ -113,6 +120,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
           form: item.form,
           unit_of_issue: item.unit_of_issue,
           quantity: item.quantity,
+          item_type: item.item_type,
         }),
       })
 
@@ -184,6 +192,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
           form: '',
           unit_of_issue: '',
           quantity: 0,
+          item_type: 'Medical Supplies',
         }),
       })
 
@@ -251,6 +260,15 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
     }
   }
 
+  const getTypeColor = (type: string) => {
+    switch (type) {
+      case 'Pharmaceuticals': return 'bg-blue-100 text-blue-700 hover:bg-blue-100 border-blue-200'
+      case 'Medical Equipment': return 'bg-purple-100 text-purple-700 hover:bg-purple-100 border-purple-200'
+      case 'Medical Supplies': return 'bg-green-100 text-green-700 hover:bg-green-100 border-green-200'
+      default: return 'bg-gray-100 text-gray-700 hover:bg-gray-100'
+    }
+  }
+
   const totalPages = Math.ceil(lineItems.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const endIndex = startIndex + ITEMS_PER_PAGE
@@ -283,8 +301,6 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
       </div>
     )
   }
-
-  const parsingStats = rfqInfo.metadata?.parsing_stats
 
   return (
     <div className="space-y-6">
@@ -330,37 +346,6 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
         </CardContent>
       </Card>
 
-      {parsingStats && (
-        <Card className="bg-linear-to-r from-green-50 to-blue-50 border-green-200">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-green-600" />
-              Parsing Summary
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-1">Total Extracted</p>
-                <p className="text-3xl font-bold text-blue-600">{parsingStats.total || 0}</p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-1">Valid Items</p>
-                <p className="text-3xl font-bold text-green-600">
-                  {parsingStats.valid || lineItems.length}
-                </p>
-              </div>
-              <div className="text-center">
-                <p className="text-sm text-muted-foreground mb-1">Filtered Out</p>
-                <p className="text-3xl font-bold text-orange-600">
-                  {parsingStats.rejected || 0}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -388,6 +373,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-16">#</TableHead>
+                  <TableHead className="w-[180px]">Type</TableHead>
                   <TableHead className="min-w-50">Generic Name</TableHead>
                   <TableHead className="min-w-30">Brand Name</TableHead>
                   <TableHead className="min-w-25">Dosage</TableHead>
@@ -400,7 +386,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
               <TableBody>
                 {currentItems.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8 text-muted-foreground">
+                    <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
                       No line items found
                     </TableCell>
                   </TableRow>
@@ -408,6 +394,27 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
                   currentItems.map(item => (
                     <TableRow key={item.id}>
                       <TableCell className="font-medium">{item.line_item_id}</TableCell>
+                      <TableCell>
+                        {editingId === item.id ? (
+                          <Select
+                            value={item.item_type}
+                            onValueChange={(val) => handleChange(item.id, 'item_type', val)}
+                          >
+                            <SelectTrigger className="h-8 w-[170px]">
+                              <SelectValue placeholder="Select type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="Pharmaceuticals">Pharmaceuticals</SelectItem>
+                              <SelectItem value="Medical Supplies">Medical Supplies</SelectItem>
+                              <SelectItem value="Medical Equipment">Medical Equipment</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        ) : (
+                          <Badge variant="outline" className={getTypeColor(item.item_type)}>
+                            {item.item_type || 'Medical Supplies'}
+                          </Badge>
+                        )}
+                      </TableCell>
                       <TableCell>
                         {editingId === item.id ? (
                           <Input
@@ -460,9 +467,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
                         {editingId === item.id ? (
                           <Input
                             value={item.unit_of_issue}
-                            onChange={e =>
-                              handleChange(item.id, 'unit_of_issue', e.target.value)
-                            }
+                            onChange={e => handleChange(item.id, 'unit_of_issue', e.target.value)}
                             className="h-8 min-w-20"
                           />
                         ) : (
@@ -474,15 +479,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
                           <Input
                             type="number"
                             value={item.quantity || 0}
-                            onChange={e =>
-                              handleChange(
-                                item.id,
-                                'quantity',
-                                Number.isNaN(parseInt(e.target.value))
-                                  ? 0
-                                  : parseInt(e.target.value)
-                              )
-                            }
+                            onChange={e => handleChange(item.id, 'quantity', Number.isNaN(parseInt(e.target.value)) ? 0 : parseInt(e.target.value))}
                             className="h-8 w-20"
                           />
                         ) : (

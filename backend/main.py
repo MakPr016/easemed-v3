@@ -44,6 +44,49 @@ def is_garbage_row(row_text: str) -> bool:
     t = row_text.lower()
     return any(bad in t for bad in blacklist)
 
+def determine_item_type(description: str, form: str) -> str:
+    """
+    Determines the category of the item based on its description and form/unit.
+    Categories: Pharmaceuticals, Medical Supplies, Medical Equipment.
+    """
+    text = (description + " " + form).lower()
+    
+    # Priority 1: Medical Supplies (Consumables)
+    # Check these first to handle cases like "Insulin Syringe" (Supply) vs "Insulin" (Pharma)
+    supplies_keywords = [
+        'syringe', 'needle', 'cannula', 'catheter', 'glove', 'mask', 'gauze', 
+        'bandage', 'dressing', 'cotton', 'swab', 'lancet', 'strip', 'test kit', 
+        'blade', 'suture', 'plaster', 'gown', 'sheet', 'bag', 'alcohol', 
+        'disinfectant', 'sanitizer', 'tongue depressor', 'specula', 'paper',
+        'wipes', 'apron', 'cap', 'shoe cover', 'tape'
+    ]
+    if any(k in text for k in supplies_keywords):
+        return 'Medical Supplies'
+
+    # Priority 2: Medical Equipment (Devices/Durable)
+    equipment_keywords = [
+        'thermometer', 'sphygmomanometer', 'stethoscope', 'oximeter', 
+        'glucometer', 'nebulizer', 'otoscope', 'penlight', 'monitor', 
+        'scale', 'microscope', 'centrifuge', 'refrigerator', 'cool box',
+        'freezer', 'lamp', 'bed', 'chair', 'pump', 'bp machine', 'device'
+    ]
+    if any(k in text for k in equipment_keywords):
+        return 'Medical Equipment'
+
+    # Priority 3: Pharmaceuticals (Medicines/Drugs)
+    pharma_keywords = [
+        'tablet', 'capsule', 'cap', 'tab', 'syrup', 'suspension', 'susp', 
+        'injection', 'inj', 'ampoule', 'amp', 'vial', 'cream', 'ointment', 
+        'gel', 'suppository', 'supp', 'drops', 'inhaler', 'vaccine', 'sera', 
+        'insulin', 'medicine', 'drug', 'mg', 'ml', 'mcg', 'iu', 'dose',
+        'solution', 'infusion', 'spray', 'lozenge'
+    ]
+    if any(k in text for k in pharma_keywords):
+        return 'Pharmaceuticals'
+
+    # Fallback
+    return 'Medical Supplies'
+
 async def delete_file_safety_net(file_path: str, delay: int = 600):
     await asyncio.sleep(delay)
     try:
@@ -69,6 +112,7 @@ def parse_pdf_file(file_path: str) -> List[Dict[str, Any]]:
                     try:
                         qty = 1
                         qty_idx = -1
+                        # Attempt to find the Quantity column (usually a number towards the end)
                         for i in range(len(cleaned_row) - 1, -1, -1):
                             val = cleaned_row[i].replace(',', '').replace('.', '')
                             if val.isdigit() and int(val) < 1000000:
@@ -78,7 +122,9 @@ def parse_pdf_file(file_path: str) -> List[Dict[str, Any]]:
                         
                         if qty_idx == -1: continue
 
+                        # Attempt to find Description
                         desc_idx = 0
+                        # If first col is just a number (Item No), skip it
                         if re.match(r'^\d+\.?$', cleaned_row[0]) and len(cleaned_row) > 1:
                             desc_idx = 1
                         
@@ -86,17 +132,23 @@ def parse_pdf_file(file_path: str) -> List[Dict[str, Any]]:
                         if re.match(r'^\d+$', description): continue
                         if is_garbage_row(description): continue
 
+                        # Attempt to find Unit/Form
                         unit = "Unit"
                         if qty_idx > 0 and qty_idx > desc_idx:
+                            # Usually the column before Qty is Unit
                             potential_unit = cleaned_row[qty_idx - 1]
                             if len(potential_unit) < 20 and potential_unit != description:
                                 unit = potential_unit
+
+                        # Determine Category
+                        item_type = determine_item_type(description, unit)
 
                         extracted_items.append({
                             "inn_name": description,
                             "quantity": qty,
                             "form": unit,
-                            "dosage": ""
+                            "dosage": "",
+                            "type": item_type 
                         })
                     except Exception:
                         continue
@@ -164,7 +216,8 @@ async def match_all(req: MatchRequest):
         matches = []
         for v in vendors:
             cats = [c.lower() for c in v.get('primary_categories', [])]
-            if 'pharmaceuticals' in cats or 'medical devices' in cats:
+            # Simple matching logic - can be expanded to use item['type'] if needed
+            if 'pharmaceuticals' in cats or 'medical devices' in cats or 'medical supplies' in cats:
                  matches.append({
                     'vendor_id': v.get('vendor_id'),
                     'name': v.get('legal_name'),

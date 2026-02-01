@@ -30,8 +30,8 @@ export async function POST(request: Request) {
         status: 'draft',
         metadata: {
           ...data.metadata,
-          item_count: data.line_items?.length || 0,
-          parsing_stats: data.metadata?.parsing_stats || {}
+          item_count: data.line_items?.length || 0
+          // parsing_stats removed as requested
         },
       })
       .select()
@@ -57,6 +57,7 @@ export async function POST(request: Request) {
         form: item.form || '',
         quantity: Number(item.quantity) || 0,
         unit_of_issue: item.form || item.unit || 'Unit',
+        item_type: item.type || 'Medical Supplies'
       }))
 
       const { error: itemsError } = await supabase
