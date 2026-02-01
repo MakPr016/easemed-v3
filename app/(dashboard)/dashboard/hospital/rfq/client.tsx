@@ -1,0 +1,298 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { Card, CardContent } from '@/components/ui/card'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import {
+    Search,
+    Clock,
+    Package,
+    FileText,
+    Eye,
+    BarChart3,
+    Plus,
+    Calendar,
+    Edit3
+} from 'lucide-react'
+import Link from 'next/link'
+import { useSearchParams, useRouter } from 'next/navigation'
+
+interface HospitalRFQ {
+    id: string
+    title: string
+    category: string
+    itemCount: number
+    status: string
+    quotationCount: number
+    deadline: string
+    createdAt: string
+    budget: string
+}
+
+interface Stats {
+    total: number
+    active: number
+    totalQuotations: number
+    avgQuotations: number | string
+}
+
+interface Props {
+    rfqs: HospitalRFQ[]
+    stats: Stats
+    statusFilter: string
+}
+
+const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('en-GB', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    })
+}
+
+export default function HospitalRFQClient({ rfqs, stats, statusFilter }: Props) {
+    const [searchTerm, setSearchTerm] = useState('')
+    const [localStatusFilter, setLocalStatusFilter] = useState(statusFilter)
+    const searchParams = useSearchParams()
+    const router = useRouter()
+
+    const filteredRFQs = rfqs.filter((rfq) => {
+        const matchesSearch = rfq.title.toLowerCase().includes(searchTerm.toLowerCase())
+        const matchesStatus = localStatusFilter === 'all' || rfq.status === localStatusFilter
+        return matchesSearch && matchesStatus
+    })
+
+    const getStatusColor = (status: string) => {
+        switch (status) {
+            case 'draft':
+                return 'bg-gray-100 text-gray-700'
+            case 'published':
+            case 'active':
+                return 'bg-green-100 text-green-700'
+            case 'closed':
+                return 'bg-blue-100 text-blue-700'
+            case 'awarded':
+                return 'bg-purple-100 text-purple-700'
+            default:
+                return 'bg-gray-100 text-gray-700'
+        }
+    }
+
+    const handleStatusChange = (value: string) => {
+        setLocalStatusFilter(value)
+        const params = new URLSearchParams(searchParams)
+        if (value === 'all') {
+            params.delete('status')
+        } else {
+            params.set('status', value)
+        }
+        router.push(`/dashboard/hospital/rfq?${params.toString()}`)
+    }
+
+    const getActionButtons = (rfq: HospitalRFQ) => {
+        if (rfq.status === 'draft') {
+            return (
+                <Link href={`/dashboard/hospital/rfq/${rfq.id}/review`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">
+                        <Edit3 className="h-4 w-4 mr-2" />
+                        Continue Editing
+                    </Button>
+                </Link>
+            )
+        }
+        
+        // Published/closed/awarded - only view
+        return (
+            <>
+                <Link href={`/dashboard/hospital/rfq/${rfq.id}`} className="flex-1">
+                    <Button variant="outline" size="sm" className="w-full">
+                        <Eye className="h-4 w-4 mr-2" />
+                        View Details
+                    </Button>
+                </Link>
+                {rfq.status === 'closed' && rfq.quotationCount > 0 && (
+                    <Link href={`/dashboard/hospital/rfq/${rfq.id}/analyze`} className="flex-1">
+                        <Button size="sm" className="w-full">
+                            <BarChart3 className="h-4 w-4 mr-2" />
+                            Analyze
+                        </Button>
+                    </Link>
+                )}
+            </>
+        )
+    }
+
+    return (
+        <div className="space-y-6">
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">My RFQs</h1>
+                    <p className="text-muted-foreground">
+                        Manage and track your procurement requests
+                    </p>
+                </div>
+                <Link href="/dashboard/hospital/rfq/upload">
+                    <Button>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Create RFQ
+                    </Button>
+                </Link>
+            </div>
+
+            <div className="grid gap-4 md:grid-cols-4">
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total RFQs</p>
+                                <p className="text-2xl font-bold mt-1">{stats.total}</p>
+                            </div>
+                            <FileText className="h-8 w-8 text-blue-500 opacity-70" />
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Active</p>
+                                <p className="text-2xl font-bold mt-1 text-green-600">{stats.active}</p>
+                            </div>
+                            <Clock className="h-8 w-8 text-green-500 opacity-70" />
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Total Quotations</p>
+                                <p className="text-2xl font-bold mt-1">{stats.totalQuotations}</p>
+                            </div>
+                            <Package className="h-8 w-8 text-orange-500 opacity-70" />
+                        </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardContent className="pt-6">
+                        <div className="flex items-center justify-between">
+                            <div>
+                                <p className="text-sm font-medium text-muted-foreground">Avg. Quotations</p>
+                                <p className="text-2xl font-bold mt-1">{stats.avgQuotations}</p>
+                            </div>
+                            <BarChart3 className="h-8 w-8 text-purple-500 opacity-70" />
+                        </div>
+                    </CardContent>
+                </Card>
+            </div>
+
+            <Card>
+                <CardContent className="pt-6">
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search RFQs..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="pl-9"
+                            />
+                        </div>
+                        <Select value={localStatusFilter} onValueChange={handleStatusChange}>
+                            <SelectTrigger className="w-full md:w-52">
+                                <SelectValue placeholder="Status" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="all">All Status</SelectItem>
+                                <SelectItem value="draft">Draft</SelectItem>
+                                <SelectItem value="published">Awaiting Bids</SelectItem>
+                                <SelectItem value="closed">Closed</SelectItem>
+                                <SelectItem value="awarded">Awarded</SelectItem>
+                            </SelectContent>
+                        </Select>
+                    </div>
+                </CardContent>
+            </Card>
+
+            <div className="grid gap-4 md:grid-cols-2">
+                {filteredRFQs.length === 0 ? (
+                    <Card>
+                        <CardContent className="p-12 text-center">
+                            <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+                            <h3 className="text-lg font-semibold mb-2">No RFQs Found</h3>
+                            <p className="text-muted-foreground mb-4">
+                                {searchTerm ? 'Try adjusting your search' : 'Create your first RFQ'}
+                            </p>
+                            <Link href="/dashboard/hospital/rfq/upload">
+                                <Button>
+                                    <Plus className="h-4 w-4 mr-2" />
+                                    Create RFQ
+                                </Button>
+                            </Link>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    filteredRFQs.map((rfq) => (
+                        <Card key={rfq.id} className="hover:shadow-lg transition-shadow">
+                            <CardContent className="p-6">
+                                <div className="space-y-4">
+                                    <div className="flex items-start justify-between">
+                                        <div className="space-y-3 flex-1">
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="text-xl font-semibold">{rfq.title}</h3>
+                                                <Badge className={getStatusColor(rfq.status)}>
+                                                    {rfq.status.charAt(0).toUpperCase() + rfq.status.slice(1)}
+                                                </Badge>
+                                            </div>
+
+                                            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                                                <span>#{rfq.id.slice(-8)}</span>
+                                                <span className="flex items-center gap-1">
+                                                    <Calendar className="h-3 w-3" />
+                                                    Created: {formatDate(rfq.createdAt)}
+                                                </span>
+                                            </div>
+
+                                            <div className="flex items-center gap-4">
+                                                <Badge variant="outline">{rfq.category}</Badge>
+                                                <span className="text-sm text-muted-foreground">
+                                                    {rfq.itemCount} items
+                                                </span>
+                                                <span className="text-sm">
+                                                    <span className="font-semibold">{rfq.quotationCount}</span> quotations
+                                                </span>
+                                            </div>
+
+                                            <div className="flex items-center gap-4 text-sm">
+                                                <span className="text-muted-foreground">
+                                                    Deadline: {formatDate(rfq.deadline)}
+                                                </span>
+                                                <span className="text-muted-foreground">
+                                                    Budget: {rfq.budget}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex gap-2 pt-2">
+                                        {getActionButtons(rfq)}
+                                    </div>
+                                </div>
+                            </CardContent>
+                        </Card>
+                    ))
+                )}
+            </div>
+        </div>
+    )
+}

@@ -4,7 +4,6 @@ import { use, useState, useEffect } from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Checkbox } from '@/components/ui/checkbox'
 import {
     MapPin,
     Clock,
@@ -13,13 +12,10 @@ import {
     FileText,
     CreditCard,
     ArrowLeft,
-    Users,
     BarChart3,
     Loader2,
-    ArrowRight,
 } from 'lucide-react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import {
     Table,
     TableBody,
@@ -28,7 +24,10 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table'
+import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination'
 import { createClient } from '@/lib/supabase/client'
+
+const ITEMS_PER_PAGE = 10
 
 const formatDate = (dateString: string | null) => {
     if (!dateString) return 'N/A'
@@ -48,11 +47,10 @@ export default function HospitalRFQDetailPage({
     params: Promise<{ id: string }>
 }) {
     const { id } = use(params)
-    const router = useRouter()
     const [rfq, setRfq] = useState<any>(null)
     const [lineItems, setLineItems] = useState<any[]>([])
-    const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set())
     const [loading, setLoading] = useState(true)
+    const [currentPage, setCurrentPage] = useState(1)
     const supabase = createClient()
 
     useEffect(() => {
@@ -86,39 +84,11 @@ export default function HospitalRFQDetailPage({
         }
     }
 
-    const toggleItemSelection = (itemId: string) => {
-        const newSelection = new Set(selectedItems)
-        if (newSelection.has(itemId)) {
-            newSelection.delete(itemId)
-        } else {
-            newSelection.add(itemId)
-        }
-        setSelectedItems(newSelection)
-    }
-
-    const toggleSelectAll = () => {
-        if (selectedItems.size === lineItems.length) {
-            setSelectedItems(new Set())
-        } else {
-            setSelectedItems(new Set(lineItems.map(item => item.id)))
-        }
-    }
-
-    const handleProceedToVendorSelection = () => {
-        if (selectedItems.size === 0) {
-            alert('Please select at least one item')
-            return
-        }
-        
-        const selectedItemsArray = lineItems.filter(item => selectedItems.has(item.id))
-        
-        localStorage.setItem('selectedRFQItems', JSON.stringify({
-            rfqId: id,
-            items: selectedItemsArray
-        }))
-        
-        router.push(`/dashboard/hospital/rfq/${id}/vendors`)
-    }
+    const totalPages = Math.ceil(lineItems.length / ITEMS_PER_PAGE)
+    const paginatedItems = lineItems.slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    )
 
     if (loading) {
         return (
@@ -193,10 +163,12 @@ export default function HospitalRFQDetailPage({
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Selected</p>
-                                <p className="text-2xl font-bold mt-1">{selectedItems.size}</p>
+                                <p className="text-sm font-medium text-muted-foreground">Currency</p>
+                                <p className="text-2xl font-bold mt-1">
+                                    {rfq.metadata?.currency || 'USD'}
+                                </p>
                             </div>
-                            <Checkbox className="h-8 w-8" checked={selectedItems.size > 0} />
+                            <CreditCard className="h-8 w-8 text-green-500 opacity-70" />
                         </div>
                     </CardContent>
                 </Card>
@@ -204,12 +176,12 @@ export default function HospitalRFQDetailPage({
                     <CardContent className="pt-6">
                         <div className="flex items-center justify-between">
                             <div>
-                                <p className="text-sm font-medium text-muted-foreground">Currency</p>
+                                <p className="text-sm font-medium text-muted-foreground">Quotations</p>
                                 <p className="text-2xl font-bold mt-1">
-                                    {rfq.metadata?.currency || 'USD'}
+                                    {rfq.metadata?.quotation_count || 0}
                                 </p>
                             </div>
-                            <CreditCard className="h-8 w-8 text-green-500 opacity-70" />
+                            <BarChart3 className="h-8 w-8 text-purple-500 opacity-70" />
                         </div>
                     </CardContent>
                 </Card>
@@ -232,28 +204,16 @@ export default function HospitalRFQDetailPage({
                 <div className="lg:col-span-2 space-y-6">
                     <Card>
                         <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <CardTitle>Line Items</CardTitle>
-                                    <CardDescription>
-                                        Select items to send to vendors ({selectedItems.size} selected)
-                                    </CardDescription>
-                                </div>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={toggleSelectAll}
-                                >
-                                    {selectedItems.size === lineItems.length ? 'Deselect All' : 'Select All'}
-                                </Button>
-                            </div>
+                            <CardTitle>Line Items</CardTitle>
+                            <CardDescription>
+                                {lineItems.length} total items | Page {currentPage} of {totalPages}
+                            </CardDescription>
                         </CardHeader>
                         <CardContent>
                             <div className="border rounded-lg overflow-hidden">
                                 <Table>
                                     <TableHeader>
                                         <TableRow>
-                                            <TableHead className="w-12"></TableHead>
                                             <TableHead className="w-16">No.</TableHead>
                                             <TableHead>INN Name</TableHead>
                                             <TableHead>Brand</TableHead>
@@ -263,24 +223,15 @@ export default function HospitalRFQDetailPage({
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {lineItems.length === 0 ? (
+                                        {paginatedItems.length === 0 ? (
                                             <TableRow>
-                                                <TableCell colSpan={7} className="text-center py-8 text-muted-foreground">
+                                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
                                                     No line items found
                                                 </TableCell>
                                             </TableRow>
                                         ) : (
-                                            lineItems.map((item) => (
-                                                <TableRow 
-                                                    key={item.id}
-                                                    className={selectedItems.has(item.id) ? 'bg-blue-50' : ''}
-                                                >
-                                                    <TableCell>
-                                                        <Checkbox
-                                                            checked={selectedItems.has(item.id)}
-                                                            onCheckedChange={() => toggleItemSelection(item.id)}
-                                                        />
-                                                    </TableCell>
+                                            paginatedItems.map((item) => (
+                                                <TableRow key={item.id}>
                                                     <TableCell className="font-medium">
                                                         {item.line_item_id}
                                                     </TableCell>
@@ -305,18 +256,39 @@ export default function HospitalRFQDetailPage({
                                     </TableBody>
                                 </Table>
                             </div>
-                            
-                            {lineItems.length > 0 && (
-                                <div className="mt-4 flex justify-end">
-                                    <Button
-                                        size="lg"
-                                        onClick={handleProceedToVendorSelection}
-                                        disabled={selectedItems.size === 0}
-                                    >
-                                        <Users className="h-4 w-4 mr-2" />
-                                        Select Vendors ({selectedItems.size} items)
-                                        <ArrowRight className="h-4 w-4 ml-2" />
-                                    </Button>
+
+                            {totalPages > 1 && (
+                                <div className="flex items-center justify-between mt-6">
+                                    <div className="text-sm text-muted-foreground">
+                                        Page {currentPage} of {totalPages}
+                                    </div>
+                                    <Pagination>
+                                        <PaginationContent>
+                                            <PaginationItem>
+                                                <PaginationPrevious
+                                                    onClick={() => setCurrentPage(Math.max(currentPage - 1, 1))}
+                                                    className={currentPage === 1 ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                                />
+                                            </PaginationItem>
+                                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                                <PaginationItem key={page}>
+                                                    <PaginationLink
+                                                        onClick={() => setCurrentPage(page)}
+                                                        isActive={currentPage === page}
+                                                        className="cursor-pointer"
+                                                    >
+                                                        {page}
+                                                    </PaginationLink>
+                                                </PaginationItem>
+                                            ))}
+                                            <PaginationItem>
+                                                <PaginationNext
+                                                    onClick={() => setCurrentPage(Math.min(currentPage + 1, totalPages))}
+                                                    className={currentPage === totalPages ? 'pointer-events-none opacity-50' : 'cursor-pointer'}
+                                                />
+                                            </PaginationItem>
+                                        </PaginationContent>
+                                    </Pagination>
                                 </div>
                             )}
                         </CardContent>

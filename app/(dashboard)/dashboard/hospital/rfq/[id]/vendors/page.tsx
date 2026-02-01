@@ -61,6 +61,7 @@ interface RFQInfo {
     title: string
     deadline: string
     status: string
+    metadata?: any
 }
 
 // Mock vendor data (replace with actual API call)
@@ -170,12 +171,38 @@ export default function VendorSelectionPage({ params }: { params: Promise<{ id: 
             return
         }
 
-        // TODO: Send RFQ to vendors in selected countries
-        console.log('Sending RFQ to vendors in:', selectedCountries)
-        console.log('Procurement mode:', procurementMode)
+        setLoading(true)
 
-        // Navigate to next step
-        router.push(`/dashboard/hospital/rfq/${resolvedParams.id}/awaiting`)
+        try {
+            // Update RFQ metadata with selected countries and procurement mode
+            const { error: updateError } = await supabase
+                .from('rfqs')
+                .update({
+                    status: 'published',
+                    metadata: {
+                        ...rfqInfo?.metadata,
+                        vendor_countries: selectedCountries,
+                        procurement_mode: procurementMode,
+                        published_at: new Date().toISOString()
+                    }
+                })
+                .eq('id', resolvedParams.id)
+
+            if (updateError) throw updateError
+
+            // TODO: Send RFQ notifications to vendors in selected countries
+            console.log('✅ RFQ sent to vendors in:', selectedCountries)
+            console.log('Procurement mode:', procurementMode)
+
+            // 🎯 Redirect to main RFQ list (replaces /awaiting page)
+            router.push('/dashboard/hospital/rfq?status=published')
+            
+        } catch (error) {
+            console.error('Error sending RFQ:', error)
+            alert('Failed to send RFQ. Please try again.')
+        } finally {
+            setLoading(false)
+        }
     }
 
     const vendorCounts = getVendorCountsByCountry()
@@ -396,12 +423,21 @@ export default function VendorSelectionPage({ params }: { params: Promise<{ id: 
 
                             <Button
                                 onClick={handleSendRFQ}
-                                disabled={selectedCountries.length === 0}
+                                disabled={selectedCountries.length === 0 || loading}
                                 className="w-full gap-2"
                                 size="lg"
                             >
-                                <Send className="h-4 w-4" />
-                                Send to {eligibleVendorsCount} Vendor{eligibleVendorsCount !== 1 ? 's' : ''}
+                                {loading ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Sending...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Send className="h-4 w-4" />
+                                        Send to {eligibleVendorsCount} Vendor{eligibleVendorsCount !== 1 ? 's' : ''}
+                                    </>
+                                )}
                             </Button>
 
                             <p className="text-xs text-center text-muted-foreground">

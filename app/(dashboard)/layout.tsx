@@ -4,7 +4,6 @@ import { useEffect } from 'react'
 import { SidebarProvider, SidebarInset, SidebarTrigger } from '@/components/ui/sidebar'
 import { AppSidebar } from '@/components/sidebar/app-sidebar'
 import { Separator } from '@/components/ui/separator'
-// REMOVED: import { UserProvider } from '@/lib/contexts/user-context'
 
 export default function DashboardLayout({
     children,
@@ -32,7 +31,6 @@ export default function DashboardLayout({
     }, [])
 
     return (
-        // REMOVED UserProvider wrapper - use AuthProvider from root layout
         <SidebarProvider>
             <AppSidebar />
             <SidebarInset>

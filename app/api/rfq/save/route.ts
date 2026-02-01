@@ -28,7 +28,11 @@ export async function POST(request: Request) {
         title,
         deadline: new Date(deadline).toISOString(),
         status: 'draft',
-        metadata: data.metadata || {},
+        metadata: {
+          ...data.metadata,
+          item_count: data.line_items?.length || 0,
+          parsing_stats: data.metadata?.parsing_stats || {}
+        },
       })
       .select()
       .single()
@@ -42,7 +46,7 @@ export async function POST(request: Request) {
     }
 
     const rawItems = data.line_items || []
-    
+
     if (Array.isArray(rawItems) && rawItems.length > 0) {
       const lineItems = rawItems.map((item: any, index: number) => ({
         rfq_id: documentId,

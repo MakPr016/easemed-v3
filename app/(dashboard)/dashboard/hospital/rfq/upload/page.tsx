@@ -30,7 +30,7 @@ export default function RFQUploadPage() {
       }
       setFile(selectedFile)
       setError('')
-      
+
       if (!title) {
         const fileName = selectedFile.name.replace('.pdf', '')
         setTitle(fileName)
@@ -107,10 +107,12 @@ export default function RFQUploadPage() {
         throw new Error('Failed to save RFQ')
       }
 
+      const { rfqId } = await saveResponse.json()
+
       setUploadProgress(100)
 
       setTimeout(() => {
-        router.push(`/dashboard/hospital/rfq/${documentId}/review`)
+        router.push(`/dashboard/hospital/rfq/${rfqId}/review`)
       }, 500)
 
     } catch (err: any) {

@@ -17,6 +17,7 @@ import {
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  FileCheck,
 } from 'lucide-react'
 import {
   Table,
@@ -51,6 +52,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
   const [editingId, setEditingId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [savingDraft, setSavingDraft] = useState(false)
   const [rfqInfo, setRfqInfo] = useState<any>(null)
   const [lineItems, setLineItems] = useState<LineItem[]>([])
   const [currentPage, setCurrentPage] = useState(1)
@@ -96,19 +98,6 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
     const item = lineItems.find(i => i.id === id)
     if (!item) return
 
-    // Add logging here ⬇️
-    console.log('=== SAVE DEBUG ===')
-    console.log('Updating item with ID:', id)
-    console.log('Item data:', item)
-    console.log('Payload:', {
-      inn_name: item.inn_name,
-      brand_name: item.brand_name,
-      dosage: item.dosage,
-      form: item.form,
-      unit_of_issue: item.unit_of_issue,
-      quantity: item.quantity,
-    })
-
     try {
       setSaving(true)
 
@@ -127,16 +116,10 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
         }),
       })
 
-      console.log('Response status:', response.status)
-
       if (!response.ok) {
         const error = await response.json()
-        console.error('Response error:', error)
         throw new Error(error.error || 'Failed to save')
       }
-
-      const result = await response.json()
-      console.log('Success response:', result)
 
       setEditingId(null)
     } catch (error: any) {
@@ -146,7 +129,6 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
       setSaving(false)
     }
   }
-
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this item?')) return
@@ -225,12 +207,37 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
     }
   }
 
+  const handleSaveAsDraft = async () => {
+    setSavingDraft(true)
+    try {
+      const { error } = await supabase
+        .from('rfqs')
+        .update({
+          status: 'draft',
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', rfqId)
+
+      if (error) throw error
+
+      router.push('/dashboard/hospital/rfq')
+    } catch (error) {
+      console.error('Error saving draft:', error)
+      alert('Failed to save as draft')
+    } finally {
+      setSavingDraft(false)
+    }
+  }
+
   const handleProceed = async () => {
     setSaving(true)
     try {
       const { error } = await supabase
         .from('rfqs')
-        .update({ status: 'published' })
+        .update({
+          status: 'published',
+          updated_at: new Date().toISOString()
+        })
         .eq('id', rfqId)
 
       if (error) throw error
@@ -307,7 +314,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
             </div>
             <div>
               <p className="text-sm text-muted-foreground">RFQ ID</p>
-              <p className="font-medium">{rfqInfo.metadata?.rfq_id || 'N/A'}</p>
+              <p className="font-mono font-medium">{rfqId}</p>
             </div>
             <div>
               <p className="text-sm text-muted-foreground">Deadline</p>
@@ -567,27 +574,47 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
         </CardContent>
       </Card>
 
-      <div className="flex justify-end gap-3">
+      <div className="flex justify-between gap-3">
         <Link href="/dashboard/hospital/rfq/upload">
           <Button variant="outline">Cancel</Button>
         </Link>
-        <Button
-          onClick={handleProceed}
-          className="gap-2"
-          disabled={saving || lineItems.length === 0}
-        >
-          {saving ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              Publishing...
-            </>
-          ) : (
-            <>
-              Proceed to Select Vendors
-              <ArrowRight className="h-4 w-4" />
-            </>
-          )}
-        </Button>
+        <div className="flex gap-3">
+          <Button
+            onClick={handleSaveAsDraft}
+            variant="outline"
+            className="gap-2"
+            disabled={savingDraft || saving || lineItems.length === 0}
+          >
+            {savingDraft ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Saving Draft...
+              </>
+            ) : (
+              <>
+                <FileCheck className="h-4 w-4" />
+                Save as Draft
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={handleProceed}
+            className="gap-2"
+            disabled={saving || savingDraft || lineItems.length === 0}
+          >
+            {saving ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Publishing...
+              </>
+            ) : (
+              <>
+                Proceed to Select Vendors
+                <ArrowRight className="h-4 w-4" />
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   )
