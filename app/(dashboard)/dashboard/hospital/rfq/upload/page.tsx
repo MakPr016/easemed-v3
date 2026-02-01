@@ -16,7 +16,7 @@ import { Upload, FileText, Loader2, AlertCircle, Calendar } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const FASTAPI_URL =
-  process.env.NEXT_PUBLIC_FASTAPI_URL || "http://localhost:5001";
+  process.env.FLASK_PARSER_URL || "https://makpr016-parse-api.hf.space/api";
 
 export default function RFQUploadPage() {
   const router = useRouter();
@@ -89,12 +89,9 @@ export default function RFQUploadPage() {
 
       // Step 2: Parse the PDF
       setParsing(true);
-      const parseResponse = await fetch(
-        `${FASTAPI_URL}/api/parse/${documentId}`,
-        {
-          method: "POST",
-        },
-      );
+      const parseResponse = await fetch(`${FASTAPI_URL}/parse/${documentId}`, {
+        method: "POST",
+      });
 
       if (!parseResponse.ok) {
         throw new Error("Parsing failed");

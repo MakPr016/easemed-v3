@@ -2,7 +2,7 @@ import { NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
 import { join } from 'path'
 
-const FASTAPI_URL = process.env.NEXT_PUBLIC_FASTAPI_URL || 'http://localhost:5001'
+const FASTAPI_URL = process.env.FLASK_PARSER_URL || 'https://makpr016-parse-api.hf.space/api'
 
 function isValidLineItem(item: any): boolean {
   if (!item.inn_name) return false
@@ -52,9 +52,9 @@ export async function POST(
   try {
     const { documentId } = await params
 
-    console.log('Calling FastAPI:', `${FASTAPI_URL}/api/parse/${documentId}`)
+    console.log('Calling FastAPI:', `${FASTAPI_URL}/parse/${documentId}`)
 
-    const response = await fetch(`${FASTAPI_URL}/api/parse/${documentId}`, {
+    const response = await fetch(`${FASTAPI_URL}/parse/${documentId}`, {
       method: 'POST',
     })
 
