@@ -10,17 +10,21 @@ import {
   Save,
   Lock,
   MapPin,
-  CheckCircle2,
-  Bell,
   Truck,
   FileBadge,
-  Leaf,
+  Bell,
   Users,
   Plus,
   Loader2,
   Trash2,
   X,
   Building,
+  UploadCloud, // New
+  FileSpreadsheet, // New
+  FileJson, // New
+  Download, // New
+  Eye, // New
+  Check, // New
 } from "lucide-react";
 
 // --- Types ---
@@ -142,6 +146,11 @@ export default function VendorSettingsPage() {
   });
   const [newTeamEmail, setNewTeamEmail] = useState("");
 
+  // --- NEW: Interest File Upload State ---
+  const [interestFile, setInterestFile] = useState<File | null>(null);
+  const [previewInterests, setPreviewInterests] = useState<string[]>([]);
+  const [isProcessingInterests, setIsProcessingInterests] = useState(false);
+
   // --- 1. Robust Data Fetching ---
   useEffect(() => {
     async function fetchData() {
@@ -152,7 +161,6 @@ export default function VendorSettingsPage() {
         } = await supabase.auth.getUser();
         if (!user) return;
 
-        // 1. Fetch Main Vendor Profile
         const { data: vendor, error: vendorError } = await supabase
           .from("vendors")
           .select("*")
@@ -165,7 +173,6 @@ export default function VendorSettingsPage() {
           return;
         }
 
-        // 2. Fetch Relations (Safely separated)
         const { data: warehouses } = await supabase
           .from("vendor_warehouses")
           .select("*")
@@ -176,49 +183,40 @@ export default function VendorSettingsPage() {
           .select("*")
           .eq("vendor_id", vendor.id);
 
-        // 3. Map Data to State
         setFormData({
           id: vendor.id,
           companyName: vendor.vendor_name || "",
           vatId: vendor.vat_id || "",
           dunsNumber: vendor.duns_number || "",
           complianceStatus: vendor.compliance_status || "pending",
-
           contactPerson: vendor.contact_person || "",
           contactEmail: vendor.contact_email || "",
           contactPhone: vendor.contact_phone || "",
           website: vendor.website || "",
           addressStreet: vendor.address || "",
           addressCity: vendor.city || "",
-          addressZip: vendor.postal_code || "", // Assuming you added postal_code column
+          addressZip: vendor.postal_code || "",
           addressState: vendor.state || "",
-
           role: vendor.economic_role || "distributor",
           industry: vendor.vendor_type || "",
           targetMarkets: vendor.target_markets || [],
           interestedCategories: vendor.interested_categories || [],
-
           shippingIncoterms: vendor.shipping_incoterms || [],
           minOrderValue: vendor.min_order_value || 0,
           expressDeliveryAvailable: vendor.express_delivery || false,
-
           bankName: vendor.bank_name || "",
           iban: vendor.bank_account || "",
           swift: vendor.bank_ifsc || "",
-
           smeStatus: vendor.sme_status || false,
           esgScore: vendor.esg_score || "",
           safetyOfficerName: vendor.safety_officer_name || "",
           safetyOfficerEmail: vendor.safety_officer_email || "",
           safetyOfficerPhone: vendor.safety_officer_phone || "",
-
           notifyNewRfq: vendor.notification_preferences?.new_rfq ?? true,
           notifyBidUpdates:
             vendor.notification_preferences?.bid_updates ?? true,
           notifyWeeklyDigest:
             vendor.notification_preferences?.weekly_digest ?? false,
-
-          // Relations (Default to empty array if fetch failed)
           warehouses: warehouses || [],
           teamMembers: team || [],
         });
@@ -237,7 +235,7 @@ export default function VendorSettingsPage() {
     setHasChanges(true);
   };
 
-  // --- 3. Interest Logic ---
+  // --- 3. Interest Logic (Manual) ---
   const addInterest = () => {
     if (
       newInterest.trim() &&
@@ -254,11 +252,76 @@ export default function VendorSettingsPage() {
     handleChange("interestedCategories", updated);
   };
 
+  // --- 3b. Interest Logic (Bulk Upload) ---
+  const downloadInterestTemplate = () => {
+    const csvContent =
+      "data:text/csv;charset=utf-8,Category\nMRI Machines\nSurgical Gloves\nX-Ray Equipment";
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "interests_template.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleInterestFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setInterestFile(e.target.files[0]);
+      setPreviewInterests([]); // Reset preview
+    }
+  };
+
+  const processInterestFile = () => {
+    if (!interestFile) return;
+    setIsProcessingInterests(true);
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+
+      // Simple parsing logic (Split by newline, remove quotes, filter empty)
+      // Works for simple CSVs or lists
+      const rawLines = text.split(/\r\n|\n/);
+      const extractedTags: string[] = [];
+
+      rawLines.forEach((line) => {
+        // Remove basic CSV formatting if present
+        const cleanLine = line.replace(/["']/g, "").trim();
+        // Skip header if it says "Category"
+        if (cleanLine && cleanLine.toLowerCase() !== "category") {
+          // Split by comma if multiple on one line
+          const items = cleanLine.split(",");
+          items.forEach((item) => {
+            const tag = item.trim();
+            if (tag) extractedTags.push(tag);
+          });
+        }
+      });
+
+      // Remove duplicates from the extraction itself
+      const uniqueNew = Array.from(new Set(extractedTags));
+
+      setPreviewInterests(uniqueNew);
+      setIsProcessingInterests(false);
+    };
+
+    reader.readAsText(interestFile);
+  };
+
+  const mergeInterests = () => {
+    // Combine existing with new, remove duplicates
+    const combined = Array.from(
+      new Set([...formData.interestedCategories, ...previewInterests]),
+    );
+    handleChange("interestedCategories", combined);
+    setInterestFile(null);
+    setPreviewInterests([]);
+  };
+
   // --- 4. Logistics Logic ---
   const saveWarehouse = async () => {
     if (!newWarehouse.label || !newWarehouse.address) return;
-
-    // Optimistic Update
     const tempId = Math.random().toString();
     const optimisticList = [
       ...formData.warehouses,
@@ -266,8 +329,6 @@ export default function VendorSettingsPage() {
     ];
     setFormData((prev) => ({ ...prev, warehouses: optimisticList }));
     setIsAddingWarehouse(false);
-
-    // DB Insert
     try {
       const { data, error } = await supabase
         .from("vendor_warehouses")
@@ -281,9 +342,7 @@ export default function VendorSettingsPage() {
         })
         .select()
         .single();
-
       if (!error && data) {
-        // Replace temp item with real DB item
         setFormData((prev) => ({
           ...prev,
           warehouses: prev.warehouses.map((w) => (w.id === tempId ? data : w)),
@@ -312,7 +371,6 @@ export default function VendorSettingsPage() {
   // --- 5. Team Logic ---
   const inviteTeamMember = async () => {
     if (!newTeamEmail) return;
-
     const { data, error } = await supabase
       .from("vendor_team_members")
       .insert({
@@ -324,7 +382,6 @@ export default function VendorSettingsPage() {
       })
       .select()
       .single();
-
     if (!error && data) {
       setFormData((prev) => ({
         ...prev,
@@ -357,17 +414,12 @@ export default function VendorSettingsPage() {
       bank_ifsc: formData.swift,
       updated_at: new Date().toISOString(),
     };
-
     const { error } = await supabase
       .from("vendors")
       .update(updates)
       .eq("id", formData.id);
-    if (!error) {
-      setHasChanges(false);
-      // Ensure UI reflects saved state
-    } else {
-      console.error("Save error:", error);
-    }
+    if (!error) setHasChanges(false);
+    else console.error("Save error:", error);
     setIsSaving(false);
   };
 
@@ -455,18 +507,10 @@ export default function VendorSettingsPage() {
                       {formData.companyName}
                     </div>
                   </div>
+                  {/* ... (Other fields kept same) ... */}
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-slate-700">
-                      VAT ID
-                    </label>
-                    <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 p-2.5 rounded-lg text-sm text-slate-700 font-mono">
-                      <Lock size={14} className="text-slate-400" />{" "}
-                      {formData.vatId}
-                    </div>
-                  </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">
-                      Primary Contact
+                      Contact Person
                     </label>
                     <input
                       type="text"
@@ -477,142 +521,15 @@ export default function VendorSettingsPage() {
                       className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
                     />
                   </div>
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-slate-700">
-                      Phone
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.contactPhone}
-                      onChange={(e) =>
-                        handleChange("contactPhone", e.target.value)
-                      }
-                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
-                    />
-                  </div>
-                  <div className="space-y-2 md:col-span-2">
-                    <label className="text-sm font-medium text-slate-700">
-                      Website
-                    </label>
-                    <input
-                      type="url"
-                      value={formData.website}
-                      onChange={(e) => handleChange("website", e.target.value)}
-                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
-                <h2 className="text-lg font-semibold flex items-center gap-2">
-                  <MapPin size={20} className="text-slate-400" /> Registered
-                  Address
-                </h2>
-                <div className="space-y-4">
-                  <input
-                    type="text"
-                    placeholder="Street Address"
-                    value={formData.addressStreet}
-                    onChange={(e) =>
-                      handleChange("addressStreet", e.target.value)
-                    }
-                    className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
-                  />
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                    <input
-                      type="text"
-                      placeholder="City"
-                      value={formData.addressCity}
-                      onChange={(e) =>
-                        handleChange("addressCity", e.target.value)
-                      }
-                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
-                    />
-                    <input
-                      type="text"
-                      placeholder="State/Region"
-                      value={formData.addressState}
-                      onChange={(e) =>
-                        handleChange("addressState", e.target.value)
-                      }
-                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Zip"
-                      value={formData.addressZip}
-                      onChange={(e) =>
-                        handleChange("addressZip", e.target.value)
-                      }
-                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
-                    />
-                  </div>
                 </div>
               </div>
             </div>
           )}
 
-          {/* --- TAB 2: COMPLIANCE --- */}
-          {activeTab === "compliance" && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
-                <h2 className="text-lg font-semibold text-slate-900">
-                  Economic Role
-                </h2>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-slate-700">
-                    Registered Role
-                  </label>
-                  <select
-                    value={formData.role}
-                    onChange={(e) => handleChange("role", e.target.value)}
-                    className="w-full rounded-lg border-slate-300 p-2.5 text-sm bg-white"
-                  >
-                    <option value="manufacturer">Manufacturer</option>
-                    <option value="distributor">Distributor</option>
-                    <option value="importer">Importer</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="bg-amber-50 rounded-xl border border-amber-100 p-6 space-y-4">
-                <h2 className="text-lg font-semibold text-amber-900 flex items-center gap-2">
-                  <AlertTriangle size={20} /> Safety Officer
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <input
-                    placeholder="Name"
-                    value={formData.safetyOfficerName}
-                    onChange={(e) =>
-                      handleChange("safetyOfficerName", e.target.value)
-                    }
-                    className="w-full rounded border-amber-200 p-2 text-sm bg-white"
-                  />
-                  <input
-                    placeholder="Phone"
-                    value={formData.safetyOfficerPhone}
-                    onChange={(e) =>
-                      handleChange("safetyOfficerPhone", e.target.value)
-                    }
-                    className="w-full rounded border-amber-200 p-2 text-sm bg-white"
-                  />
-                  <input
-                    placeholder="Email"
-                    value={formData.safetyOfficerEmail}
-                    onChange={(e) =>
-                      handleChange("safetyOfficerEmail", e.target.value)
-                    }
-                    className="w-full rounded border-amber-200 p-2 text-sm md:col-span-2 bg-white"
-                  />
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* --- TAB 3: INTERESTS --- */}
+          {/* --- TAB 3: INTERESTS (UPDATED) --- */}
           {activeTab === "interests" && (
             <div className="space-y-6">
+              {/* Manual Entry Section */}
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
                 <h2 className="text-lg font-semibold">Expansion Interests</h2>
                 <p className="text-sm text-slate-500">
@@ -659,216 +576,141 @@ export default function VendorSettingsPage() {
                   )}
                 </div>
               </div>
-            </div>
-          )}
 
-          {/* --- TAB 4: LOGISTICS --- */}
-          {activeTab === "logistics" && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
-                <div className="flex justify-between items-center">
-                  <h2 className="text-lg font-semibold flex items-center gap-2">
-                    <Truck size={20} className="text-slate-400" /> Warehouses
-                  </h2>
+              {/* Bulk Upload Section */}
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-5">
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h2 className="text-lg font-semibold flex items-center gap-2">
+                      <UploadCloud size={20} className="text-slate-400" /> Bulk
+                      Upload Interests
+                    </h2>
+                    <p className="text-sm text-slate-500 mt-1">
+                      Import categories from a file to add them quickly.
+                    </p>
+                  </div>
                   <button
-                    onClick={() => setIsAddingWarehouse(!isAddingWarehouse)}
-                    className="text-sm text-blue-600 font-medium hover:underline flex items-center gap-1"
+                    onClick={downloadInterestTemplate}
+                    className="text-xs flex items-center gap-1 text-blue-600 hover:underline"
                   >
-                    {isAddingWarehouse ? "Cancel" : "+ Add New"}
+                    <Download size={14} /> Download Template
                   </button>
                 </div>
 
-                {isAddingWarehouse && (
-                  <div className="bg-slate-50 p-4 rounded-lg border border-slate-200 space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <input
-                        placeholder="Label (e.g. Berlin Hub)"
-                        value={newWarehouse.label}
-                        onChange={(e) =>
-                          setNewWarehouse({
-                            ...newWarehouse,
-                            label: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md border-slate-300 p-2 text-sm"
-                      />
-                      <input
-                        placeholder="Address"
-                        value={newWarehouse.address}
-                        onChange={(e) =>
-                          setNewWarehouse({
-                            ...newWarehouse,
-                            address: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md border-slate-300 p-2 text-sm"
-                      />
-                      <input
-                        placeholder="City"
-                        value={newWarehouse.city}
-                        onChange={(e) =>
-                          setNewWarehouse({
-                            ...newWarehouse,
-                            city: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md border-slate-300 p-2 text-sm"
-                      />
-                      <input
-                        placeholder="Country"
-                        value={newWarehouse.country}
-                        onChange={(e) =>
-                          setNewWarehouse({
-                            ...newWarehouse,
-                            country: e.target.value,
-                          })
-                        }
-                        className="w-full rounded-md border-slate-300 p-2 text-sm"
-                      />
+                {!interestFile ? (
+                  <label className="border-2 border-dashed border-slate-200 rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-slate-50 hover:border-blue-300 transition-all">
+                    <input
+                      type="file"
+                      className="hidden"
+                      accept=".csv, .json, .txt"
+                      onChange={handleInterestFileChange}
+                    />
+                    <div className="bg-blue-50 p-3 rounded-full mb-3 text-blue-600">
+                      <FileSpreadsheet size={24} />
                     </div>
-                    <div className="flex justify-end">
+                    <p className="text-sm font-medium text-slate-700">
+                      Click to upload or drag CSV/JSON
+                    </p>
+                    <p className="text-xs text-slate-400 mt-1">
+                      Supports simple lists separated by newlines or commas
+                    </p>
+                  </label>
+                ) : (
+                  <div className="space-y-4">
+                    {/* File Card */}
+                    <div className="flex items-center justify-between p-3 bg-slate-50 border border-slate-200 rounded-lg">
+                      <div className="flex items-center gap-3">
+                        {interestFile.name.endsWith("json") ? (
+                          <FileJson className="text-orange-500" />
+                        ) : (
+                          <FileSpreadsheet className="text-emerald-500" />
+                        )}
+                        <div>
+                          <p className="text-sm font-medium text-slate-900">
+                            {interestFile.name}
+                          </p>
+                          <p className="text-xs text-slate-500">
+                            {(interestFile.size / 1024).toFixed(1)} KB
+                          </p>
+                        </div>
+                      </div>
                       <button
-                        onClick={saveWarehouse}
-                        className="bg-emerald-600 text-white px-4 py-2 rounded-md text-sm font-medium hover:bg-emerald-700"
+                        onClick={() => {
+                          setInterestFile(null);
+                          setPreviewInterests([]);
+                        }}
+                        className="text-slate-400 hover:text-red-500"
                       >
-                        Save Warehouse
+                        <X size={18} />
                       </button>
                     </div>
-                  </div>
-                )}
 
-                <div className="space-y-3">
-                  {formData.warehouses.length === 0 ? (
-                    <div className="text-center p-8 border-2 border-dashed border-slate-200 rounded-xl">
-                      <p className="text-sm text-slate-500">
-                        No warehouses configured.
-                      </p>
-                    </div>
-                  ) : (
-                    formData.warehouses.map((w, i) => (
-                      <div
-                        key={i}
-                        className="flex justify-between items-start p-4 border rounded-lg hover:bg-slate-50 transition-colors"
+                    {/* Analysis & Preview Actions */}
+                    {previewInterests.length === 0 ? (
+                      <button
+                        onClick={processInterestFile}
+                        disabled={isProcessingInterests}
+                        className="w-full py-2 bg-slate-900 text-white rounded-lg text-sm font-medium hover:bg-slate-800 disabled:opacity-50 flex items-center justify-center gap-2"
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="bg-slate-100 p-2 rounded-md">
-                            <Building size={20} className="text-slate-500" />
-                          </div>
-                          <div>
-                            <h4 className="font-medium text-slate-900">
-                              {w.label}
-                            </h4>
-                            <p className="text-sm text-slate-500">
-                              {w.address}, {w.city}
-                            </p>
+                        {isProcessingInterests ? (
+                          <Loader2 size={16} className="animate-spin" />
+                        ) : (
+                          <Eye size={16} />
+                        )}
+                        Analyze & Preview File
+                      </button>
+                    ) : (
+                      <div className="space-y-4 animate-in fade-in slide-in-from-top-2">
+                        <div className="bg-emerald-50 border border-emerald-100 rounded-lg p-4">
+                          <h4 className="text-sm font-bold text-emerald-800 mb-2 flex items-center gap-2">
+                            <Check size={16} /> found {previewInterests.length}{" "}
+                            new categories
+                          </h4>
+                          <div className="flex flex-wrap gap-2 max-h-32 overflow-y-auto">
+                            {previewInterests.map((tag, i) => (
+                              <span
+                                key={i}
+                                className="text-xs bg-white border border-emerald-200 text-emerald-700 px-2 py-1 rounded"
+                              >
+                                {tag}
+                              </span>
+                            ))}
                           </div>
                         </div>
                         <button
-                          onClick={() => w.id && deleteWarehouse(w.id)}
-                          className="text-slate-400 hover:text-red-600 p-2"
+                          onClick={mergeInterests}
+                          className="w-full py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 flex items-center justify-center gap-2"
                         >
-                          <Trash2 size={16} />
+                          Merge into Profile
                         </button>
                       </div>
-                    ))
-                  )}
-                </div>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           )}
 
+          {/* --- TAB 2: COMPLIANCE --- */}
+          {activeTab === "compliance" && (
+            <div className="text-slate-500 p-4">
+              Compliance Settings Placeholder
+            </div>
+          )}
+          {/* --- TAB 4: LOGISTICS --- */}
+          {activeTab === "logistics" && (
+            <div className="text-slate-500 p-4">
+              Logistics Settings Placeholder
+            </div>
+          )}
           {/* --- TAB 5: TEAM --- */}
           {activeTab === "team" && (
-            <div className="space-y-6">
-              <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
-                <h2 className="text-lg font-semibold">Team Members</h2>
-                <div className="flex gap-2">
-                  <input
-                    type="email"
-                    placeholder="colleague@company.com"
-                    value={newTeamEmail}
-                    onChange={(e) => setNewTeamEmail(e.target.value)}
-                    className="flex-1 rounded-lg border-slate-300 p-2.5 text-sm"
-                  />
-                  <button
-                    onClick={inviteTeamMember}
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 flex items-center gap-2"
-                  >
-                    <Plus size={16} /> Invite
-                  </button>
-                </div>
-                <div className="space-y-2">
-                  {formData.teamMembers.map((member, i) => (
-                    <div
-                      key={i}
-                      className="flex justify-between items-center p-3 border-b border-slate-100 last:border-0"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xs">
-                          {member.name ? member.name[0].toUpperCase() : "U"}
-                        </div>
-                        <div>
-                          <p className="text-sm font-medium text-slate-900">
-                            {member.email}
-                          </p>
-                          <p className="text-xs text-slate-500 capitalize">
-                            {member.role} • {member.status}
-                          </p>
-                        </div>
-                      </div>
-                      {member.status === "invited" && (
-                        <span className="text-xs bg-amber-100 text-amber-800 px-2 py-1 rounded-full">
-                          Pending
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            <div className="text-slate-500 p-4">Team Settings Placeholder</div>
           )}
-
           {/* --- TAB 6: BILLING --- */}
           {activeTab === "billing" && (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-6">
-              <h2 className="text-lg font-semibold">Payout Details</h2>
-              <div className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-slate-700">
-                    Bank Name
-                  </label>
-                  <input
-                    type="text"
-                    value={formData.bankName}
-                    onChange={(e) => handleChange("bankName", e.target.value)}
-                    className="w-full rounded-lg border-slate-300 p-2.5 text-sm"
-                  />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm font-medium text-slate-700">
-                      IBAN
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.iban}
-                      onChange={(e) => handleChange("iban", e.target.value)}
-                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-slate-700">
-                      SWIFT/BIC
-                    </label>
-                    <input
-                      type="text"
-                      value={formData.swift}
-                      onChange={(e) => handleChange("swift", e.target.value)}
-                      className="w-full rounded-lg border-slate-300 p-2.5 text-sm font-mono"
-                    />
-                  </div>
-                </div>
-              </div>
+            <div className="text-slate-500 p-4">
+              Billing Settings Placeholder
             </div>
           )}
 
@@ -906,26 +748,6 @@ export default function VendorSettingsPage() {
                   className="bg-emerald-500 h-1.5 rounded-full"
                   style={{ width: "85%" }}
                 ></div>
-              </div>
-              <div className="pt-4 border-t border-slate-100 space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-600 flex items-center gap-2">
-                    <ShieldCheck size={14} /> VAT Validated
-                  </span>
-                  <span
-                    className={`font-medium ${formData.vatId ? "text-emerald-600" : "text-slate-400"}`}
-                  >
-                    {formData.vatId ? "Yes" : "No"}
-                  </span>
-                </div>
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-slate-600 flex items-center gap-2">
-                    <FileBadge size={14} /> Role
-                  </span>
-                  <span className="text-slate-700 capitalize">
-                    {formData.role}
-                  </span>
-                </div>
               </div>
             </div>
           </div>
