@@ -31,7 +31,6 @@ export default function RFQUploadPage() {
       setFile(selectedFile)
       setError('')
       
-      // Auto-populate title from filename if empty
       if (!title) {
         const fileName = selectedFile.name.replace('.pdf', '')
         setTitle(fileName)
@@ -60,7 +59,6 @@ export default function RFQUploadPage() {
       setError('')
       setUploadProgress(0)
 
-      // Step 1: Upload to FastAPI
       const formData = new FormData()
       formData.append('file', file)
 
@@ -79,9 +77,8 @@ export default function RFQUploadPage() {
       const documentId = uploadData.document_id
 
       setUploadProgress(40)
-
-      // Step 2: Parse the PDF
       setParsing(true)
+
       const parseResponse = await fetch(`${FASTAPI_URL}/api/parse/${documentId}`, {
         method: 'POST',
       })
@@ -93,7 +90,6 @@ export default function RFQUploadPage() {
       const parseData = await parseResponse.json()
       setUploadProgress(60)
 
-      // Step 3: Save to database with title and deadline
       const saveResponse = await fetch('/api/rfq/save', {
         method: 'POST',
         headers: {
@@ -111,10 +107,8 @@ export default function RFQUploadPage() {
         throw new Error('Failed to save RFQ')
       }
 
-      const saveData = await saveResponse.json()
       setUploadProgress(100)
 
-      // Redirect to review page
       setTimeout(() => {
         router.push(`/dashboard/hospital/rfq/${documentId}/review`)
       }, 500)
@@ -143,7 +137,6 @@ export default function RFQUploadPage() {
           <CardDescription>Provide the basic details for this RFQ</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Title and Deadline Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="title">
@@ -176,7 +169,6 @@ export default function RFQUploadPage() {
             </div>
           </div>
 
-          {/* File Upload */}
           <div className="space-y-2">
             <Label htmlFor="file">
               PDF Document <span className="text-red-500">*</span>
@@ -225,7 +217,6 @@ export default function RFQUploadPage() {
             </div>
           </div>
 
-          {/* Progress Bar */}
           {uploadProgress > 0 && uploadProgress < 100 && (
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
@@ -241,7 +232,6 @@ export default function RFQUploadPage() {
             </div>
           )}
 
-          {/* Error Alert */}
           {error && (
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
@@ -251,7 +241,6 @@ export default function RFQUploadPage() {
         </CardContent>
       </Card>
 
-      {/* Instructions Card */}
       <Card>
         <CardHeader>
           <CardTitle>Instructions</CardTitle>

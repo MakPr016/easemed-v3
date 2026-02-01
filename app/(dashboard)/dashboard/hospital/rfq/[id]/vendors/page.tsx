@@ -2,25 +2,50 @@
 
 import { useState, use, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import dynamic from 'next/dynamic'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Badge } from '@/components/ui/badge'
-import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
 import {
-    Search,
-    ArrowRight,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import {
+    MapPin,
     Package,
-    Users,
-    CheckCircle2,
+    ArrowLeft,
+    Send,
     Loader2,
-    AlertCircle,
-    ChevronLeft,
-    ChevronRight,
 } from 'lucide-react'
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from '@/components/ui/table'
 import { createClient } from '@/lib/supabase/client'
 import Link from 'next/link'
 
-interface Requirement {
+// Dynamic import for the map component
+const EuropeMap = dynamic(
+    () => import('@/components/maps/europe-map').then(mod => ({ default: mod.EuropeMap })),
+    {
+        ssr: false,
+        loading: () => (
+            <div className="w-full h-125 flex items-center justify-center bg-muted rounded-lg border">
+                <div className="animate-pulse text-muted-foreground">Loading map...</div>
+            </div>
+        )
+    }
+)
+
+interface LineItem {
     id: string
     line_item_id: number
     inn_name: string
@@ -29,9 +54,6 @@ interface Requirement {
     form: string
     quantity: number
     unit_of_issue: string
-    matchedVendorsCount: number
-    selectedVendorsCount: number
-    category: string
 }
 
 interface RFQInfo {
@@ -39,40 +61,54 @@ interface RFQInfo {
     title: string
     deadline: string
     status: string
-    totalRequirements: number
 }
 
-const ITEMS_PER_PAGE = 10
-
-const formatDate = (dateString: string) => {
-    const date = new Date(dateString)
-    const day = date.getDate().toString().padStart(2, '0')
-    const month = (date.getMonth() + 1).toString().padStart(2, '0')
-    const year = date.getFullYear()
-    return `${day}/${month}/${year}`
+// Mock vendor data (replace with actual API call)
+interface Vendor {
+    id: string
+    name: string
+    location: string
+    country: string
+    rating: number
+    responseRate: number
+    pastOrders: number
+    certifications: string[]
 }
 
-const getCategoryFromForm = (form: string): string => {
-    const formLower = form.toLowerCase()
-    if (formLower.includes('tablet') || formLower.includes('capsule')) return 'Oral Medications'
-    if (formLower.includes('injection') || formLower.includes('ampule') || formLower.includes('vial')) return 'Injectable'
-    if (formLower.includes('syrup') || formLower.includes('suspension')) return 'Liquid Medications'
-    if (formLower.includes('cream') || formLower.includes('gel') || formLower.includes('ointment')) return 'Topical'
-    if (formLower.includes('inhaler') || formLower.includes('spray')) return 'Respiratory'
-    return 'Other'
-}
+const mockVendors: Vendor[] = [
+    {
+        id: '1',
+        name: 'MedSupply GmbH',
+        location: 'Berlin',
+        country: 'Germany',
+        rating: 4.8,
+        responseRate: 95,
+        pastOrders: 142,
+        certifications: ['ISO 9001', 'WHO-GMP', 'GDP']
+    },
+    {
+        id: '2',
+        name: 'PharmaDistrib France',
+        location: 'Paris',
+        country: 'France',
+        rating: 4.6,
+        responseRate: 92,
+        pastOrders: 98,
+        certifications: ['ISO 9001', 'GDP']
+    },
+    // Add more vendors...
+]
 
-export default function RequirementsListPage({ params }: { params: Promise<{ id: string }> }) {
+export default function VendorSelectionPage({ params }: { params: Promise<{ id: string }> }) {
     const resolvedParams = use(params)
     const router = useRouter()
     const supabase = createClient()
-    
-    const [searchTerm, setSearchTerm] = useState('')
+
+    const [selectedCountries, setSelectedCountries] = useState<string[]>([])
+    const [procurementMode, setProcurementMode] = useState<string>('balanced')
     const [rfqInfo, setRfqInfo] = useState<RFQInfo | null>(null)
-    const [requirements, setRequirements] = useState<Requirement[]>([])
+    const [lineItems, setLineItems] = useState<LineItem[]>([])
     const [loading, setLoading] = useState(true)
-    const [error, setError] = useState('')
-    const [currentPage, setCurrentPage] = useState(1)
 
     useEffect(() => {
         fetchRFQData()
@@ -101,58 +137,51 @@ export default function RequirementsListPage({ params }: { params: Promise<{ id:
                 title: rfqData.title,
                 deadline: rfqData.deadline,
                 status: rfqData.status,
-                totalRequirements: itemsData?.length || 0,
             })
 
-            const transformedRequirements: Requirement[] = itemsData.map((item) => ({
-                id: item.id,
-                line_item_id: item.line_item_id,
-                inn_name: item.inn_name || 'N/A',
-                brand_name: item.brand_name || 'Generic',
-                dosage: item.dosage || 'N/A',
-                form: item.form || 'N/A',
-                quantity: item.quantity || 0,
-                unit_of_issue: item.unit_of_issue || 'Unit',
-                matchedVendorsCount: 0,
-                selectedVendorsCount: 0,
-                category: getCategoryFromForm(item.form || ''),
-            }))
-
-            setRequirements(transformedRequirements)
-
+            setLineItems(itemsData || [])
         } catch (err: any) {
             console.error('Error fetching RFQ:', err)
-            setError(err.message || 'Failed to load RFQ')
         } finally {
             setLoading(false)
         }
     }
 
-    const filteredRequirements = requirements.filter(req =>
-        req.inn_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.brand_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        req.category.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-
-    // Pagination
-    const totalPages = Math.ceil(filteredRequirements.length / ITEMS_PER_PAGE)
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
-    const endIndex = startIndex + ITEMS_PER_PAGE
-    const currentItems = filteredRequirements.slice(startIndex, endIndex)
-
-    const handlePageChange = (page: number) => {
-        setCurrentPage(page)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
+    const getVendorCountsByCountry = () => {
+        const counts: { [key: string]: number } = {}
+        mockVendors.forEach(vendor => {
+            const country = vendor.country
+            counts[country] = (counts[country] || 0) + 1
+        })
+        return counts
     }
 
-    // Reset to page 1 when search changes
-    useEffect(() => {
-        setCurrentPage(1)
-    }, [searchTerm])
-
-    const handleSelectRequirement = (lineItemId: number) => {
-        router.push(`/dashboard/hospital/rfq/${resolvedParams.id}/vendors/${lineItemId}`)
+    const handleCountrySelect = (country: string) => {
+        setSelectedCountries(prev =>
+            prev.includes(country)
+                ? prev.filter(c => c !== country)
+                : [...prev, country]
+        )
     }
+
+    const handleSendRFQ = async () => {
+        if (selectedCountries.length === 0) {
+            alert('Please select at least one region')
+            return
+        }
+
+        // TODO: Send RFQ to vendors in selected countries
+        console.log('Sending RFQ to vendors in:', selectedCountries)
+        console.log('Procurement mode:', procurementMode)
+
+        // Navigate to next step
+        router.push(`/dashboard/hospital/rfq/${resolvedParams.id}/awaiting`)
+    }
+
+    const vendorCounts = getVendorCountsByCountry()
+    const eligibleVendorsCount = mockVendors.filter(v =>
+        selectedCountries.length === 0 || selectedCountries.includes(v.country)
+    ).length
 
     if (loading) {
         return (
@@ -162,14 +191,12 @@ export default function RequirementsListPage({ params }: { params: Promise<{ id:
         )
     }
 
-    if (error || !rfqInfo) {
+    if (!rfqInfo) {
         return (
             <div className="space-y-6">
                 <Card>
                     <CardContent className="p-12 text-center">
-                        <AlertCircle className="h-12 w-12 text-destructive mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">Error Loading RFQ</h3>
-                        <p className="text-muted-foreground mb-4">{error || 'RFQ not found'}</p>
+                        <h3 className="text-lg font-semibold mb-2">RFQ Not Found</h3>
                         <Link href="/dashboard/hospital/rfq/upload">
                             <Button>Back to Upload</Button>
                         </Link>
@@ -180,12 +207,19 @@ export default function RequirementsListPage({ params }: { params: Promise<{ id:
     }
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Select Vendors by Requirement</h1>
-                <p className="text-muted-foreground">
-                    Choose vendors for each requirement individually
-                </p>
+        <div className="space-y-6 pb-6">
+            <div className="flex items-center gap-4">
+                <Link href={`/dashboard/hospital/rfq/${resolvedParams.id}/review`}>
+                    <Button variant="ghost" size="icon">
+                        <ArrowLeft className="h-5 w-5" />
+                    </Button>
+                </Link>
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">Select Vendor Regions</h1>
+                    <p className="text-muted-foreground">
+                        Choose European regions to send your RFQ. Vendors will bid on items they can supply.
+                    </p>
+                </div>
             </div>
 
             <Card>
@@ -194,179 +228,189 @@ export default function RequirementsListPage({ params }: { params: Promise<{ id:
                         <div>
                             <CardTitle>{rfqInfo.title}</CardTitle>
                             <CardDescription>
-                                RFQ #{rfqInfo.id.slice(0, 8)} • {rfqInfo.totalRequirements} requirements
+                                {lineItems.length} requirement{lineItems.length !== 1 ? 's' : ''}
                             </CardDescription>
                         </div>
-                        <div className="flex items-center gap-3">
-                            <Badge variant="outline">
-                                Deadline: {formatDate(rfqInfo.deadline)}
-                            </Badge>
-                            <Badge 
-                                variant={rfqInfo.status === 'published' ? 'default' : 'secondary'}
-                            >
-                                {rfqInfo.status}
-                            </Badge>
-                        </div>
+                        <Badge variant="outline">
+                            Deadline: {new Date(rfqInfo.deadline).toLocaleDateString()}
+                        </Badge>
                     </div>
                 </CardHeader>
             </Card>
 
-            <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search requirements by name, brand, or category..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                />
-            </div>
-
-            {requirements.length === 0 ? (
-                <Card>
-                    <CardContent className="p-12 text-center">
-                        <Package className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <h3 className="text-lg font-semibold mb-2">No Requirements Found</h3>
-                        <p className="text-muted-foreground mb-4">
-                            This RFQ doesn't have any line items yet.
-                        </p>
-                        <Link href={`/dashboard/hospital/rfq/${resolvedParams.id}/review`}>
-                            <Button>Go to Review Page</Button>
-                        </Link>
-                    </CardContent>
-                </Card>
-            ) : (
-                <>
-                    <div className="space-y-3">
-                        {currentItems.map((requirement) => (
-                            <Card
-                                key={requirement.id}
-                                className="hover:border-primary/50 transition-colors cursor-pointer"
-                                onClick={() => handleSelectRequirement(requirement.line_item_id)}
-                            >
-                                <CardContent className="p-6">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-start gap-4 flex-1">
-                                            <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-                                                <Package className="h-6 w-6 text-primary" />
-                                            </div>
-                                            <div className="flex-1">
-                                                <div className="flex items-start justify-between mb-2">
-                                                    <div>
-                                                        <h3 className="font-semibold text-lg">{requirement.inn_name}</h3>
-                                                        <p className="text-sm text-muted-foreground">
-                                                            {requirement.brand_name}
-                                                        </p>
-                                                    </div>
-                                                    <Badge variant="secondary">{requirement.category}</Badge>
-                                                </div>
-                                                <div className="flex items-center gap-6 mt-3">
-                                                    <div className="text-sm">
-                                                        <span className="text-muted-foreground">Dosage:</span>{' '}
-                                                        <span className="font-medium">{requirement.dosage}</span>
-                                                    </div>
-                                                    <div className="text-sm">
-                                                        <span className="text-muted-foreground">Form:</span>{' '}
-                                                        <span className="font-medium">{requirement.form}</span>
-                                                    </div>
-                                                    <div className="text-sm">
-                                                        <span className="text-muted-foreground">Quantity:</span>{' '}
-                                                        <span className="font-medium">
-                                                            {requirement.quantity} {requirement.unit_of_issue}
-                                                            {requirement.quantity > 1 ? 's' : ''}
-                                                        </span>
-                                                    </div>
-                                                </div>
-                                                <div className="flex items-center gap-4 mt-3">
-                                                    <div className="flex items-center gap-2 text-sm">
-                                                        <Users className="h-4 w-4 text-muted-foreground" />
-                                                        <span className="font-medium">{requirement.matchedVendorsCount}</span>
-                                                        <span className="text-muted-foreground">vendors matched</span>
-                                                    </div>
-                                                    {requirement.selectedVendorsCount > 0 && (
-                                                        <div className="flex items-center gap-2 text-sm text-green-600">
-                                                            <CheckCircle2 className="h-4 w-4" />
-                                                            <span className="font-medium">{requirement.selectedVendorsCount} selected</span>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <Button variant="ghost" size="icon" className="shrink-0">
-                                            <ArrowRight className="h-5 w-5" />
-                                        </Button>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-
-                    {/* Pagination */}
-                    {totalPages > 1 && (
-                        <div className="flex items-center justify-between">
-                            <p className="text-sm text-muted-foreground">
-                                Showing {startIndex + 1}-{Math.min(endIndex, filteredRequirements.length)} of {filteredRequirements.length} requirements
-                            </p>
-                            <div className="flex items-center gap-2">
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                                    disabled={currentPage === 1}
-                                >
-                                    <ChevronLeft className="h-4 w-4 mr-1" />
-                                    Previous
-                                </Button>
-                                
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: Math.min(totalPages, 5) }, (_, i) => {
-                                        let pageNum: number
-                                        if (totalPages <= 5) {
-                                            pageNum = i + 1
-                                        } else if (currentPage <= 3) {
-                                            pageNum = i + 1
-                                        } else if (currentPage >= totalPages - 2) {
-                                            pageNum = totalPages - 4 + i
-                                        } else {
-                                            pageNum = currentPage - 2 + i
-                                        }
-                                        
-                                        return (
-                                            <Button
-                                                key={pageNum}
-                                                variant={currentPage === pageNum ? 'default' : 'outline'}
-                                                size="sm"
-                                                onClick={() => handlePageChange(pageNum)}
-                                                className="w-8 h-8"
-                                            >
-                                                {pageNum}
-                                            </Button>
-                                        )
-                                    })}
-                                </div>
-
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                                    disabled={currentPage === totalPages}
-                                >
-                                    Next
-                                    <ChevronRight className="h-4 w-4 ml-1" />
-                                </Button>
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div className="lg:col-span-2 space-y-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Vendor Locations</CardTitle>
+                            <CardDescription>Select regions to filter vendors on the map</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="w-full h-125 rounded-lg overflow-hidden border">
+                                <EuropeMap
+                                    selectedCountries={selectedCountries}
+                                    onCountrySelect={handleCountrySelect}
+                                    vendorCounts={vendorCounts}
+                                />
                             </div>
-                        </div>
-                    )}
-                </>
-            )}
 
-            {filteredRequirements.length === 0 && requirements.length > 0 && (
-                <Card>
-                    <CardContent className="p-12 text-center">
-                        <Search className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                        <p className="text-muted-foreground">No requirements found matching your search.</p>
-                    </CardContent>
-                </Card>
-            )}
+                            {selectedCountries.length > 0 && (
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <span className="text-sm text-muted-foreground">Selected:</span>
+                                    {selectedCountries.map(country => (
+                                        <Badge key={country} variant="secondary" className="gap-1">
+                                            <MapPin className="h-3 w-3" />
+                                            {country}
+                                            <button
+                                                onClick={() => handleCountrySelect(country)}
+                                                className="ml-1 hover:text-destructive"
+                                            >
+                                                ×
+                                            </button>
+                                        </Badge>
+                                    ))}
+                                    <Button
+                                        variant="ghost"
+                                        size="sm"
+                                        onClick={() => setSelectedCountries([])}
+                                    >
+                                        Clear all
+                                    </Button>
+                                </div>
+                            )}
+                        </CardContent>
+                    </Card>
+
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2">
+                                <Package className="h-5 w-5" />
+                                RFQ Preview
+                            </CardTitle>
+                            <CardDescription>What vendors will receive</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="border rounded-lg overflow-hidden">
+                                <div className="max-h-100 overflow-y-auto">
+                                    <Table>
+                                        <TableHeader className="sticky top-0 bg-background">
+                                            <TableRow>
+                                                <TableHead className="w-12">#</TableHead>
+                                                <TableHead>Generic Name</TableHead>
+                                                <TableHead>Brand</TableHead>
+                                                <TableHead>Dosage</TableHead>
+                                                <TableHead>Form</TableHead>
+                                                <TableHead className="text-right">Quantity</TableHead>
+                                            </TableRow>
+                                        </TableHeader>
+                                        <TableBody>
+                                            {lineItems.map((item) => (
+                                                <TableRow key={item.id}>
+                                                    <TableCell className="font-medium">{item.line_item_id}</TableCell>
+                                                    <TableCell className="font-medium">{item.inn_name}</TableCell>
+                                                    <TableCell>{item.brand_name}</TableCell>
+                                                    <TableCell>{item.dosage}</TableCell>
+                                                    <TableCell>{item.form}</TableCell>
+                                                    <TableCell className="text-right">
+                                                        {item.quantity} {item.unit_of_issue}
+                                                    </TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </div>
+                            </div>
+                            <div className="mt-4 bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-900 rounded-lg p-4">
+                                <p className="text-sm font-medium text-blue-900 dark:text-blue-100 mb-2">
+                                    📋 Note to Vendors
+                                </p>
+                                <p className="text-sm text-blue-700 dark:text-blue-300">
+                                    You can bid on individual items you can supply. We'll review all bids based on cost, delivery time, and quality.
+                                </p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </div>
+
+                <div className="lg:col-span-1">
+                    <Card className="sticky top-6">
+                        <CardHeader>
+                            <CardTitle>RFQ Summary</CardTitle>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                            <div>
+                                <Label className="text-sm text-muted-foreground">Selected Items</Label>
+                                <p className="text-4xl font-bold text-primary mt-1">{lineItems.length}</p>
+                            </div>
+
+                            <div>
+                                <Label className="text-sm text-muted-foreground">Eligible Vendors</Label>
+                                <p className="text-4xl font-bold mt-1">{eligibleVendorsCount}</p>
+                            </div>
+
+                            <div className="border-t pt-6">
+                                <Label className="text-sm font-medium mb-3 block">Procurement Mode</Label>
+                                <Select value={procurementMode} onValueChange={setProcurementMode}>
+                                    <SelectTrigger className="w-full py-6">
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="balanced">
+                                            <div className="text-left py-1">
+                                                <p className="font-medium">Balanced</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Equal weight to cost, time & quality
+                                                </p>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="emergency">
+                                            <div className="text-left py-1">
+                                                <p className="font-medium">Emergency (Speed Priority)</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Fastest delivery preferred
+                                                </p>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="cost">
+                                            <div className="text-left py-1">
+                                                <p className="font-medium">Cost Optimization</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Lowest price preferred
+                                                </p>
+                                            </div>
+                                        </SelectItem>
+                                        <SelectItem value="quality">
+                                            <div className="text-left py-1">
+                                                <p className="font-medium">Quality Focus</p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Best certifications & ratings
+                                                </p>
+                                            </div>
+                                        </SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <p className="text-xs text-muted-foreground mt-3">
+                                    This affects how vendor bids will be scored
+                                </p>
+                            </div>
+
+                            <Button
+                                onClick={handleSendRFQ}
+                                disabled={selectedCountries.length === 0}
+                                className="w-full gap-2"
+                                size="lg"
+                            >
+                                <Send className="h-4 w-4" />
+                                Send to {eligibleVendorsCount} Vendor{eligibleVendorsCount !== 1 ? 's' : ''}
+                            </Button>
+
+                            <p className="text-xs text-center text-muted-foreground">
+                                Selected vendors will receive this RFQ via email
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+            </div>
         </div>
     )
 }

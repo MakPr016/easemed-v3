@@ -15,20 +15,16 @@ export async function POST(request: Request) {
 
     const supabase = await createClient()
 
-    // Get current user
     const { data: { user }, error: userError } = await supabase.auth.getUser()
     if (userError || !user) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    console.log('Saving RFQ:', { documentId, title, deadline, user_id: user.id })
-
-    // Save RFQ metadata
     const { data: rfqData, error: rfqError } = await supabase
       .from('rfqs')
       .insert({
         id: documentId,
-        user_id: user.id, // ✅ Changed from hospital_id to user_id
+        user_id: user.id,
         title,
         deadline: new Date(deadline).toISOString(),
         status: 'draft',
@@ -38,58 +34,51 @@ export async function POST(request: Request) {
       .single()
 
     if (rfqError) {
-      console.error('RFQ insert error:', rfqError)
+      console.error('RFQ Insert Error:', rfqError)
       return NextResponse.json(
-        { error: 'Failed to save RFQ', details: rfqError.message },
+        { error: 'Failed to create RFQ record', details: rfqError.message },
         { status: 500 }
       )
     }
 
-    console.log('RFQ saved successfully:', rfqData)
-
-    // Save line items
-    const requirements = data.line_items || data.lineitems || []
+    const rawItems = data.line_items || []
     
-    if (requirements && Array.isArray(requirements) && requirements.length > 0) {
-      const lineItems = requirements.map((item: any) => ({
+    if (Array.isArray(rawItems) && rawItems.length > 0) {
+      const lineItems = rawItems.map((item: any, index: number) => ({
         rfq_id: documentId,
-        line_item_id: item.line_item_id || item.lineitemid || 0,
-        inn_name: item.inn_name || item.innname || '',
-        brand_name: item.brand_name || item.brandname || '',
+        line_item_id: index + 1,
+        inn_name: item.inn_name || 'Unknown',
+        brand_name: item.brand_name || 'Generic',
         dosage: item.dosage || '',
         form: item.form || '',
-        quantity: item.quantity || 0,
-        unit_of_issue: item.unit_of_issue || item.unitofissue || '',
+        quantity: Number(item.quantity) || 0,
+        unit_of_issue: item.form || item.unit || 'Unit',
       }))
-
-      console.log('Saving line items:', lineItems.length)
 
       const { error: itemsError } = await supabase
         .from('rfq_line_items')
         .insert(lineItems)
 
       if (itemsError) {
-        console.error('Line items insert error:', itemsError)
+        console.error('Line Items Insert Error:', itemsError)
         return NextResponse.json(
-          { error: 'Failed to save line items', details: itemsError.message },
+          { error: 'Saved RFQ but failed to save items', details: itemsError.message },
           { status: 500 }
         )
-      } else {
-        console.log('Line items saved successfully:', lineItems.length)
       }
     }
 
     return NextResponse.json({
       success: true,
-      rfq_id: documentId,
-      message: 'RFQ saved successfully',
-      line_items_count: requirements.length,
+      rfqId: documentId,
+      itemCount: rawItems.length,
+      message: 'RFQ saved successfully'
     })
 
   } catch (error: any) {
-    console.error('Save error:', error)
+    console.error('Internal API Error:', error)
     return NextResponse.json(
-      { error: error.message || 'Internal server error' },
+      { error: error.message || 'Internal Server Error' },
       { status: 500 }
     )
   }

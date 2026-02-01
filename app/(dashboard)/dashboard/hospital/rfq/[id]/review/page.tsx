@@ -96,6 +96,19 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
     const item = lineItems.find(i => i.id === id)
     if (!item) return
 
+    // Add logging here ⬇️
+    console.log('=== SAVE DEBUG ===')
+    console.log('Updating item with ID:', id)
+    console.log('Item data:', item)
+    console.log('Payload:', {
+      inn_name: item.inn_name,
+      brand_name: item.brand_name,
+      dosage: item.dosage,
+      form: item.form,
+      unit_of_issue: item.unit_of_issue,
+      quantity: item.quantity,
+    })
+
     try {
       setSaving(true)
 
@@ -114,10 +127,16 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
         }),
       })
 
+      console.log('Response status:', response.status)
+
       if (!response.ok) {
         const error = await response.json()
+        console.error('Response error:', error)
         throw new Error(error.error || 'Failed to save')
       }
+
+      const result = await response.json()
+      console.log('Success response:', result)
 
       setEditingId(null)
     } catch (error: any) {
@@ -127,6 +146,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
       setSaving(false)
     }
   }
+
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this item?')) return
@@ -304,7 +324,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
       </Card>
 
       {parsingStats && (
-        <Card className="bg-gradient-to-r from-green-50 to-blue-50 border-green-200">
+        <Card className="bg-linear-to-r from-green-50 to-blue-50 border-green-200">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <CheckCircle2 className="h-5 w-5 text-green-600" />
@@ -361,12 +381,12 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
               <TableHeader>
                 <TableRow>
                   <TableHead className="w-16">#</TableHead>
-                  <TableHead className="min-w-[200px]">Generic Name</TableHead>
-                  <TableHead className="min-w-[150px]">Brand Name</TableHead>
-                  <TableHead className="min-w-[120px]">Dosage</TableHead>
-                  <TableHead className="min-w-[100px]">Form</TableHead>
-                  <TableHead className="min-w-[100px]">Unit</TableHead>
-                  <TableHead className="min-w-[100px]">Quantity</TableHead>
+                  <TableHead className="min-w-50">Generic Name</TableHead>
+                  <TableHead className="min-w-30">Brand Name</TableHead>
+                  <TableHead className="min-w-25">Dosage</TableHead>
+                  <TableHead className="min-w-25">Form</TableHead>
+                  <TableHead className="min-w-25">Unit</TableHead>
+                  <TableHead className="min-w-25">Quantity</TableHead>
                   <TableHead className="w-32 sticky right-0 bg-background">Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -386,10 +406,10 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
                           <Input
                             value={item.inn_name}
                             onChange={e => handleChange(item.id, 'inn_name', e.target.value)}
-                            className="h-8 min-w-[180px]"
+                            className="h-8 min-w-45"
                           />
                         ) : (
-                          <div className="max-w-[200px] truncate" title={item.inn_name}>
+                          <div className="max-w-50 truncate" title={item.inn_name}>
                             {item.inn_name}
                           </div>
                         )}
@@ -399,10 +419,10 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
                           <Input
                             value={item.brand_name}
                             onChange={e => handleChange(item.id, 'brand_name', e.target.value)}
-                            className="h-8 min-w-[130px]"
+                            className="h-8 min-w-32.5"
                           />
                         ) : (
-                          <div className="max-w-[150px] truncate" title={item.brand_name}>
+                          <div className="max-w-37.5 truncate" title={item.brand_name}>
                             {item.brand_name}
                           </div>
                         )}
@@ -412,7 +432,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
                           <Input
                             value={item.dosage}
                             onChange={e => handleChange(item.id, 'dosage', e.target.value)}
-                            className="h-8 min-w-[100px]"
+                            className="h-8 min-w-25"
                           />
                         ) : (
                           item.dosage
@@ -423,7 +443,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
                           <Input
                             value={item.form}
                             onChange={e => handleChange(item.id, 'form', e.target.value)}
-                            className="h-8 min-w-[80px]"
+                            className="h-8 min-w-20"
                           />
                         ) : (
                           item.form
@@ -436,7 +456,7 @@ export default function RFQReviewPage({ params }: { params: Promise<{ id: string
                             onChange={e =>
                               handleChange(item.id, 'unit_of_issue', e.target.value)
                             }
-                            className="h-8 min-w-[80px]"
+                            className="h-8 min-w-20"
                           />
                         ) : (
                           item.unit_of_issue

@@ -116,7 +116,7 @@ export default function HospitalRFQPage() {
                         Manage and track your procurement requests
                     </p>
                 </div>
-                <Link href="/dashboard/hospital/rfq/create">
+                <Link href="/dashboard/hospital/rfq/upload">
                     <Button>
                         <Plus className="h-4 w-4 mr-2" />
                         Create RFQ

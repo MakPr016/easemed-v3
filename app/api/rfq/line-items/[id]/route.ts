@@ -1,18 +1,12 @@
-// app/api/rfq/line-items/[id]/route.ts
-
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
-interface Params {
-  id: string
-}
-
-// 1. Update the context type to Promise<Params>
-export async function PUT(request: Request, context: { params: Promise<Params> }) {
+export async function PUT(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    // 2. Await the params
     const { id } = await context.params
-    
     const body = await request.json()
     const { inn_name, brand_name, dosage, form, unit_of_issue, quantity } = body
 
@@ -30,13 +24,16 @@ export async function PUT(request: Request, context: { params: Promise<Params> }
       })
       .eq('id', id)
       .select()
-      .single()
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 })
     }
 
-    return NextResponse.json({ success: true, data })
+    if (!data || data.length === 0) {
+      return NextResponse.json({ error: 'Item not found' }, { status: 404 })
+    }
+
+    return NextResponse.json({ success: true, data: data[0] })
   } catch (error: any) {
     return NextResponse.json(
       { error: error.message || 'Internal server error' },
@@ -45,9 +42,11 @@ export async function PUT(request: Request, context: { params: Promise<Params> }
   }
 }
 
-export async function DELETE(request: Request, context: { params: Promise<Params> }) {
+export async function DELETE(
+  request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
-    // 2. Await the params
     const { id } = await context.params
 
     const supabase = await createClient()
